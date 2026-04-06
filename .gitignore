@@ -1,0 +1,27 @@
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude/OMC
+.claude/
+.omc/
+
+# Dependencies
+node_modules/
+.npm
+
+# Build
+dist/
+build/
+target/
+
+# Environment
+.env
+.env.local
+.env.*.local

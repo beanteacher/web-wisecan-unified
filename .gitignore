@@ -9,7 +9,7 @@
 Thumbs.db
 
 # Claude/OMC
-.claude/
+.claude/settings.local.json
 .omc/
 
 # Dependencies
@@ -20,6 +20,9 @@ node_modules/
 dist/
 build/
 target/
+
+# MCP (contains API keys)
+.mcp.json
 
 # Environment
 .env

@@ -1,0 +1,468 @@
+{
+  "meta": {
+    "wbs": "1.1.1",
+    "title": "Design System Init",
+    "description": "Wisecan B2C SaaS 디자인 시스템 — 색상, 타이포그래피, 컴포넌트 토큰 정의",
+    "framework": "Next.js 16 + Tailwind CSS v4 + shadcn/ui",
+    "lastUpdated": "2026-04-07"
+  },
+
+  "designTokens": {
+    "colors": {
+      "primary": {
+        "default": "#2563EB",
+        "dark": "#1D4ED8",
+        "light": "#3B82F6",
+        "extraLight": "#EFF6FF",
+        "tailwind": "blue-600 / blue-700 / blue-500 / blue-50"
+      },
+      "background": {
+        "page": "#FFFFFF",
+        "surface": "#F8FAFC",
+        "surfaceHover": "#F1F5F9",
+        "tailwind": "white / slate-50 / slate-100"
+      },
+      "border": {
+        "default": "#E2E8F0",
+        "strong": "#CBD5E1",
+        "tailwind": "slate-200 / slate-300"
+      },
+      "text": {
+        "primary": "#0F172A",
+        "secondary": "#64748B",
+        "disabled": "#94A3B8",
+        "inverse": "#FFFFFF",
+        "tailwind": "slate-900 / slate-500 / slate-400 / white"
+      },
+      "semantic": {
+        "success": "#22C55E",
+        "successBg": "#F0FDF4",
+        "error": "#EF4444",
+        "errorBg": "#FEF2F2",
+        "warning": "#F59E0B",
+        "warningBg": "#FFFBEB",
+        "info": "#3B82F6",
+        "infoBg": "#EFF6FF"
+      }
+    },
+
+    "typography": {
+      "fontFamily": {
+        "primary": "Pretendard",
+        "fallback": "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        "mono": "'JetBrains Mono', 'Fira Code', monospace",
+        "note": "Pretendard — Google Fonts 미지원, CDN: cdn.jsdelivr.net/gh/orioncactus/pretendard"
+      },
+      "scale": {
+        "display": {
+          "size": "36px",
+          "weight": 800,
+          "lineHeight": "44px",
+          "letterSpacing": "-0.02em",
+          "tailwind": "text-4xl font-extrabold tracking-tight",
+          "usage": "랜딩 히어로 타이틀"
+        },
+        "h1": {
+          "size": "30px",
+          "weight": 700,
+          "lineHeight": "38px",
+          "letterSpacing": "-0.01em",
+          "tailwind": "text-3xl font-bold tracking-tight",
+          "usage": "페이지 제목"
+        },
+        "h2": {
+          "size": "24px",
+          "weight": 600,
+          "lineHeight": "32px",
+          "letterSpacing": "-0.01em",
+          "tailwind": "text-2xl font-semibold",
+          "usage": "섹션 제목"
+        },
+        "h3": {
+          "size": "20px",
+          "weight": 600,
+          "lineHeight": "28px",
+          "tailwind": "text-xl font-semibold",
+          "usage": "카드 제목, 서브섹션"
+        },
+        "body1": {
+          "size": "16px",
+          "weight": 400,
+          "lineHeight": "24px",
+          "tailwind": "text-base font-normal",
+          "usage": "기본 본문"
+        },
+        "body2": {
+          "size": "14px",
+          "weight": 400,
+          "lineHeight": "20px",
+          "tailwind": "text-sm font-normal",
+          "usage": "보조 텍스트, 레이블"
+        },
+        "caption": {
+          "size": "12px",
+          "weight": 400,
+          "lineHeight": "16px",
+          "tailwind": "text-xs font-normal",
+          "usage": "캡션, 힌트 텍스트, 타임스탬프"
+        },
+        "label": {
+          "size": "14px",
+          "weight": 500,
+          "lineHeight": "20px",
+          "tailwind": "text-sm font-medium",
+          "usage": "폼 레이블, 버튼 텍스트"
+        }
+      }
+    },
+
+    "spacing": {
+      "base": "8px",
+      "scale": {
+        "1": "4px",
+        "2": "8px",
+        "3": "12px",
+        "4": "16px",
+        "6": "24px",
+        "8": "32px",
+        "12": "48px",
+        "16": "64px"
+      },
+      "tailwindMapping": {
+        "4px": "p-1 / gap-1",
+        "8px": "p-2 / gap-2",
+        "12px": "p-3 / gap-3",
+        "16px": "p-4 / gap-4",
+        "24px": "p-6 / gap-6",
+        "32px": "p-8 / gap-8",
+        "48px": "p-12 / gap-12",
+        "64px": "p-16 / gap-16"
+      }
+    },
+
+    "borderRadius": {
+      "sm": "6px",
+      "md": "8px",
+      "lg": "12px",
+      "xl": "16px",
+      "full": "9999px",
+      "tailwind": "rounded-md / rounded-lg / rounded-xl / rounded-2xl / rounded-full"
+    },
+
+    "shadows": {
+      "sm": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+      "md": "0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -1px rgb(0 0 0 / 0.04)",
+      "lg": "0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -2px rgb(0 0 0 / 0.04)",
+      "tailwind": "shadow-sm / shadow-md / shadow-lg"
+    }
+  },
+
+  "componentSpecs": {
+    "button": {
+      "variants": {
+        "primary": {
+          "bg": "#2563EB",
+          "bgHover": "#1D4ED8",
+          "text": "#FFFFFF",
+          "border": "none",
+          "tailwind": "bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors"
+        },
+        "secondary": {
+          "bg": "#FFFFFF",
+          "bgHover": "#F8FAFC",
+          "text": "#0F172A",
+          "border": "1px solid #E2E8F0",
+          "tailwind": "bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 font-medium px-4 py-2 rounded-lg transition-colors"
+        },
+        "ghost": {
+          "bg": "transparent",
+          "bgHover": "#F1F5F9",
+          "text": "#64748B",
+          "border": "none",
+          "tailwind": "bg-transparent hover:bg-slate-100 text-slate-500 font-medium px-4 py-2 rounded-lg transition-colors"
+        },
+        "destructive": {
+          "bg": "#EF4444",
+          "bgHover": "#DC2626",
+          "text": "#FFFFFF",
+          "border": "none",
+          "tailwind": "bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg transition-colors"
+        }
+      },
+      "sizes": {
+        "sm": { "height": "32px", "px": "12px", "fontSize": "14px" },
+        "md": { "height": "40px", "px": "16px", "fontSize": "14px" },
+        "lg": { "height": "48px", "px": "24px", "fontSize": "16px" }
+      }
+    },
+
+    "input": {
+      "default": {
+        "height": "40px",
+        "border": "1px solid #E2E8F0",
+        "borderRadius": "8px",
+        "bg": "#FFFFFF",
+        "text": "#0F172A",
+        "placeholder": "#94A3B8",
+        "tailwind": "h-10 border border-slate-200 rounded-lg bg-white text-slate-900 placeholder:text-slate-400 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      },
+      "states": {
+        "focus": { "ring": "2px solid #2563EB", "border": "transparent" },
+        "error": { "border": "1px solid #EF4444", "ring": "2px solid #FCA5A5" },
+        "disabled": { "bg": "#F8FAFC", "opacity": "0.5" }
+      }
+    },
+
+    "card": {
+      "default": {
+        "bg": "#FFFFFF",
+        "border": "1px solid #E2E8F0",
+        "borderRadius": "12px",
+        "shadow": "shadow-sm",
+        "padding": "24px",
+        "tailwind": "bg-white border border-slate-200 rounded-xl shadow-sm p-6"
+      },
+      "elevated": {
+        "bg": "#FFFFFF",
+        "border": "none",
+        "shadow": "shadow-md",
+        "tailwind": "bg-white rounded-xl shadow-md p-6"
+      }
+    },
+
+    "badge": {
+      "variants": {
+        "success": {
+          "bg": "#F0FDF4",
+          "text": "#16A34A",
+          "tailwind": "bg-green-50 text-green-700 text-xs font-medium px-2.5 py-0.5 rounded-full"
+        },
+        "error": {
+          "bg": "#FEF2F2",
+          "text": "#DC2626",
+          "tailwind": "bg-red-50 text-red-700 text-xs font-medium px-2.5 py-0.5 rounded-full"
+        },
+        "warning": {
+          "bg": "#FFFBEB",
+          "text": "#D97706",
+          "tailwind": "bg-amber-50 text-amber-700 text-xs font-medium px-2.5 py-0.5 rounded-full"
+        },
+        "neutral": {
+          "bg": "#F1F5F9",
+          "text": "#475569",
+          "tailwind": "bg-slate-100 text-slate-600 text-xs font-medium px-2.5 py-0.5 rounded-full"
+        },
+        "primary": {
+          "bg": "#EFF6FF",
+          "text": "#1D4ED8",
+          "tailwind": "bg-blue-50 text-blue-700 text-xs font-medium px-2.5 py-0.5 rounded-full"
+        }
+      }
+    },
+
+    "table": {
+      "header": {
+        "bg": "#F8FAFC",
+        "text": "#64748B",
+        "fontSize": "12px",
+        "fontWeight": 500,
+        "tailwind": "bg-slate-50 text-slate-500 text-xs font-medium uppercase tracking-wider"
+      },
+      "row": {
+        "bg": "#FFFFFF",
+        "bgHover": "#F8FAFC",
+        "border": "1px solid #F1F5F9",
+        "text": "#0F172A",
+        "tailwind": "bg-white hover:bg-slate-50 border-b border-slate-100 text-sm text-slate-900"
+      }
+    }
+  },
+
+  "frames": [
+    {
+      "id": "frame-design-system-overview",
+      "name": "Design System Overview - PC (1440px)",
+      "viewport": { "width": 1440, "height": 4200 },
+      "layout": {
+        "maxWidth": "1280px",
+        "margin": "0 auto",
+        "padding": "64px 80px",
+        "columns": 1,
+        "gap": "64px"
+      },
+      "sections": [
+        {
+          "id": "s1-header",
+          "title": "Wisecan Design System",
+          "subtitle": "Sprint 1 — 디자인 토큰 정의 v1.0.0",
+          "type": "header",
+          "height": "120px"
+        },
+        {
+          "id": "s2-colors",
+          "title": "Color Palette",
+          "type": "color-swatches",
+          "height": "480px",
+          "content": {
+            "groups": [
+              {
+                "label": "Primary",
+                "swatches": [
+                  { "name": "Primary", "hex": "#2563EB", "tailwind": "blue-600" },
+                  { "name": "Primary Dark", "hex": "#1D4ED8", "tailwind": "blue-700" },
+                  { "name": "Primary Light", "hex": "#3B82F6", "tailwind": "blue-500" },
+                  { "name": "Primary Extra Light", "hex": "#EFF6FF", "tailwind": "blue-50" }
+                ]
+              },
+              {
+                "label": "Neutral",
+                "swatches": [
+                  { "name": "Background", "hex": "#FFFFFF", "tailwind": "white" },
+                  { "name": "Surface", "hex": "#F8FAFC", "tailwind": "slate-50" },
+                  { "name": "Surface Hover", "hex": "#F1F5F9", "tailwind": "slate-100" },
+                  { "name": "Border", "hex": "#E2E8F0", "tailwind": "slate-200" },
+                  { "name": "Border Strong", "hex": "#CBD5E1", "tailwind": "slate-300" }
+                ]
+              },
+              {
+                "label": "Text",
+                "swatches": [
+                  { "name": "Text Primary", "hex": "#0F172A", "tailwind": "slate-900" },
+                  { "name": "Text Secondary", "hex": "#64748B", "tailwind": "slate-500" },
+                  { "name": "Text Disabled", "hex": "#94A3B8", "tailwind": "slate-400" }
+                ]
+              },
+              {
+                "label": "Semantic",
+                "swatches": [
+                  { "name": "Success", "hex": "#22C55E", "tailwind": "green-500" },
+                  { "name": "Error", "hex": "#EF4444", "tailwind": "red-500" },
+                  { "name": "Warning", "hex": "#F59E0B", "tailwind": "amber-500" },
+                  { "name": "Info", "hex": "#3B82F6", "tailwind": "blue-500" }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "s3-typography",
+          "title": "Typography Scale (Pretendard)",
+          "type": "typography-scale",
+          "height": "600px",
+          "content": {
+            "rows": [
+              { "token": "Display", "size": "36px/800", "sample": "MCP 도구로 연결하는 새로운 방식", "usage": "Hero Title" },
+              { "token": "H1", "size": "30px/700", "sample": "API 키 관리", "usage": "Page Title" },
+              { "token": "H2", "size": "24px/600", "sample": "최근 호출 이력", "usage": "Section Title" },
+              { "token": "H3", "size": "20px/600", "sample": "오늘 API 호출", "usage": "Card Title" },
+              { "token": "Body1", "size": "16px/400", "sample": "Wisecan은 MCP 도구 기반 메시지 발송, 에이전트 진단, 파일 변환 서비스를 제공합니다.", "usage": "Body Text" },
+              { "token": "Body2", "size": "14px/400", "sample": "API 키는 생성 후 다시 확인할 수 없습니다.", "usage": "Secondary Text" },
+              { "token": "Label", "size": "14px/500", "sample": "이메일 *", "usage": "Form Label" },
+              { "token": "Caption", "size": "12px/400", "sample": "예) user@wisecan.co.kr", "usage": "Hint / Timestamp" }
+            ]
+          }
+        },
+        {
+          "id": "s4-buttons",
+          "title": "Button Styles",
+          "type": "component-showcase",
+          "height": "280px",
+          "content": {
+            "groups": [
+              {
+                "label": "Variants",
+                "items": [
+                  { "variant": "Primary", "label": "API Key 발급", "size": "md" },
+                  { "variant": "Secondary", "label": "내보내기", "size": "md" },
+                  { "variant": "Ghost", "label": "취소", "size": "md" },
+                  { "variant": "Destructive", "label": "키 비활성화", "size": "md" }
+                ]
+              },
+              {
+                "label": "Sizes",
+                "items": [
+                  { "variant": "Primary", "label": "Small", "size": "sm" },
+                  { "variant": "Primary", "label": "Medium", "size": "md" },
+                  { "variant": "Primary", "label": "Large", "size": "lg" }
+                ]
+              },
+              {
+                "label": "States",
+                "items": [
+                  { "variant": "Primary", "label": "로그인", "state": "default" },
+                  { "variant": "Primary", "label": "로그인 중...", "state": "loading", "showSpinner": true },
+                  { "variant": "Primary", "label": "로그인", "state": "disabled", "disabled": true }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "s5-inputs",
+          "title": "Input Fields",
+          "type": "component-showcase",
+          "height": "320px",
+          "content": {
+            "rows": [
+              { "label": "이메일 *", "placeholder": "예) user@wisecan.co.kr", "state": "default" },
+              { "label": "비밀번호 *", "placeholder": "8자 이상 입력", "type": "password", "state": "default" },
+              { "label": "이메일 *", "placeholder": "예) user@wisecan.co.kr", "state": "focus", "note": "Focus — ring: blue-500" },
+              { "label": "이메일 *", "value": "invalid-email", "state": "error", "errorMsg": "올바른 이메일 형식이 아닙니다" },
+              { "label": "API Key 별칭", "placeholder": "예) 프로덕션 서버 키", "state": "default" }
+            ]
+          }
+        },
+        {
+          "id": "s6-cards",
+          "title": "Card Components",
+          "type": "component-showcase",
+          "height": "280px",
+          "content": {
+            "variants": [
+              {
+                "name": "Stat Card",
+                "width": "280px",
+                "label": "오늘 API 호출",
+                "value": "1,234건",
+                "change": "+12.5% 전일 대비",
+                "changeType": "positive",
+                "icon": "Activity"
+              },
+              {
+                "name": "Default Card",
+                "width": "320px",
+                "title": "최근 호출 이력",
+                "content": "테이블 컨텐츠 영역",
+                "style": "bordered"
+              },
+              {
+                "name": "Elevated Card",
+                "width": "280px",
+                "title": "활성 API Key",
+                "value": "3개",
+                "style": "elevated"
+              }
+            ]
+          }
+        },
+        {
+          "id": "s7-badges",
+          "title": "Badge & Status Indicators",
+          "type": "component-showcase",
+          "height": "160px",
+          "content": {
+            "items": [
+              { "label": "Active", "variant": "success" },
+              { "label": "Revoked", "variant": "error" },
+              { "label": "Pending", "variant": "warning" },
+              { "label": "성공", "variant": "success" },
+              { "label": "실패", "variant": "error" },
+              { "label": "베타", "variant": "primary" },
+              { "label": "신규", "variant": "neutral" }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

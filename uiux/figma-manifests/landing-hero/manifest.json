@@ -1,0 +1,7 @@
+{
+  "name": "Wisecan Landing Hero",
+  "id": "wisecan-landing-hero",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": ["figma"]
+}

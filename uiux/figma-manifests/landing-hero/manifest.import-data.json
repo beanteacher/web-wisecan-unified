@@ -1,0 +1,233 @@
+{
+  "meta": {
+    "wbs": "1.1.4",
+    "title": "Landing Hero Section",
+    "description": "Wisecan B2C 랜딩 히어로 — 통합 메시징 플랫폼 소개, 채널 카드, 핵심 기능 카드",
+    "reference": "SOLAPI (solapi.com) 벤치마킹 — 구조/문구 참고, 비주얼 차별화",
+    "framework": "Next.js + Tailwind CSS + shadcn/ui + framer-motion",
+    "lastUpdated": "2026-04-07"
+  },
+
+  "frames": [
+    {
+      "name": "Landing Hero - PC (1440px)",
+      "viewport": { "width": 1440, "height": 1080 },
+      "layout": {
+        "maxWidth": "1200px",
+        "margin": "0 auto",
+        "columns": 1,
+        "textAlign": "center"
+      },
+      "sections": {
+        "nav": {
+          "height": "64px",
+          "logo": "Wisecan",
+          "links": ["기능", "요금", "API 문서", "고객사례"],
+          "actions": ["로그인 (ghost)", "시작하기 (primary)"]
+        },
+        "hero": {
+          "badge": "통합 메시징 플랫폼",
+          "headline": ["문자, 알림톡, RCS.", "하나의 API로 모두 보내세요."],
+          "headlineAccent": "line2 → Primary Blue",
+          "subCopy": "SMS, MMS, 카카오 알림톡, RCS까지 — 통합 발송과 실시간 통계를 한 곳에서",
+          "cta": [
+            { "label": "무료로 시작하기", "variant": "primary", "href": "/register" },
+            { "label": "API 문서 보기", "variant": "secondary", "href": "/docs" }
+          ],
+          "trustIndicators": [
+            "4채널 통합 발송",
+            "실시간 발송 통계",
+            "5분 만에 API 연동",
+            "발송 결과 자동 분석"
+          ]
+        },
+        "channels": {
+          "sectionLabel": "지원 채널",
+          "layout": "4열 가로 배치, gap-24px",
+          "items": [
+            { "name": "SMS", "desc": "단문 문자", "iconColor": "#2563EB", "iconBg": "#EFF6FF" },
+            { "name": "MMS", "desc": "장문/이미지", "iconColor": "#7C3AED", "iconBg": "#F5F3FF" },
+            { "name": "카카오 알림톡", "desc": "카카오톡 알림", "iconColor": "#F59E0B", "iconBg": "#FFFBEB" },
+            { "name": "RCS", "desc": "리치 메시지", "iconColor": "#059669", "iconBg": "#ECFDF5" }
+          ]
+        },
+        "features": {
+          "sectionLabel": "핵심 기능",
+          "layout": "4열 가로 배치, gap-24px",
+          "items": [
+            { "icon": "Send", "title": "통합 발송", "desc": "SMS, MMS, 카카오 알림톡, RCS를 하나의 API로 발송", "accentColor": "#2563EB" },
+            { "icon": "BarChart3", "title": "실시간 통계", "desc": "발송 현황, 성공률, 채널별 통계를 대시보드에서 확인", "accentColor": "#7C3AED" },
+            { "icon": "Key", "title": "API Key 관리", "desc": "API Key 발급·관리·사용량 추적을 한 곳에서", "accentColor": "#059669" },
+            { "icon": "FileText", "title": "파일 변환", "desc": "Markdown을 DOCX, PDF로 간편하게 변환", "accentColor": "#F59E0B" }
+          ]
+        }
+      },
+
+      "motions": [
+        {
+          "id": "motion-badge",
+          "target": "badge",
+          "trigger": "onLoad",
+          "animation": "fadeInDown",
+          "initial": { "opacity": 0, "y": -16 },
+          "animate": { "opacity": 1, "y": 0 },
+          "duration": 0.5,
+          "delay": 0,
+          "easing": "easeOut"
+        },
+        {
+          "id": "motion-headline-1",
+          "target": "headline-line1",
+          "trigger": "onLoad",
+          "animation": "fadeInUp",
+          "initial": { "opacity": 0, "y": 24 },
+          "animate": { "opacity": 1, "y": 0 },
+          "duration": 0.6,
+          "delay": 0.15,
+          "easing": "easeOut"
+        },
+        {
+          "id": "motion-headline-2",
+          "target": "headline-line2",
+          "trigger": "onLoad",
+          "animation": "fadeInUp",
+          "initial": { "opacity": 0, "y": 24 },
+          "animate": { "opacity": 1, "y": 0 },
+          "duration": 0.6,
+          "delay": 0.3,
+          "easing": "easeOut"
+        },
+        {
+          "id": "motion-subcopy",
+          "target": "sub-copy",
+          "trigger": "onLoad",
+          "animation": "fadeIn",
+          "initial": { "opacity": 0 },
+          "animate": { "opacity": 1 },
+          "duration": 0.5,
+          "delay": 0.5,
+          "easing": "easeOut"
+        },
+        {
+          "id": "motion-ctas",
+          "target": "cta-buttons",
+          "trigger": "onLoad",
+          "animation": "fadeInUp",
+          "initial": { "opacity": 0, "y": 16 },
+          "animate": { "opacity": 1, "y": 0 },
+          "duration": 0.5,
+          "delay": 0.65,
+          "easing": "easeOut"
+        },
+        {
+          "id": "motion-trust",
+          "target": "trust-indicators",
+          "trigger": "onLoad",
+          "animation": "staggerFadeIn",
+          "initial": { "opacity": 0 },
+          "animate": { "opacity": 1 },
+          "duration": 0.3,
+          "delay": 0.85,
+          "staggerDelay": 0.08,
+          "easing": "easeOut"
+        },
+        {
+          "id": "motion-channels",
+          "target": "channel-cards",
+          "trigger": "onScroll",
+          "animation": "staggerSlideUp",
+          "initial": { "opacity": 0, "y": 32 },
+          "animate": { "opacity": 1, "y": 0 },
+          "duration": 0.5,
+          "staggerDelay": 0.1,
+          "threshold": 0.3,
+          "easing": "easeOut",
+          "once": true
+        },
+        {
+          "id": "motion-features",
+          "target": "feature-cards",
+          "trigger": "onScroll",
+          "animation": "staggerSlideUp",
+          "initial": { "opacity": 0, "y": 32 },
+          "animate": { "opacity": 1, "y": 0 },
+          "duration": 0.5,
+          "staggerDelay": 0.1,
+          "threshold": 0.3,
+          "easing": "easeOut",
+          "once": true
+        },
+        {
+          "id": "motion-cta-hover",
+          "target": "cta-primary",
+          "trigger": "onHover",
+          "animation": "scale",
+          "whileHover": { "scale": 1.03, "boxShadow": "0 8px 24px rgba(37,99,235,0.25)" },
+          "duration": 0.2,
+          "easing": "easeInOut"
+        },
+        {
+          "id": "motion-channel-hover",
+          "target": "channel-card-each",
+          "trigger": "onHover",
+          "animation": "lift",
+          "whileHover": { "y": -4, "boxShadow": "0 8px 24px rgba(0,0,0,0.08)" },
+          "duration": 0.2,
+          "easing": "easeOut"
+        },
+        {
+          "id": "motion-feature-hover",
+          "target": "feature-card-each",
+          "trigger": "onHover",
+          "animation": "lift",
+          "whileHover": { "y": -4, "borderColor": "#2563EB" },
+          "duration": 0.2,
+          "easing": "easeOut"
+        }
+      ]
+    },
+
+    {
+      "name": "Landing Hero - Mobile (375px)",
+      "viewport": { "width": 375, "height": 1400 },
+      "layout": {
+        "padding": "0 20px",
+        "columns": 1
+      },
+      "responsive": {
+        "nav": "로고 + 햄버거 메뉴",
+        "headline": "28px, 3줄 줄바꿈",
+        "cta": "세로 스택 (full-width)",
+        "trustIndicators": "2x2 그리드",
+        "channels": "2x2 그리드",
+        "features": "1컬럼 가로형 카드 스택"
+      },
+      "motions": [
+        { "note": "PC와 동일하되, stagger delay를 0.08s → 0.06s로 줄여 모바일에서 빠르게 전개" },
+        { "note": "onScroll threshold를 0.3 → 0.2로 낮춰 작은 뷰포트에서 일찍 트리거" }
+      ]
+    }
+  ],
+
+  "motionSummary": {
+    "description": "페이지 로드 시 히어로 요소가 순차적으로 나타나고, 스크롤 시 채널/기능 카드가 stagger로 올라옴",
+    "timeline": [
+      "0.00s — 뱃지 fadeInDown",
+      "0.15s — 메인 카피 1줄 fadeInUp",
+      "0.30s — 메인 카피 2줄 fadeInUp (Blue)",
+      "0.50s — 서브 카피 fadeIn",
+      "0.65s — CTA 버튼 fadeInUp",
+      "0.85s — 신뢰 지표 stagger fadeIn (0.08s 간격)",
+      "scroll — 채널 카드 stagger slideUp (0.1s 간격)",
+      "scroll — 기능 카드 stagger slideUp (0.1s 간격)",
+      "hover  — CTA scale(1.03) + shadow",
+      "hover  — 카드 lift translateY(-4px) + shadow"
+    ],
+    "framerMotionNotes": [
+      "onLoad 애니메이션: initial + animate + transition 조합",
+      "onScroll 애니메이션: whileInView + viewport={{ once: true, amount: threshold }}",
+      "onHover 애니메이션: whileHover 속성 사용",
+      "stagger: 부모에 staggerChildren, 자식에 variants 패턴"
+    ]
+  }
+}

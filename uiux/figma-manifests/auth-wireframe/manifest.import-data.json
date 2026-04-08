@@ -1,0 +1,459 @@
+{
+  "meta": {
+    "wbs": "1.1.2",
+    "title": "Auth Wireframe",
+    "description": "로그인 / 회원가입 화면 와이어프레임 — shadcn/ui Blocks Login/Signup 벤치마킹",
+    "reference": "ui.shadcn.com/blocks → Login / Signup 탭",
+    "framework": "Next.js 16 + Tailwind CSS v4 + shadcn/ui",
+    "lastUpdated": "2026-04-07"
+  },
+
+  "sharedTokens": {
+    "brandGradient": "from-blue-600 to-blue-800",
+    "formMaxWidth": "400px",
+    "inputHeight": "40px",
+    "buttonHeight": "40px",
+    "pageBg": "#F8FAFC",
+    "formBg": "#FFFFFF"
+  },
+
+  "frames": [
+    {
+      "id": "frame-login-pc",
+      "name": "Login - PC (1440px)",
+      "viewport": { "width": 1440, "height": 900 },
+      "layout": {
+        "type": "two-column",
+        "leftWidth": "50%",
+        "rightWidth": "50%",
+        "minHeight": "100vh"
+      },
+      "blocks": [
+        {
+          "id": "login-left-brand",
+          "column": "left",
+          "type": "brand-panel",
+          "background": {
+            "type": "gradient",
+            "value": "linear-gradient(135deg, #2563EB 0%, #1D4ED8 60%, #1E40AF 100%)"
+          },
+          "content": {
+            "logo": {
+              "text": "Wisecan",
+              "icon": "Zap",
+              "iconColor": "#FFFFFF",
+              "textColor": "#FFFFFF",
+              "fontSize": "24px",
+              "fontWeight": 700
+            },
+            "headline": {
+              "text": "MCP 도구로 연결하는\n새로운 비즈니스 방식",
+              "fontSize": "36px",
+              "fontWeight": 800,
+              "color": "#FFFFFF",
+              "lineHeight": "44px"
+            },
+            "subtext": {
+              "text": "메시지 발송부터 파일 변환까지 — API 하나로 모든 MCP 도구를 연결하세요.",
+              "fontSize": "16px",
+              "color": "rgba(255,255,255,0.80)",
+              "lineHeight": "24px"
+            },
+            "featureList": [
+              { "icon": "MessageSquare", "text": "MCP 메시지 발송 도구" },
+              { "icon": "Activity", "text": "에이전트 상태 진단" },
+              { "icon": "FileText", "text": "파일 형식 변환" }
+            ],
+            "featureIconColor": "rgba(255,255,255,0.70)",
+            "featureTextColor": "rgba(255,255,255,0.90)"
+          }
+        },
+        {
+          "id": "login-right-form",
+          "column": "right",
+          "type": "form-panel",
+          "background": "#FFFFFF",
+          "alignment": "center",
+          "padding": "48px",
+          "content": {
+            "header": {
+              "title": "로그인",
+              "titleSize": "30px",
+              "titleWeight": 700,
+              "subtitle": "Wisecan 계정에 로그인하세요",
+              "subtitleColor": "#64748B"
+            },
+            "form": {
+              "fields": [
+                {
+                  "id": "email",
+                  "label": "이메일 *",
+                  "type": "email",
+                  "placeholder": "예) user@wisecan.co.kr",
+                  "autocomplete": "email",
+                  "required": true
+                },
+                {
+                  "id": "password",
+                  "label": "비밀번호 *",
+                  "type": "password",
+                  "placeholder": "비밀번호를 입력하세요",
+                  "autocomplete": "current-password",
+                  "required": true,
+                  "trailingAction": {
+                    "type": "link",
+                    "label": "비밀번호 찾기",
+                    "href": "/auth/forgot-password",
+                    "position": "label-right"
+                  }
+                }
+              ],
+              "errorState": {
+                "visible": true,
+                "message": "이메일 또는 비밀번호가 일치하지 않습니다",
+                "icon": "AlertCircle",
+                "style": {
+                  "bg": "#FEF2F2",
+                  "border": "1px solid #FECACA",
+                  "text": "#DC2626",
+                  "borderRadius": "8px",
+                  "padding": "12px 16px"
+                }
+              },
+              "submitButton": {
+                "label": "로그인",
+                "variant": "primary",
+                "width": "100%",
+                "height": "44px",
+                "loadingLabel": "로그인 중..."
+              }
+            },
+            "divider": {
+              "text": "또는",
+              "show": false
+            },
+            "footer": {
+              "text": "계정이 없으신가요?",
+              "linkLabel": "회원가입",
+              "linkHref": "/auth/register"
+            }
+          },
+          "spacing": {
+            "formGap": "16px",
+            "sectionGap": "24px",
+            "headerGap": "32px"
+          }
+        }
+      ],
+      "responsive": {
+        "breakpoint": "lg (1024px)",
+        "mobileRedirect": "Login - Mobile (375px)"
+      }
+    },
+
+    {
+      "id": "frame-login-mobile",
+      "name": "Login - Mobile (375px)",
+      "viewport": { "width": 375, "height": 812 },
+      "layout": {
+        "type": "single-column",
+        "minHeight": "100vh",
+        "background": "#FFFFFF"
+      },
+      "blocks": [
+        {
+          "id": "mobile-login-logo",
+          "type": "logo-header",
+          "padding": "48px 24px 0",
+          "content": {
+            "logo": {
+              "text": "Wisecan",
+              "icon": "Zap",
+              "iconColor": "#2563EB",
+              "textColor": "#0F172A",
+              "fontSize": "24px",
+              "fontWeight": 700
+            },
+            "tagline": "MCP 도구 연결 플랫폼",
+            "taglineColor": "#64748B"
+          }
+        },
+        {
+          "id": "mobile-login-form",
+          "type": "form-panel",
+          "padding": "32px 24px 24px",
+          "content": {
+            "header": {
+              "title": "로그인",
+              "titleSize": "24px",
+              "titleWeight": 700
+            },
+            "form": {
+              "fields": [
+                {
+                  "id": "email",
+                  "label": "이메일 *",
+                  "type": "email",
+                  "placeholder": "예) user@wisecan.co.kr"
+                },
+                {
+                  "id": "password",
+                  "label": "비밀번호 *",
+                  "type": "password",
+                  "placeholder": "비밀번호를 입력하세요",
+                  "trailingAction": {
+                    "type": "link",
+                    "label": "비밀번호 찾기",
+                    "position": "label-right"
+                  }
+                }
+              ],
+              "errorState": {
+                "message": "이메일 또는 비밀번호가 일치하지 않습니다"
+              },
+              "submitButton": {
+                "label": "로그인",
+                "width": "100%",
+                "height": "48px"
+              }
+            },
+            "footer": {
+              "text": "계정이 없으신가요?",
+              "linkLabel": "회원가입"
+            }
+          },
+          "hiddenFromPC": ["brand-panel"]
+        }
+      ]
+    },
+
+    {
+      "id": "frame-register-pc",
+      "name": "Register - PC (1440px)",
+      "viewport": { "width": 1440, "height": 960 },
+      "layout": {
+        "type": "two-column",
+        "leftWidth": "50%",
+        "rightWidth": "50%",
+        "minHeight": "100vh"
+      },
+      "blocks": [
+        {
+          "id": "register-left-brand",
+          "column": "left",
+          "type": "brand-panel",
+          "background": {
+            "type": "gradient",
+            "value": "linear-gradient(135deg, #2563EB 0%, #1D4ED8 60%, #1E40AF 100%)"
+          },
+          "content": {
+            "logo": {
+              "text": "Wisecan",
+              "icon": "Zap",
+              "textColor": "#FFFFFF"
+            },
+            "headline": {
+              "text": "지금 바로 시작하세요",
+              "fontSize": "36px",
+              "fontWeight": 800,
+              "color": "#FFFFFF"
+            },
+            "subtext": {
+              "text": "무료로 가입하고 Wisecan MCP 도구의 모든 기능을 체험하세요.",
+              "color": "rgba(255,255,255,0.80)"
+            },
+            "trustItems": [
+              { "icon": "Shield", "text": "엔터프라이즈급 보안" },
+              { "icon": "Zap", "text": "즉시 사용 가능한 API" },
+              { "icon": "HeadphonesIcon", "text": "전담 기술 지원" }
+            ]
+          }
+        },
+        {
+          "id": "register-right-form",
+          "column": "right",
+          "type": "form-panel",
+          "background": "#FFFFFF",
+          "alignment": "center",
+          "padding": "48px",
+          "content": {
+            "header": {
+              "title": "회원가입",
+              "titleSize": "30px",
+              "titleWeight": 700,
+              "subtitle": "Wisecan 계정을 만들어보세요",
+              "subtitleColor": "#64748B"
+            },
+            "form": {
+              "fields": [
+                {
+                  "id": "name",
+                  "label": "이름 *",
+                  "type": "text",
+                  "placeholder": "예) 김위즈캔",
+                  "autocomplete": "name",
+                  "required": true,
+                  "validation": {
+                    "required": "이름을 입력해주세요",
+                    "minLength": { "value": 2, "message": "이름은 2자 이상이어야 합니다" }
+                  }
+                },
+                {
+                  "id": "email",
+                  "label": "이메일 *",
+                  "type": "email",
+                  "placeholder": "예) user@wisecan.co.kr",
+                  "autocomplete": "email",
+                  "required": true,
+                  "validation": {
+                    "required": "이메일을 입력해주세요",
+                    "pattern": { "message": "올바른 이메일 형식이 아닙니다" }
+                  }
+                },
+                {
+                  "id": "password",
+                  "label": "비밀번호 *",
+                  "type": "password",
+                  "placeholder": "8자 이상, 영문+숫자 조합",
+                  "autocomplete": "new-password",
+                  "required": true,
+                  "hint": "영문, 숫자를 포함하여 8자 이상 입력하세요",
+                  "validation": {
+                    "required": "비밀번호를 입력해주세요",
+                    "minLength": { "value": 8, "message": "비밀번호는 8자 이상이어야 합니다" },
+                    "pattern": { "message": "영문과 숫자를 모두 포함해야 합니다" }
+                  }
+                },
+                {
+                  "id": "passwordConfirm",
+                  "label": "비밀번호 확인 *",
+                  "type": "password",
+                  "placeholder": "비밀번호를 다시 입력하세요",
+                  "autocomplete": "new-password",
+                  "required": true,
+                  "validation": {
+                    "required": "비밀번호 확인을 입력해주세요",
+                    "match": { "message": "비밀번호가 일치하지 않습니다" }
+                  }
+                }
+              ],
+              "validationErrorStates": {
+                "fieldError": {
+                  "borderColor": "#EF4444",
+                  "ring": "2px solid #FCA5A5",
+                  "messageColor": "#DC2626",
+                  "messageSize": "12px",
+                  "messageIcon": "AlertCircle"
+                },
+                "passwordMismatch": {
+                  "id": "passwordConfirm",
+                  "value": "abcd1234",
+                  "confirmValue": "abcd12345",
+                  "errorMsg": "비밀번호가 일치하지 않습니다"
+                }
+              },
+              "submitButton": {
+                "label": "회원가입",
+                "variant": "primary",
+                "width": "100%",
+                "height": "44px",
+                "loadingLabel": "계정 생성 중..."
+              }
+            },
+            "footer": {
+              "text": "이미 계정이 있으신가요?",
+              "linkLabel": "로그인",
+              "linkHref": "/auth/login"
+            },
+            "terms": {
+              "show": true,
+              "text": "가입하면 Wisecan의 이용약관 및 개인정보처리방침에 동의하는 것으로 간주됩니다.",
+              "fontSize": "12px",
+              "color": "#94A3B8"
+            }
+          },
+          "spacing": {
+            "formGap": "16px",
+            "sectionGap": "24px"
+          }
+        }
+      ],
+      "responsive": {
+        "breakpoint": "lg (1024px)",
+        "mobileRedirect": "Register - Mobile (375px)"
+      }
+    },
+
+    {
+      "id": "frame-register-mobile",
+      "name": "Register - Mobile (375px)",
+      "viewport": { "width": 375, "height": 900 },
+      "layout": {
+        "type": "single-column",
+        "minHeight": "100vh",
+        "background": "#FFFFFF",
+        "overflow": "scroll"
+      },
+      "blocks": [
+        {
+          "id": "mobile-register-logo",
+          "type": "logo-header",
+          "padding": "48px 24px 0",
+          "content": {
+            "logo": {
+              "text": "Wisecan",
+              "icon": "Zap",
+              "iconColor": "#2563EB",
+              "textColor": "#0F172A"
+            }
+          }
+        },
+        {
+          "id": "mobile-register-form",
+          "type": "form-panel",
+          "padding": "32px 24px 48px",
+          "content": {
+            "header": {
+              "title": "회원가입",
+              "titleSize": "24px",
+              "titleWeight": 700
+            },
+            "form": {
+              "fields": [
+                { "id": "name", "label": "이름 *", "placeholder": "예) 김위즈캔" },
+                { "id": "email", "label": "이메일 *", "placeholder": "예) user@wisecan.co.kr" },
+                { "id": "password", "label": "비밀번호 *", "placeholder": "8자 이상, 영문+숫자 조합", "hint": "영문, 숫자를 포함하여 8자 이상" },
+                { "id": "passwordConfirm", "label": "비밀번호 확인 *", "placeholder": "비밀번호를 다시 입력하세요" }
+              ],
+              "submitButton": {
+                "label": "회원가입",
+                "width": "100%",
+                "height": "48px"
+              }
+            },
+            "footer": {
+              "text": "이미 계정이 있으신가요?",
+              "linkLabel": "로그인"
+            }
+          },
+          "hiddenFromPC": ["brand-panel"],
+          "stackBehavior": "all fields stack vertically, gap-4 between fields"
+        }
+      ]
+    }
+  ],
+
+  "componentLibrary": {
+    "shadcnBlocks": "ui.shadcn.com/blocks — Login-01, Login-02 패턴 참고",
+    "components": ["Input", "Button", "Label", "Card", "Alert", "Form", "Link"],
+    "icons": "lucide-react (Zap, AlertCircle, Shield, MessageSquare, Activity, FileText, Eye, EyeOff)"
+  },
+
+  "accessibilityNotes": [
+    "모든 Input에 htmlFor-id 연결 필수",
+    "에러 메시지는 role='alert' aria-live='polite'",
+    "비밀번호 toggle 버튼: aria-label='비밀번호 보기/숨기기'",
+    "Submit 버튼 로딩 상태: aria-busy='true' aria-label='로그인 중'",
+    "폼 유효성 실패 시 첫 번째 에러 필드로 focus 이동"
+  ]
+}

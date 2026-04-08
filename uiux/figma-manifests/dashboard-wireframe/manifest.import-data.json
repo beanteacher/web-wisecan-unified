@@ -1,0 +1,781 @@
+{
+  "meta": {
+    "wbs": "1.1.3",
+    "title": "Dashboard + API Key Wireframe",
+    "description": "대시보드, API Key 관리, 발급 모달 화면 와이어프레임 — shadcn/ui Blocks Dashboard + Sidebar 벤치마킹",
+    "reference": "ui.shadcn.com/blocks → Featured Dashboard, Sidebar 탭",
+    "framework": "Next.js 16 + Tailwind CSS v4 + shadcn/ui",
+    "lastUpdated": "2026-04-07"
+  },
+
+  "sharedLayout": {
+    "sidebar": {
+      "width": "240px",
+      "collapsedWidth": "64px",
+      "bg": "#FFFFFF",
+      "border": "1px solid #E2E8F0",
+      "zIndex": 40
+    },
+    "contentArea": {
+      "bg": "#F8FAFC",
+      "padding": "32px",
+      "maxWidth": "1200px"
+    },
+    "topbar": {
+      "height": "64px",
+      "bg": "#FFFFFF",
+      "border": "1px solid #E2E8F0",
+      "mobileOnly": true
+    }
+  },
+
+  "navigation": {
+    "logo": {
+      "text": "Wisecan",
+      "icon": "Zap",
+      "iconColor": "#2563EB",
+      "textColor": "#0F172A",
+      "fontSize": "18px",
+      "fontWeight": 700,
+      "padding": "20px 16px"
+    },
+    "items": [
+      {
+        "id": "dashboard",
+        "label": "대시보드",
+        "icon": "LayoutDashboard",
+        "href": "/dashboard",
+        "active": true,
+        "activeStyle": "bg-blue-50 text-blue-700 font-medium"
+      },
+      {
+        "id": "api-keys",
+        "label": "API Keys",
+        "icon": "Key",
+        "href": "/dashboard/api-keys",
+        "active": false
+      },
+      {
+        "id": "message-tools",
+        "label": "메시지 도구",
+        "icon": "MessageSquare",
+        "href": "/dashboard/message-tools",
+        "active": false
+      },
+      {
+        "id": "message-stats",
+        "label": "메시지 통계",
+        "icon": "BarChart2",
+        "href": "/dashboard/message-stats",
+        "active": false
+      },
+      {
+        "id": "file-convert",
+        "label": "파일 변환",
+        "icon": "FileText",
+        "href": "/dashboard/file-convert",
+        "active": false
+      },
+      {
+        "id": "settings",
+        "label": "설정",
+        "icon": "Settings",
+        "href": "/dashboard/settings",
+        "active": false
+      }
+    ],
+    "userProfile": {
+      "position": "bottom",
+      "padding": "16px",
+      "content": {
+        "avatar": { "initials": "KW", "bg": "#EFF6FF", "text": "#2563EB", "size": "36px" },
+        "name": "김위즈캔",
+        "email": "kim@wisecan.co.kr",
+        "menuItems": ["프로필 설정", "로그아웃"],
+        "tailwind": "flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 cursor-pointer"
+      }
+    }
+  },
+
+  "frames": [
+    {
+      "id": "frame-dashboard-pc",
+      "name": "Dashboard - PC (1440px)",
+      "viewport": { "width": 1440, "height": 900 },
+      "layout": {
+        "type": "sidebar-content",
+        "sidebarWidth": "240px",
+        "contentBg": "#F8FAFC",
+        "minHeight": "100vh"
+      },
+      "blocks": [
+        {
+          "id": "db-sidebar",
+          "type": "sidebar",
+          "activeItem": "dashboard",
+          "ref": "navigation"
+        },
+        {
+          "id": "db-content",
+          "type": "content-area",
+          "padding": "32px",
+          "sections": [
+            {
+              "id": "db-page-header",
+              "type": "page-header",
+              "content": {
+                "title": "대시보드",
+                "subtitle": "2026년 4월 7일 기준 서비스 현황",
+                "actions": []
+              },
+              "spacing": { "mb": "24px" }
+            },
+            {
+              "id": "db-stat-cards",
+              "type": "stat-card-grid",
+              "columns": 4,
+              "gap": "16px",
+              "spacing": { "mb": "24px" },
+              "cards": [
+                {
+                  "id": "stat-today-calls",
+                  "label": "오늘 API 호출",
+                  "value": "1,234건",
+                  "change": "+12.5%",
+                  "changeLabel": "전일 대비",
+                  "changeType": "positive",
+                  "icon": "Activity",
+                  "iconBg": "#EFF6FF",
+                  "iconColor": "#2563EB"
+                },
+                {
+                  "id": "stat-success-rate",
+                  "label": "성공률",
+                  "value": "98.5%",
+                  "change": "+0.3%p",
+                  "changeLabel": "전일 대비",
+                  "changeType": "positive",
+                  "icon": "CheckCircle2",
+                  "iconBg": "#F0FDF4",
+                  "iconColor": "#22C55E"
+                },
+                {
+                  "id": "stat-active-keys",
+                  "label": "활성 API Key",
+                  "value": "3개",
+                  "change": "변동 없음",
+                  "changeLabel": "",
+                  "changeType": "neutral",
+                  "icon": "Key",
+                  "iconBg": "#FFFBEB",
+                  "iconColor": "#F59E0B"
+                },
+                {
+                  "id": "stat-monthly-calls",
+                  "label": "이번 달 총 호출",
+                  "value": "45,678건",
+                  "change": "+8.2%",
+                  "changeLabel": "전월 대비",
+                  "changeType": "positive",
+                  "icon": "TrendingUp",
+                  "iconBg": "#F5F3FF",
+                  "iconColor": "#7C3AED"
+                }
+              ]
+            },
+            {
+              "id": "db-chart-section",
+              "type": "chart-area",
+              "spacing": { "mb": "24px" },
+              "content": {
+                "title": "최근 7일 API 호출 추이",
+                "subtitle": "2026.03.31 ~ 2026.04.07",
+                "chartType": "area",
+                "height": "280px",
+                "bg": "#FFFFFF",
+                "border": "1px solid #E2E8F0",
+                "borderRadius": "12px",
+                "padding": "24px",
+                "xAxis": ["3/31", "4/1", "4/2", "4/3", "4/4", "4/5", "4/6", "4/7"],
+                "yAxis": "호출 수",
+                "dataSeries": [
+                  {
+                    "name": "API 호출",
+                    "color": "#2563EB",
+                    "fillColor": "rgba(37,99,235,0.08)",
+                    "data": [980, 1120, 890, 1340, 1180, 760, 1050, 1234]
+                  }
+                ],
+                "legend": true,
+                "tooltip": "날짜 + 호출 수 + 성공/실패 분류",
+                "component": "recharts AreaChart (shadcn/ui chart wrapper)"
+              }
+            },
+            {
+              "id": "db-recent-calls-table",
+              "type": "data-table",
+              "content": {
+                "title": "최근 호출 이력",
+                "subtitle": "실시간 업데이트",
+                "bg": "#FFFFFF",
+                "border": "1px solid #E2E8F0",
+                "borderRadius": "12px",
+                "padding": "0px",
+                "headerPadding": "20px 24px",
+                "columns": [
+                  { "id": "time", "label": "시간", "width": "120px", "type": "text" },
+                  { "id": "apiKey", "label": "API Key", "width": "160px", "type": "code" },
+                  { "id": "tool", "label": "도구명", "width": "180px", "type": "text" },
+                  { "id": "status", "label": "상태", "width": "100px", "type": "badge" },
+                  { "id": "responseTime", "label": "응답시간", "width": "100px", "type": "text", "align": "right" }
+                ],
+                "rows": [
+                  {
+                    "time": "14:23:05",
+                    "apiKey": "wc_a1b2c3d4",
+                    "tool": "message_send",
+                    "status": { "label": "성공", "variant": "success" },
+                    "responseTime": "234ms"
+                  },
+                  {
+                    "time": "14:22:51",
+                    "apiKey": "wc_e5f6g7h8",
+                    "tool": "agent_diagnose",
+                    "status": { "label": "성공", "variant": "success" },
+                    "responseTime": "412ms"
+                  },
+                  {
+                    "time": "14:21:38",
+                    "apiKey": "wc_a1b2c3d4",
+                    "tool": "file_convert",
+                    "status": { "label": "실패", "variant": "error" },
+                    "responseTime": "1,203ms"
+                  },
+                  {
+                    "time": "14:20:17",
+                    "apiKey": "wc_e5f6g7h8",
+                    "tool": "message_send",
+                    "status": { "label": "성공", "variant": "success" },
+                    "responseTime": "189ms"
+                  },
+                  {
+                    "time": "14:19:44",
+                    "apiKey": "wc_a1b2c3d4",
+                    "tool": "message_send",
+                    "status": { "label": "성공", "variant": "success" },
+                    "responseTime": "201ms"
+                  }
+                ],
+                "pagination": {
+                  "show": true,
+                  "currentPage": 1,
+                  "totalPages": 24,
+                  "perPage": 5,
+                  "totalItems": 119
+                },
+                "emptyState": {
+                  "icon": "Inbox",
+                  "title": "호출 이력이 없습니다",
+                  "subtitle": "API를 호출하면 이곳에 이력이 표시됩니다"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "responsive": {
+        "breakpoint": "lg (1024px)",
+        "mobileRedirect": "Dashboard - Mobile (375px)"
+      }
+    },
+
+    {
+      "id": "frame-dashboard-mobile",
+      "name": "Dashboard - Mobile (375px)",
+      "viewport": { "width": 375, "height": 812 },
+      "layout": {
+        "type": "topbar-content",
+        "contentBg": "#F8FAFC",
+        "overflow": "scroll"
+      },
+      "blocks": [
+        {
+          "id": "mobile-topbar",
+          "type": "mobile-topbar",
+          "height": "56px",
+          "bg": "#FFFFFF",
+          "border": "1px solid #E2E8F0",
+          "content": {
+            "left": { "type": "hamburger-button", "icon": "Menu", "ariaLabel": "메뉴 열기" },
+            "center": { "type": "logo", "text": "Wisecan", "icon": "Zap" },
+            "right": { "type": "avatar", "initials": "KW" }
+          }
+        },
+        {
+          "id": "mobile-drawer",
+          "type": "sheet-drawer",
+          "trigger": "hamburger-button",
+          "side": "left",
+          "width": "280px",
+          "content": { "ref": "navigation" }
+        },
+        {
+          "id": "mobile-content",
+          "type": "content-area",
+          "padding": "16px",
+          "sections": [
+            {
+              "id": "mobile-page-header",
+              "type": "page-header",
+              "content": { "title": "대시보드", "subtitle": "4월 7일 기준" }
+            },
+            {
+              "id": "mobile-stat-cards",
+              "type": "stat-card-grid",
+              "columns": 2,
+              "gap": "12px",
+              "note": "PC 4열 → 모바일 2x2 그리드",
+              "cards": [
+                { "label": "오늘 API 호출", "value": "1,234건", "change": "+12.5%" },
+                { "label": "성공률", "value": "98.5%", "change": "+0.3%p" },
+                { "label": "활성 API Key", "value": "3개", "change": "-" },
+                { "label": "이번 달 총 호출", "value": "45,678건", "change": "+8.2%" }
+              ]
+            },
+            {
+              "id": "mobile-chart",
+              "type": "chart-area",
+              "note": "PC 차트 높이 280px → 모바일 180px, 레전드 축소",
+              "height": "180px",
+              "horizontalScroll": false,
+              "showXAxisLabels": "주요 날짜만 (3/31, 4/4, 4/7)"
+            },
+            {
+              "id": "mobile-table",
+              "type": "data-table",
+              "note": "테이블 가로 스크롤 (overflow-x-auto), 최소 컬럼 width 유지",
+              "visibleColumns": ["time", "tool", "status"],
+              "hiddenColumns": ["apiKey", "responseTime"],
+              "horizontalScroll": true
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "frame-api-keys-pc",
+      "name": "API Keys - PC (1440px)",
+      "viewport": { "width": 1440, "height": 900 },
+      "layout": {
+        "type": "sidebar-content",
+        "sidebarWidth": "240px",
+        "contentBg": "#F8FAFC"
+      },
+      "blocks": [
+        {
+          "id": "apikeys-sidebar",
+          "type": "sidebar",
+          "activeItem": "api-keys",
+          "ref": "navigation"
+        },
+        {
+          "id": "apikeys-content",
+          "type": "content-area",
+          "padding": "32px",
+          "sections": [
+            {
+              "id": "apikeys-header",
+              "type": "page-header",
+              "content": {
+                "title": "API Keys",
+                "subtitle": "API 키를 생성하고 관리하세요. 키는 생성 시 한 번만 확인 가능합니다.",
+                "actions": [
+                  {
+                    "label": "새 키 발급",
+                    "icon": "Plus",
+                    "variant": "primary",
+                    "action": "open-modal-create-key"
+                  }
+                ]
+              },
+              "spacing": { "mb": "24px" }
+            },
+            {
+              "id": "apikeys-table",
+              "type": "data-table",
+              "content": {
+                "bg": "#FFFFFF",
+                "border": "1px solid #E2E8F0",
+                "borderRadius": "12px",
+                "columns": [
+                  { "id": "alias", "label": "별칭", "width": "200px", "type": "text" },
+                  { "id": "prefix", "label": "접두사", "width": "160px", "type": "code" },
+                  { "id": "status", "label": "상태", "width": "100px", "type": "badge" },
+                  { "id": "lastUsed", "label": "마지막 사용", "width": "140px", "type": "text" },
+                  { "id": "createdAt", "label": "생성일", "width": "120px", "type": "text" },
+                  { "id": "actions", "label": "", "width": "120px", "type": "actions", "align": "right" }
+                ],
+                "rows": [
+                  {
+                    "alias": "프로덕션 키",
+                    "prefix": "wc_a1b2c3d4",
+                    "status": { "label": "Active", "variant": "success" },
+                    "lastUsed": "2분 전",
+                    "createdAt": "2024-03-15",
+                    "actions": [
+                      { "label": "비활성화", "variant": "ghost", "icon": "EyeOff", "confirmRequired": true }
+                    ]
+                  },
+                  {
+                    "alias": "테스트 키",
+                    "prefix": "wc_e5f6g7h8",
+                    "status": { "label": "Active", "variant": "success" },
+                    "lastUsed": "1시간 전",
+                    "createdAt": "2024-03-10",
+                    "actions": [
+                      { "label": "비활성화", "variant": "ghost", "icon": "EyeOff", "confirmRequired": true }
+                    ]
+                  },
+                  {
+                    "alias": "레거시 키",
+                    "prefix": "wc_i9j0k1l2",
+                    "status": { "label": "Revoked", "variant": "error" },
+                    "lastUsed": "-",
+                    "createdAt": "2024-02-01",
+                    "actions": []
+                  }
+                ],
+                "emptyState": {
+                  "icon": "Key",
+                  "title": "API 키가 없습니다",
+                  "subtitle": "'새 키 발급' 버튼을 눌러 첫 번째 API 키를 만들어보세요",
+                  "action": { "label": "새 키 발급", "variant": "primary" }
+                }
+              }
+            },
+            {
+              "id": "apikeys-info-banner",
+              "type": "info-banner",
+              "spacing": { "mt": "16px" },
+              "content": {
+                "icon": "Info",
+                "text": "API 키는 생성 시 단 한 번만 전체 값을 확인할 수 있습니다. 안전한 곳에 복사해두세요.",
+                "bg": "#EFF6FF",
+                "border": "1px solid #BFDBFE",
+                "textColor": "#1D4ED8",
+                "borderRadius": "8px",
+                "padding": "12px 16px"
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "frame-api-keys-mobile",
+      "name": "API Keys - Mobile (375px)",
+      "viewport": { "width": 375, "height": 812 },
+      "layout": {
+        "type": "topbar-content",
+        "contentBg": "#F8FAFC",
+        "overflow": "scroll"
+      },
+      "blocks": [
+        {
+          "id": "mobile-apikeys-topbar",
+          "type": "mobile-topbar",
+          "height": "56px",
+          "content": {
+            "left": { "type": "hamburger-button", "icon": "Menu" },
+            "center": { "type": "text", "text": "API Keys" },
+            "right": { "type": "icon-button", "icon": "Plus", "label": "새 키 발급", "action": "open-modal-create-key" }
+          }
+        },
+        {
+          "id": "mobile-apikeys-content",
+          "type": "content-area",
+          "padding": "16px",
+          "sections": [
+            {
+              "id": "mobile-apikeys-list",
+              "type": "card-list",
+              "note": "PC 테이블 → 모바일 카드 리스트 형태 변환",
+              "gap": "12px",
+              "cards": [
+                {
+                  "alias": "프로덕션 키",
+                  "prefix": "wc_a1b2c3d4",
+                  "status": { "label": "Active", "variant": "success" },
+                  "lastUsed": "2분 전",
+                  "actions": [
+                    { "label": "비활성화", "variant": "ghost-destructive", "fullWidth": false }
+                  ],
+                  "cardLayout": {
+                    "top": "alias + status badge",
+                    "middle": "prefix (monospace, text-sm text-slate-500)",
+                    "bottom": "마지막 사용: 2분 전 | action button"
+                  }
+                },
+                {
+                  "alias": "테스트 키",
+                  "prefix": "wc_e5f6g7h8",
+                  "status": { "label": "Active", "variant": "success" },
+                  "lastUsed": "1시간 전",
+                  "actions": [{ "label": "비활성화", "variant": "ghost-destructive" }]
+                },
+                {
+                  "alias": "레거시 키",
+                  "prefix": "wc_i9j0k1l2",
+                  "status": { "label": "Revoked", "variant": "error" },
+                  "lastUsed": "-",
+                  "actions": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "frame-api-key-modal-pc",
+      "name": "API Key 발급 모달 - PC",
+      "viewport": { "width": 1440, "height": 900 },
+      "layout": {
+        "type": "modal-overlay",
+        "overlayBg": "rgba(0,0,0,0.50)",
+        "baseFrame": "API Keys - PC (1440px)"
+      },
+      "blocks": [
+        {
+          "id": "modal-create-key",
+          "type": "dialog-modal",
+          "width": "480px",
+          "borderRadius": "16px",
+          "bg": "#FFFFFF",
+          "shadow": "0 20px 60px rgba(0,0,0,0.15)",
+          "padding": "32px",
+          "states": [
+            {
+              "id": "state-input",
+              "name": "Step 1 — 별칭 입력",
+              "content": {
+                "header": {
+                  "title": "새 API Key 발급",
+                  "subtitle": "이 키로 Wisecan API에 접근할 수 있습니다.",
+                  "icon": "Key",
+                  "iconBg": "#EFF6FF",
+                  "iconColor": "#2563EB",
+                  "closeButton": true
+                },
+                "form": {
+                  "fields": [
+                    {
+                      "id": "keyAlias",
+                      "label": "API Key 별칭 *",
+                      "type": "text",
+                      "placeholder": "예) 프로덕션 서버 키",
+                      "hint": "키를 구분하기 위한 이름입니다. 나중에 변경 가능합니다.",
+                      "maxLength": 50
+                    }
+                  ]
+                },
+                "footer": {
+                  "actions": [
+                    { "label": "취소", "variant": "secondary", "action": "close-modal" },
+                    { "label": "발급", "variant": "primary", "action": "submit-create-key", "loadingLabel": "발급 중..." }
+                  ],
+                  "layout": "row-right",
+                  "gap": "8px"
+                }
+              }
+            },
+            {
+              "id": "state-success",
+              "name": "Step 2 — 발급 성공 (Raw Key 표시)",
+              "content": {
+                "header": {
+                  "title": "API Key가 발급되었습니다",
+                  "icon": "CheckCircle2",
+                  "iconBg": "#F0FDF4",
+                  "iconColor": "#22C55E"
+                },
+                "warningBanner": {
+                  "text": "이 키는 다시 확인할 수 없습니다. 지금 바로 복사해 안전한 곳에 저장하세요.",
+                  "icon": "AlertTriangle",
+                  "bg": "#FFFBEB",
+                  "border": "1px solid #FDE68A",
+                  "textColor": "#92400E",
+                  "borderRadius": "8px",
+                  "padding": "12px 16px",
+                  "fontWeight": 500
+                },
+                "keyDisplay": {
+                  "label": "API Key",
+                  "value": "wc_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
+                  "type": "masked-copyable",
+                  "bg": "#F8FAFC",
+                  "border": "1px solid #E2E8F0",
+                  "borderRadius": "8px",
+                  "padding": "12px 16px",
+                  "fontFamily": "monospace",
+                  "fontSize": "14px",
+                  "copyButton": {
+                    "label": "복사",
+                    "icon": "Copy",
+                    "successLabel": "복사됨",
+                    "successIcon": "Check",
+                    "position": "trailing"
+                  }
+                },
+                "keyMeta": {
+                  "alias": "프로덕션 서버 키",
+                  "createdAt": "2026-04-07 14:30:00"
+                },
+                "footer": {
+                  "actions": [
+                    { "label": "닫기", "variant": "primary", "width": "100%", "action": "close-modal" }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "frame-api-key-modal-mobile",
+      "name": "API Key 발급 모달 - Mobile",
+      "viewport": { "width": 375, "height": 812 },
+      "layout": {
+        "type": "bottom-sheet",
+        "overlayBg": "rgba(0,0,0,0.50)",
+        "baseFrame": "API Keys - Mobile (375px)"
+      },
+      "blocks": [
+        {
+          "id": "bottom-sheet-create-key",
+          "type": "sheet-bottom",
+          "width": "100%",
+          "maxHeight": "90vh",
+          "borderRadius": "16px 16px 0 0",
+          "bg": "#FFFFFF",
+          "handleBar": { "show": true, "width": "40px", "height": "4px", "color": "#E2E8F0" },
+          "padding": "24px",
+          "states": [
+            {
+              "id": "state-input",
+              "name": "Step 1 — 별칭 입력",
+              "content": {
+                "header": {
+                  "title": "새 API Key 발급",
+                  "subtitle": "이 키로 Wisecan API에 접근할 수 있습니다."
+                },
+                "form": {
+                  "fields": [
+                    {
+                      "id": "keyAlias",
+                      "label": "API Key 별칭 *",
+                      "placeholder": "예) 프로덕션 서버 키",
+                      "hint": "키를 구분하기 위한 이름입니다."
+                    }
+                  ]
+                },
+                "footer": {
+                  "layout": "stack",
+                  "actions": [
+                    { "label": "발급", "variant": "primary", "width": "100%", "height": "48px" },
+                    { "label": "취소", "variant": "ghost", "width": "100%", "height": "48px" }
+                  ]
+                }
+              }
+            },
+            {
+              "id": "state-success",
+              "name": "Step 2 — 발급 성공 (Raw Key 표시)",
+              "content": {
+                "header": {
+                  "title": "발급 완료",
+                  "icon": "CheckCircle2",
+                  "iconColor": "#22C55E"
+                },
+                "warningBanner": {
+                  "text": "이 키는 다시 확인할 수 없습니다. 지금 복사하세요.",
+                  "icon": "AlertTriangle",
+                  "bg": "#FFFBEB",
+                  "textColor": "#92400E"
+                },
+                "keyDisplay": {
+                  "value": "wc_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
+                  "type": "masked-copyable",
+                  "truncate": true,
+                  "copyButton": { "label": "복사", "icon": "Copy", "fullWidth": true, "variant": "secondary" }
+                },
+                "footer": {
+                  "actions": [
+                    { "label": "닫기", "variant": "primary", "width": "100%", "height": "48px" }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "componentLibrary": {
+    "shadcnBlocks": "ui.shadcn.com/blocks — Dashboard-01, Sidebar-07, Sidebar-08 패턴 참고",
+    "components": [
+      "Sidebar", "SidebarMenu", "SidebarMenuItem", "SidebarMenuButton",
+      "Card", "CardHeader", "CardContent", "CardTitle",
+      "Table", "TableHeader", "TableBody", "TableRow", "TableCell",
+      "Badge", "Button", "Dialog", "DialogContent", "DialogHeader",
+      "Sheet", "SheetContent", "SheetHeader",
+      "Avatar", "DropdownMenu", "Tooltip",
+      "ChartContainer", "ChartTooltip"
+    ],
+    "icons": "lucide-react (LayoutDashboard, Key, MessageSquare, BarChart2, FileText, Settings, Activity, CheckCircle2, TrendingUp, Plus, EyeOff, Copy, Check, AlertTriangle, Info, Menu, Zap, Inbox)",
+    "charting": "recharts via shadcn/ui chart components (AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer)"
+  },
+
+  "responsiveSummary": {
+    "sidebar": {
+      "pc": "항상 표시 (240px fixed left)",
+      "mobile": "숨김 → 햄버거 버튼 → Sheet (left drawer)"
+    },
+    "statCards": {
+      "pc": "4열 가로 grid (grid-cols-4)",
+      "mobile": "2열 그리드 (grid-cols-2)"
+    },
+    "chart": {
+      "pc": "280px height, 전체 X축 라벨",
+      "mobile": "180px height, 주요 날짜만 표시"
+    },
+    "table": {
+      "pc": "전체 컬럼 표시",
+      "mobile": "overflow-x-auto 가로 스크롤 (주요 컬럼 우선)"
+    },
+    "apiKeyList": {
+      "pc": "테이블 형태",
+      "mobile": "카드 리스트 (각 행 → 개별 카드)"
+    },
+    "modal": {
+      "pc": "Dialog (중앙 480px 너비)",
+      "mobile": "Sheet Bottom (하단 시트, 최대 90vh)"
+    }
+  },
+
+  "accessibilityNotes": [
+    "사이드바 네비게이션: aria-current='page' 활성 메뉴 아이템",
+    "햄버거 메뉴: aria-expanded, aria-controls 연결",
+    "테이블: role='table' + caption, th scope='col'",
+    "모달: aria-modal='true', focus trap, Esc키 닫기",
+    "API Key 복사 버튼: aria-label='API Key 복사', 성공 후 aria-live='polite' 피드백",
+    "배지 색상: 색상 외 텍스트로도 상태 구분 (Active/Revoked)",
+    "차트: aria-label='최근 7일 API 호출 추이 차트', 데이터 테이블 대안 제공"
+  ]
+}

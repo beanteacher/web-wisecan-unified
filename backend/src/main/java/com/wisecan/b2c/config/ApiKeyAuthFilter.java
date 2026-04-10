@@ -66,6 +66,17 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
         this.redisTemplate = redisTemplate;
     }
 
+    /**
+     * /api/v1/tools/** 경로에만 이 필터를 적용한다.
+     * SecurityConfig 에는 filter chain 한 개로 등록되므로 모든 요청이 이 필터를 통과한다.
+     * 따라서 여기서 경로 스코프를 명시적으로 제한해야 /auth/**, /api-keys/** 등이 401 로 차단되지 않는다.
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path == null || !path.startsWith("/api/v1/tools/");
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,

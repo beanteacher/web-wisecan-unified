@@ -1,7 +1,6 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MessageResultDetail } from '@/features/message-tool';
 
@@ -12,20 +11,23 @@ export default function MessageResultPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
+      {/* 뒤로가기 버튼 */}
+      <div>
         <Button
-          variant="ghost"
-          size="icon-sm"
+          variant="secondary"
+          size="sm"
           onClick={() => router.push('/dashboard/message-tools?tab=history')}
         >
-          <ArrowLeft className="h-4 w-4" />
+          ← 이력으로 돌아가기
         </Button>
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">발송 결과 상세</h1>
-          <p className="mt-0.5 text-xs text-slate-400">
-            메시지 도구 &rsaquo; 발송 이력 &rsaquo; 상세
-          </p>
-        </div>
+      </div>
+
+      {/* 페이지 헤더 */}
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">발송 결과 상세</h1>
+        <p className="mt-1 text-sm text-slate-500">
+          메시지 ID 기반 상태 및 응답 상세 정보
+        </p>
       </div>
 
       <MessageResultDetail msgId={msgId} />

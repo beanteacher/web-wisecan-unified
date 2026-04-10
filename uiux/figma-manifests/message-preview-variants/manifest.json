@@ -1,0 +1,8 @@
+{
+  "name": "Wisecan Message Preview Variants",
+  "id": "wisecan-message-preview-variants",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"]
+}

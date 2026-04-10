@@ -1,5 +1,6 @@
 export type MessageStatus = 'PENDING' | 'SUCCESS' | 'FAILED' | 'PARTIAL';
-export type MessageChannel = 'EMAIL' | 'SMS' | 'PUSH' | 'SLACK';
+// 현재는 메시징 3종(SMS/LMS/MMS) 만 제공. 이메일/푸시/Slack 등은 Phase 2 이후 추가 예정.
+export type MessageChannel = 'SMS' | 'LMS' | 'MMS';
 
 // GET /api/v1/tools/message/{msgId} 응답
 export interface MessageResult {

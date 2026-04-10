@@ -14,8 +14,8 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 const mockResult: MessageResult = {
   messageId: 'msg-abc123',
-  channel: 'EMAIL',
-  recipient: 'test@example.com',
+  channel: 'SMS',
+  recipient: '01012345678',
   content: '테스트 본문입니다.',
   status: 'SUCCESS',
   sentAt: '2026-04-10T10:00:00Z',
@@ -39,9 +39,10 @@ describe('MessageResultDetail', () => {
 
     render(<MessageResultDetail msgId="msg-abc123" />, { wrapper });
 
-    expect(screen.getByText('msg-abc123')).toBeInTheDocument();
-    expect(screen.getByText('성공')).toBeInTheDocument();
-    expect(screen.getByText('test@example.com')).toBeInTheDocument();
+    // PC + Mobile 그리드 양쪽에 렌더링되므로 getAllByText 사용
+    expect(screen.getAllByText('msg-abc123').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('성공').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('01012345678')).toBeInTheDocument();
     expect(screen.getByText('테스트 본문입니다.')).toBeInTheDocument();
   });
 

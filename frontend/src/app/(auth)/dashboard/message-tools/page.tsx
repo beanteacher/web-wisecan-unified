@@ -25,29 +25,35 @@ export default function MessageToolsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">메시지 도구</h1>
+    <div className="space-y-0">
+      {/* 페이지 헤더 */}
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold text-slate-900">
+          {tab === 'send' ? '메시지 발송' : '발송 이력'}
+        </h1>
         <p className="mt-1 text-sm text-slate-500">
-          MCP 채널을 통해 메시지를 발송하고 결과를 확인하세요
+          MCP 채널을 통해 메시지를 발송하세요
         </p>
       </div>
 
-      {/* 탭 */}
-      <div className="border-b border-slate-200">
-        <nav className="-mb-px flex gap-6">
+      {/* 탭 바 */}
+      <div className="mb-6 border-b border-slate-200">
+        <nav className="-mb-px flex">
           {TABS.map(({ key, label }) => (
             <button
               key={key}
               onClick={() => handleTabChange(key)}
               className={[
-                'border-b-2 pb-3 text-sm font-medium transition-colors',
+                'relative px-8 pb-3 text-sm font-medium transition-colors',
                 tab === key
-                  ? 'border-slate-900 text-slate-900'
-                  : 'border-transparent text-slate-500 hover:text-slate-700',
+                  ? 'text-blue-600'
+                  : 'text-slate-500 hover:text-slate-700',
               ].join(' ')}
             >
               {label}
+              {tab === key && (
+                <span className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600" />
+              )}
             </button>
           ))}
         </nav>

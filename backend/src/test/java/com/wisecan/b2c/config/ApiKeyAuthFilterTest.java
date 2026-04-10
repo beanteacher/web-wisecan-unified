@@ -83,6 +83,7 @@ class ApiKeyAuthFilterTest {
         given(apiKeyRepository.findByKeyHash(keyHash)).willReturn(Optional.of(activeKey));
 
         MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI("/api/v1/tools/message/send");
         request.addHeader("X-API-Key", VALID_KEY);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -100,6 +101,7 @@ class ApiKeyAuthFilterTest {
         given(apiKeyRepository.findByKeyHash(anyString())).willReturn(Optional.empty());
 
         MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI("/api/v1/tools/message/send");
         request.addHeader("X-API-Key", "unknown-key");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -119,6 +121,7 @@ class ApiKeyAuthFilterTest {
         given(apiKeyRepository.findByKeyHash(keyHash)).willReturn(Optional.of(revokedKey));
 
         MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI("/api/v1/tools/message/send");
         request.addHeader("X-API-Key", VALID_KEY);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -143,6 +146,7 @@ class ApiKeyAuthFilterTest {
         given(apiKeyRepository.findByKeyHash(keyHash)).willReturn(Optional.of(activeKey));
 
         MockHttpServletRequest request1 = new MockHttpServletRequest();
+        request1.setRequestURI("/api/v1/tools/message/send");
         request1.addHeader("X-API-Key", VALID_KEY);
         MockHttpServletResponse response1 = new MockHttpServletResponse();
         limitedFilter.doFilter(request1, response1, filterChain);
@@ -151,6 +155,7 @@ class ApiKeyAuthFilterTest {
         SecurityContextHolder.clearContext();
 
         MockHttpServletRequest request2 = new MockHttpServletRequest();
+        request2.setRequestURI("/api/v1/tools/message/send");
         request2.addHeader("X-API-Key", VALID_KEY);
         MockHttpServletResponse response2 = new MockHttpServletResponse();
         limitedFilter.doFilter(request2, response2, filterChain);

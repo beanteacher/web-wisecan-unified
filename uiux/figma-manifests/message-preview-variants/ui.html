@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>메시지 미리보기 Variant</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+      font-size: 13px;
+      background: #F8FAFC;
+      color: #0F172A;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      min-height: 100vh;
+    }
+
+    .header {
+      width: 100%;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0F172A;
+      margin-bottom: 4px;
+    }
+
+    .header p {
+      font-size: 11px;
+      color: #64748B;
+    }
+
+    .info-box {
+      width: 100%;
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+
+    .info-box p {
+      font-size: 12px;
+      color: #1D4ED8;
+      line-height: 1.5;
+    }
+
+    .info-box strong {
+      font-weight: 600;
+    }
+
+    .frame-list {
+      width: 100%;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .frame-list-header {
+      background: #F1F5F9;
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748B;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    .frame-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-bottom: 1px solid #F1F5F9;
+      gap: 8px;
+    }
+
+    .frame-item:last-child { border-bottom: none; }
+
+    .frame-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-sms    { background: #007AFF; }
+    .dot-kakao  { background: #FAE100; border: 1px solid #D4A800; }
+    .dot-rcs    { background: #2563EB; }
+    .dot-empty  { background: #94A3B8; }
+    .dot-overview { background: #7C3AED; }
+
+    .frame-name {
+      flex: 1;
+      font-size: 12px;
+      color: #0F172A;
+    }
+
+    .frame-size {
+      font-size: 11px;
+      color: #94A3B8;
+      white-space: nowrap;
+    }
+
+    .run-btn {
+      width: 100%;
+      background: #2563EB;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .run-btn:hover { background: #1D4ED8; }
+    .run-btn:active { background: #1E40AF; }
+
+    .footer {
+      margin-top: 12px;
+      font-size: 11px;
+      color: #94A3B8;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>메시지 미리보기 Variant</h1>
+    <p>SMS · 카카오 알림톡 · RCS 3채널 와이어프레임</p>
+  </div>
+
+  <div class="info-box">
+    <p><strong>생성 프레임:</strong> 총 10개<br>
+    PC 패널(360×640) 6개 + 모바일 전체(375×812) 3개 + Overview(1200×720) 1개<br>
+    <strong>실행하면</strong> 현재 Figma 페이지에 모든 프레임이 배치됩니다.</p>
+  </div>
+
+  <div class="frame-list">
+    <div class="frame-list-header">생성될 프레임 목록</div>
+
+    <div class="frame-item">
+      <span class="frame-dot dot-empty"></span>
+      <span class="frame-name">Empty State (PC Panel)</span>
+      <span class="frame-size">360×640</span>
+    </div>
+    <div class="frame-item">
+      <span class="frame-dot dot-sms"></span>
+      <span class="frame-name">SMS (PC Panel)</span>
+      <span class="frame-size">360×640</span>
+    </div>
+    <div class="frame-item">
+      <span class="frame-dot dot-sms"></span>
+      <span class="frame-name">LMS (PC Panel)</span>
+      <span class="frame-size">360×640</span>
+    </div>
+    <div class="frame-item">
+      <span class="frame-dot dot-sms"></span>
+      <span class="frame-name">MMS (PC Panel)</span>
+      <span class="frame-size">360×640</span>
+    </div>
+    <div class="frame-item">
+      <span class="frame-dot dot-kakao"></span>
+      <span class="frame-name">카카오 알림톡 (PC Panel)</span>
+      <span class="frame-size">360×640</span>
+    </div>
+    <div class="frame-item">
+      <span class="frame-dot dot-rcs"></span>
+      <span class="frame-name">RCS (PC Panel)</span>
+      <span class="frame-size">360×640</span>
+    </div>
+    <div class="frame-item">
+      <span class="frame-dot dot-sms"></span>
+      <span class="frame-name">SMS (Mobile Full)</span>
+      <span class="frame-size">375×812</span>
+    </div>
+    <div class="frame-item">
+      <span class="frame-dot dot-kakao"></span>
+      <span class="frame-name">카카오 알림톡 (Mobile Full)</span>
+      <span class="frame-size">375×812</span>
+    </div>
+    <div class="frame-item">
+      <span class="frame-dot dot-rcs"></span>
+      <span class="frame-name">RCS (Mobile Full)</span>
+      <span class="frame-size">375×812</span>
+    </div>
+    <div class="frame-item">
+      <span class="frame-dot dot-overview"></span>
+      <span class="frame-name">Overview — 전체 Variant 비교</span>
+      <span class="frame-size">1200×720</span>
+    </div>
+  </div>
+
+  <button class="run-btn" onclick="parent.postMessage({ pluginMessage: { type: 'run' } }, '*')">
+    Figma에 프레임 생성
+  </button>
+
+  <div class="footer">
+    Wisecan MCP Connector B2C · message-preview-variants
+  </div>
+</body>
+</html>

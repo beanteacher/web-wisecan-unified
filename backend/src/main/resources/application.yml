@@ -51,13 +51,18 @@ management:
 logging:
   level:
     root: INFO
-    com.wisecan.b2c: INFO
+    com.wisecan.b2c: DEBUG
+    com.wisecan.b2c.service.AuthService: DEBUG
     org.springframework.web: INFO
     org.springframework.security: WARN
     org.hibernate: WARN
     org.hibernate.SQL: OFF
+  charset:
+    console: UTF-8
+    file: UTF-8
   pattern:
-    console: "%d{HH:mm:ss.SSS} %highlight(%-5level) [%thread] %cyan(%logger{36}) - %msg%n"
+    # Spring Boot 전용 컬러 컨버터 %clr 사용 — Logback 의 %highlight / %cyan 은 Windows 에서 출력 누락 사례가 있음
+    console: "%clr(%d{HH:mm:ss.SSS}){faded} %clr(%-5level) %clr([%thread]){faded} %clr(%-40.40logger{39}){cyan} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
   file:
     name: logs/wisecan-b2c.log

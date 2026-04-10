@@ -38,7 +38,7 @@ describe('SendMessageForm', () => {
     });
   });
 
-  it('발송 성공 시 mutateAsync를 호출한다', async () => {
+  it('짧은 본문 발송 시 SMS 채널로 자동 설정되어 호출된다', async () => {
     const mockMutateAsync = vi.fn().mockResolvedValue({ messageId: 'msg-001', status: 'SUCCESS', sentAt: '' });
     vi.spyOn(useSendMessageModule, 'useSendMessage').mockReturnValue({
       mutateAsync: mockMutateAsync,
@@ -47,14 +47,12 @@ describe('SendMessageForm', () => {
 
     render(<SendMessageForm />, { wrapper });
 
-    fireEvent.change(
-      screen.getByPlaceholderText('예) user@example.com 또는 @slack-user'),
-      { target: { value: 'test@example.com' } },
-    );
-    fireEvent.change(
-      screen.getByPlaceholderText('발송할 메시지 내용을 입력하세요. 최대 2,000자까지 입력 가능합니다.'),
-      { target: { value: '테스트 메시지 본문입니다.' } },
-    );
+    fireEvent.change(screen.getByPlaceholderText('예) 01012345678'), {
+      target: { value: '01012345678' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('발송할 문자 내용을 입력하세요.'), {
+      target: { value: '테스트' }, // 4 byte (한글 2×2)
+    });
 
     const buttons = screen.getAllByRole('button');
     const sendButton = buttons.find((b) => b.textContent?.trim() === '발송');
@@ -63,9 +61,41 @@ describe('SendMessageForm', () => {
     await waitFor(() => {
       expect(mockMutateAsync).toHaveBeenCalledWith(
         expect.objectContaining({
-          channel: 'EMAIL',
-          recipient: 'test@example.com',
-          content: '테스트 메시지 본문입니다.',
+          channel: 'SMS',
+          recipient: '01012345678',
+          content: '테스트',
+        }),
+      );
+    });
+  });
+
+  it('90 byte 초과 본문은 LMS 로 자동 전환된다', async () => {
+    const mockMutateAsync = vi.fn().mockResolvedValue({ messageId: 'msg-002', status: 'SUCCESS', sentAt: '' });
+    vi.spyOn(useSendMessageModule, 'useSendMessage').mockReturnValue({
+      mutateAsync: mockMutateAsync,
+      isPending: false,
+    } as unknown as ReturnType<typeof useSendMessageModule.useSendMessage>);
+
+    render(<SendMessageForm />, { wrapper });
+
+    fireEvent.change(screen.getByPlaceholderText('예) 01012345678'), {
+      target: { value: '01012345678' },
+    });
+    // 한글 50자 = 100 byte
+    const longContent = '가'.repeat(50);
+    fireEvent.change(screen.getByPlaceholderText('발송할 문자 내용을 입력하세요.'), {
+      target: { value: longContent },
+    });
+
+    const buttons = screen.getAllByRole('button');
+    const sendButton = buttons.find((b) => b.textContent?.trim() === '발송');
+    fireEvent.click(sendButton!);
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          channel: 'LMS',
+          content: longContent,
         }),
       );
     });

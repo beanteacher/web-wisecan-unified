@@ -1,0 +1,313 @@
+{
+  "meta": {
+    "wbs": "2.1.2",
+    "title": "메시지 미리보기 공용 컴포넌트 — 3 Variant 와이어프레임",
+    "description": "SMS/LMS/MMS, 카카오 알림톡, RCS 3가지 메시지 채널 미리보기 패널 와이어프레임. SendMessageForm 우측 360px 패널 기준 + 모바일 전체화면 기준. 향후 채널 확장 대비 variant 구조로 설계.",
+    "reference": "iOS iMessage(SMS), KakaoTalk Business 알림톡 UI, Google RCS Business Messaging",
+    "framework": "Next.js + Tailwind CSS v4 + shadcn/ui",
+    "parentManifest": "tools-message-wireframe",
+    "lastUpdated": "2026-04-10"
+  },
+
+  "panelSpec": {
+    "pcPanel": {
+      "width": 360,
+      "height": 640,
+      "note": "SendMessageForm 우측 미리보기 패널 고정 크기. 내부 스크롤 가능."
+    },
+    "mobile": {
+      "width": 375,
+      "height": 812,
+      "note": "모바일 전체화면 기준. 상단 상태바 + 채팅 헤더 + 말풍선 영역 + 하단 입력바 암시."
+    }
+  },
+
+  "designTokens": {
+    "colors": {
+      "primary": "#2563EB",
+      "primaryLight": "#EFF6FF",
+      "success": "#22C55E",
+      "error": "#DC2626",
+      "warning": "#F59E0B",
+      "surface": "#FFFFFF",
+      "bg": "#F8FAFC",
+      "border": "#E2E8F0",
+      "textPrimary": "#0F172A",
+      "textSecondary": "#64748B",
+      "textMuted": "#94A3B8",
+
+      "iosBlueBubble": "#007AFF",
+      "iosBlueBubbleText": "#FFFFFF",
+      "iosGrayBubble": "#E5E5EA",
+      "iosGrayBubbleText": "#0F172A",
+      "iosChatBg": "#FFFFFF",
+      "iosStatusBarBg": "#F2F2F7",
+
+      "kakaoYellowHeader": "#FAE100",
+      "kakaoBubbleYellow": "#FFEB3B",
+      "kakaoChatBg": "#B2C7D9",
+      "kakaoButtonBg": "#FFFFFF",
+      "kakaoButtonBorder": "#C8C8C8",
+      "kakaoButtonText": "#0F172A",
+      "kakaoProfileBg": "#FAE100",
+
+      "rcsVerifiedGreen": "#22C55E",
+      "rcsChipBg": "#FFFFFF",
+      "rcsChipBorder": "#2563EB",
+      "rcsChipText": "#2563EB",
+      "rcsChatBg": "#F8FAFC",
+      "rcsCardBg": "#FFFFFF",
+      "rcsCardBorder": "#E2E8F0"
+    },
+    "typography": {
+      "statusBar": "11px Regular",
+      "chatHeader": "16px Semi Bold",
+      "senderName": "12px Medium",
+      "bubbleText": "14px Regular",
+      "bubbleCaption": "12px Regular",
+      "timestamp": "11px Regular",
+      "buttonLabel": "13px Medium",
+      "disclaimer": "11px Regular",
+      "emptyState": "14px Regular"
+    },
+    "spacing": {
+      "bubbleHorizontalPadding": "12px",
+      "bubbleVerticalPadding": "10px",
+      "bubbleMaxWidth": "75%",
+      "bubbleGap": "8px",
+      "sectionGap": "16px",
+      "panelPadding": "16px"
+    },
+    "borderRadius": {
+      "bubble": "18px",
+      "bubbleTailSide": "4px",
+      "button": "8px",
+      "rcsCard": "12px",
+      "rcsChip": "20px",
+      "imageThumb": "8px"
+    }
+  },
+
+  "frames": [
+    {
+      "id": "frame-empty-pc",
+      "name": "Message Preview - Empty State (PC Panel)",
+      "viewport": { "width": 360, "height": 640 },
+      "category": "empty-state",
+      "variant": "shared",
+      "layout": "중앙 정렬 빈 상태 — 아이콘(48px) + 제목 + 설명 텍스트 2줄. 수신자/본문 미입력 시 초기 상태.",
+      "components": ["EmptyStateIcon", "HeadingText", "BodyText", "VariantSwitchHint"],
+      "spacing": "패널 padding 16px, 아이콘-텍스트 gap 12px, 텍스트 gap 8px",
+      "colors": ["#F8FAFC(bg)", "#94A3B8(icon)", "#64748B(text)"],
+      "typography": "제목 16px Medium, 설명 13px Regular muted",
+      "responsive": "모바일에서는 전체화면 중앙 배치 동일",
+      "mockContent": {
+        "icon": "MessageSquare (48px, #94A3B8)",
+        "title": "미리보기",
+        "body": "수신자와 본문을 입력하면\n메시지가 여기에 표시됩니다.",
+        "hint": "채널: SMS / 알림톡 / RCS"
+      }
+    },
+    {
+      "id": "frame-sms-pc",
+      "name": "Message Preview - SMS (PC Panel)",
+      "viewport": { "width": 360, "height": 640 },
+      "category": "preview-panel",
+      "variant": "SMS",
+      "layout": "iOS iMessage 스타일. 상단 헤더(수신자 번호 + 아이콘) → 채팅 영역(흰 배경) → 말풍선 우측 정렬(파란 배경). 타임스탬프 우측 하단.",
+      "components": ["ChatHeader", "BlueBubble", "TimestampLabel", "StatusLabel", "ScrollHint"],
+      "spacing": "header height 52px, bubble padding 12px 16px, bubble gap 8px, bubble maxWidth 75%(270px), panelPadding 16px",
+      "colors": ["#007AFF(발신 bubble)", "#E5E5EA(수신 bubble)", "#FFFFFF(bg)", "#64748B(timestamp)"],
+      "typography": "헤더 수신자번호 14px Semi Bold, 말풍선 본문 14px Regular, 시각 11px Regular muted",
+      "responsive": "모바일 전체화면 frame별도(frame-sms-mobile) — 상단 iOS 상태바 20px 추가, 하단 입력바 암시 영역 56px",
+      "mockContent": {
+        "receiverNumber": "01012345678",
+        "receiverLabel": "수신자",
+        "bubbleText": "[Wisecan] 오늘 오후 3시 회의가 있습니다. 일정을 확인해주세요.",
+        "timestamp": "방금 전",
+        "status": "전송됨",
+        "messageType": "SMS (80byte)"
+      }
+    },
+    {
+      "id": "frame-lms-pc",
+      "name": "Message Preview - LMS (PC Panel)",
+      "viewport": { "width": 360, "height": 640 },
+      "category": "preview-panel",
+      "variant": "LMS",
+      "layout": "SMS와 동일 구조. 말풍선 높이 확장 — 본문 5줄 이상. 하단 스크롤 암시(점선 또는 'v' 아이콘). 바이트 표시 배지 추가.",
+      "components": ["ChatHeader", "BlueBubble(tall)", "ByteBadge", "TimestampLabel", "StatusLabel", "ScrollHint"],
+      "spacing": "bubble padding 12px 16px, long body min-height 120px, byte badge margin-top 4px",
+      "colors": ["#007AFF(bubble)", "#EFF6FF(byte badge bg)", "#2563EB(byte badge text)"],
+      "typography": "말풍선 본문 14px Regular line-height 1.5, 바이트 배지 11px Medium",
+      "responsive": "모바일 frame-lms-mobile — 말풍선 최대 너비 80%",
+      "mockContent": {
+        "receiverNumber": "01012345678",
+        "bubbleText": "[Wisecan 알림] 안녕하세요 김OO 고객님.\n요청하신 상세 내용을 아래와 같이 안내드립니다.\n\n1) 항목 A — 결제 완료 (2026-04-10)\n2) 항목 B — 배송 준비 중 (예상 3~5일)\n3) 항목 C — 고객센터 문의 가능\n\n추가 문의는 1588-XXXX로 연락주세요.",
+        "byteCount": "213byte (LMS)",
+        "timestamp": "방금 전",
+        "status": "전송됨"
+      }
+    },
+    {
+      "id": "frame-mms-pc",
+      "name": "Message Preview - MMS (PC Panel)",
+      "viewport": { "width": 360, "height": 640 },
+      "category": "preview-panel",
+      "variant": "MMS",
+      "layout": "말풍선 상단에 이미지 첨부 썸네일(16:9, 최대 너비 75%). 이미지 아래 캡션 텍스트. 하단 타임스탬프. 이미지는 라운드 코너 8px.",
+      "components": ["ChatHeader", "ImageThumbnail", "BlueBubble(with-caption)", "ByteBadge", "TimestampLabel"],
+      "spacing": "image height 150px (16:9 기준 270*150), image-caption gap 0 (동일 bubble 내), bubble padding 0 (이미지) + 12px (캡션)",
+      "colors": ["#007AFF(bubble)", "#C8D6E5(image placeholder bg)", "#FFFFFF(caption text)"],
+      "typography": "캡션 14px Regular white, 이미지 플레이스홀더 레이블 12px muted center",
+      "responsive": "모바일 이미지 너비 80% 제한",
+      "mockContent": {
+        "receiverNumber": "01012345678",
+        "imagePlaceholder": "이미지 첨부 (JPG/PNG)",
+        "imageAlt": "이벤트 배너",
+        "caption": "[Wisecan 이벤트] 신규 고객 20% 할인 쿠폰입니다. 지금 바로 사용하세요!",
+        "byteCount": "첨부 포함",
+        "timestamp": "방금 전",
+        "status": "전송됨"
+      }
+    },
+    {
+      "id": "frame-sms-mobile",
+      "name": "Message Preview - SMS (Mobile Full)",
+      "viewport": { "width": 375, "height": 812 },
+      "category": "preview-panel",
+      "variant": "SMS",
+      "layout": "iOS 전체화면. 상단 상태바(20px) + 채팅 헤더(52px) + 채팅 영역(스크롤) + 하단 입력바 암시(56px). 말풍선 우측 파란 bubble.",
+      "components": ["StatusBar", "ChatHeader", "BlueBubble", "TimestampLabel", "InputBarHint"],
+      "spacing": "statusBar 20px, chatHeader 52px, inputBar 56px, bubble maxWidth 280px",
+      "colors": ["#F2F2F7(statusBar bg)", "#FFFFFF(chat bg)", "#007AFF(bubble)"],
+      "typography": "상태바 11px Regular, 헤더 16px Semi Bold, 본문 14px Regular",
+      "responsive": "이 프레임 자체가 모바일 기준",
+      "mockContent": {
+        "statusBarTime": "9:41",
+        "receiverNumber": "01012345678",
+        "bubbleText": "[Wisecan] 오늘 오후 3시 회의가 있습니다. 일정을 확인해주세요.",
+        "timestamp": "오후 3:00",
+        "status": "읽음",
+        "inputBarPlaceholder": "메시지 입력..."
+      }
+    },
+    {
+      "id": "frame-kakao-pc",
+      "name": "Message Preview - 카카오 알림톡 (PC Panel)",
+      "viewport": { "width": 360, "height": 640 },
+      "category": "preview-panel",
+      "variant": "KakaoAlimtalk",
+      "layout": "카카오톡 채팅방 배경(#B2C7D9) + 채널 프로필 카드(흰 배경, 좌측 정렬). 카드 구조: 프로필 아이콘(40px 원형 노란배경) + 채널명 → 말풍선 카드(흰 배경, 라운드 12px) → 버튼 영역(1~3개) → 하단 disclaimer.",
+      "components": ["KakaoChatBg", "ChannelProfile", "AlimtalkCard", "AlimtalkButton(x2)", "DisclaimerText"],
+      "spacing": "chat padding 16px, card padding 16px, card border-radius 12px, button height 40px, button gap 8px, disclaimer margin-top 8px",
+      "colors": ["#B2C7D9(chatBg)", "#FAE100(profileBg)", "#FFFFFF(card)", "#C8C8C8(buttonBorder)", "#0F172A(buttonText)"],
+      "typography": "채널명 13px Medium, 본문 14px Regular line-height 1.5, 버튼 13px Medium center, disclaimer 11px muted",
+      "responsive": "모바일 frame-kakao-mobile — 전체화면, 상단 카카오 헤더바 추가",
+      "mockContent": {
+        "channelName": "Wisecan",
+        "channelVerified": true,
+        "bubbleText": "주문 번호 #12345 결제가 완료되었습니다.\n\n- 상품명: Wisecan MCP 이용권 (1개월)\n- 결제금액: 29,000원\n- 결제일시: 2026-04-10 14:32",
+        "buttons": [
+          { "label": "주문 상세 보기", "type": "webLink" },
+          { "label": "고객센터", "type": "webLink" }
+        ],
+        "disclaimer": "이 메시지는 Wisecan에서 보낸 알림 메시지입니다.",
+        "timestamp": "오후 2:32"
+      }
+    },
+    {
+      "id": "frame-kakao-mobile",
+      "name": "Message Preview - 카카오 알림톡 (Mobile Full)",
+      "viewport": { "width": 375, "height": 812 },
+      "category": "preview-panel",
+      "variant": "KakaoAlimtalk",
+      "layout": "카카오톡 앱 전체화면. 상단 헤더(노란 배경 #FAE100, 채널명, 뒤로가기). 채팅 영역(#B2C7D9 배경). 알림톡 카드 + 버튼 + disclaimer. 하단 입력 영역 암시.",
+      "components": ["KakaoTopBar", "KakaoChatBg", "ChannelProfile", "AlimtalkCard", "AlimtalkButton(x2)", "DisclaimerText", "InputBarHint"],
+      "spacing": "topBar 52px, chatPadding 16px, inputBar 56px",
+      "colors": ["#FAE100(topBar)", "#B2C7D9(chatBg)", "#FFFFFF(card)"],
+      "typography": "topBar 채널명 16px Bold black, 카드 본문 14px Regular",
+      "responsive": "이 프레임 자체가 모바일 기준",
+      "mockContent": {
+        "topBarChannelName": "Wisecan",
+        "bubbleText": "주문 번호 #12345 결제가 완료되었습니다.\n\n- 상품명: Wisecan MCP 이용권 (1개월)\n- 결제금액: 29,000원",
+        "buttons": ["주문 상세 보기", "고객센터"],
+        "disclaimer": "이 메시지는 Wisecan에서 보낸 알림 메시지입니다."
+      }
+    },
+    {
+      "id": "frame-rcs-pc",
+      "name": "Message Preview - RCS (PC Panel)",
+      "viewport": { "width": 360, "height": 640 },
+      "category": "preview-panel",
+      "variant": "RCS",
+      "layout": "RCS 카드형 rich content. 채팅 배경(#F8FAFC) + 발송자 프로필 행(아이콘 40px + 이름 + verified 뱃지). 큰 이미지 카드(16:9, 328px*184px, 라운드 12px). 카드 하단: 제목 + 본문. Suggested action chips(가로 정렬, 라운드 20px). 하단 '안전한 RCS 메시지' 표시.",
+      "components": ["RcsChatBg", "SenderProfile", "VerifiedBadge", "RcsCard", "CardImage", "CardTitle", "CardBody", "ActionChip(x3)", "RcsFooter"],
+      "spacing": "chatPadding 16px, card border-radius 12px, image height 184px, cardContent padding 16px, chip height 36px, chip gap 8px, chip padding 0 16px",
+      "colors": ["#F8FAFC(chatBg)", "#FFFFFF(card)", "#E2E8F0(cardBorder)", "#2563EB(chipBorder+text)", "#22C55E(verifiedIcon)", "#94A3B8(footer)"],
+      "typography": "발송자명 13px Medium, 제목 16px Semi Bold, 본문 14px Regular, chip 13px Medium blue, footer 11px muted center",
+      "responsive": "모바일 frame-rcs-mobile — 전체화면, 카드 너비 100%",
+      "mockContent": {
+        "senderName": "Wisecan",
+        "senderVerified": true,
+        "cardImageAlt": "주말 특별 이벤트 배너",
+        "cardTitle": "주말 특별 이벤트",
+        "cardBody": "이번 주말 한정! Wisecan 신규 가입 고객에게 프리미엄 플랜 1개월 무료 제공. 지금 바로 확인하세요.",
+        "chips": ["예약하기", "지도 보기", "공유"],
+        "timestamp": "오후 4:15",
+        "footer": "안전한 RCS 메시지 · Wisecan 인증 발신"
+      }
+    },
+    {
+      "id": "frame-rcs-mobile",
+      "name": "Message Preview - RCS (Mobile Full)",
+      "viewport": { "width": 375, "height": 812 },
+      "category": "preview-panel",
+      "variant": "RCS",
+      "layout": "RCS 전체화면. 상단 상태바(20px) + 채팅 헤더(발송자명 + verified 체크, 52px) + 채팅 영역(RCS 카드 + chips + footer) + 입력바 암시(56px).",
+      "components": ["StatusBar", "RcsChatHeader", "RcsChatBg", "SenderProfile", "RcsCard", "ActionChip(x3)", "RcsFooter", "InputBarHint"],
+      "spacing": "statusBar 20px, chatHeader 52px, inputBar 56px, card maxWidth 343px",
+      "colors": ["#F8FAFC(chatBg)", "#FFFFFF(card)", "#2563EB(chips)"],
+      "typography": "헤더 16px Semi Bold, 카드 제목 16px Semi Bold, chip 13px Medium blue",
+      "responsive": "이 프레임 자체가 모바일 기준",
+      "mockContent": {
+        "statusBarTime": "9:41",
+        "senderName": "Wisecan",
+        "senderVerified": true,
+        "cardTitle": "주말 특별 이벤트",
+        "cardBody": "이번 주말 한정! Wisecan 신규 가입 고객에게 프리미엄 플랜 1개월 무료 제공.",
+        "chips": ["예약하기", "지도 보기", "공유"],
+        "footer": "안전한 RCS 메시지 · Wisecan 인증 발신"
+      }
+    },
+    {
+      "id": "frame-overview",
+      "name": "Message Preview - Overview (All Variants)",
+      "viewport": { "width": 1200, "height": 720 },
+      "category": "overview",
+      "variant": "all",
+      "layout": "3 variant PC 패널을 가로 나열. 각 패널 360*640. 좌: SMS, 중: 카카오 알림톡, 우: RCS. 상단 라벨(variant 명 + 채널 설명). 전체 배경 #F1F5F9.",
+      "components": ["OverviewBg", "PanelLabel(x3)", "SMSPanel", "KakaoPanel", "RCSPanel"],
+      "spacing": "패널 gap 40px, 상단 여백 40px, 라벨-패널 gap 12px",
+      "colors": ["#F1F5F9(overviewBg)", "#0F172A(label)", "#64748B(sublabel)"],
+      "typography": "패널 라벨 16px Semi Bold, 채널 설명 12px Regular muted",
+      "responsive": "Overview는 PC 전용 참고 프레임",
+      "mockContent": {
+        "labels": [
+          { "variant": "SMS / LMS / MMS", "desc": "문자 메시지" },
+          { "variant": "카카오 알림톡", "desc": "KakaoTalk Business" },
+          { "variant": "RCS", "desc": "Rich Communication Services" }
+        ]
+      }
+    }
+  ],
+
+  "handoffNotes": {
+    "componentPath": "src/app/(auth)/dashboard/message-tools/result",
+    "previewPanelWidth": 360,
+    "variantSwitchControl": "SendMessageForm 상단 채널 선택 탭(SMS/알림톡/RCS) 또는 Select 컴포넌트",
+    "emptyStateCondition": "receiverPhone === '' || messageBody === ''",
+    "scrollBehavior": "패널 내부 overflow-y: auto, 말풍선은 하단 정렬(flexbox column-reverse)",
+    "accessibilityNotes": "말풍선에 aria-label='발신 메시지', 버튼에 aria-label 명시, 이미지에 alt 필수"
+  }
+}

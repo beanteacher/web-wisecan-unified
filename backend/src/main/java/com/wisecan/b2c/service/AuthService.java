@@ -8,6 +8,7 @@ import com.wisecan.b2c.dto.AuthDto;
 import com.wisecan.b2c.exception.DuplicateEmailException;
 import com.wisecan.b2c.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class AuthService {
 
     private final MemberRepository memberRepository;
@@ -45,6 +47,7 @@ public class AuthService {
     public AuthDto.TokenResponse login(AuthDto.LoginRequest request) {
         Member member = memberRepository.findByEmail(request.email())
             .orElseThrow(() -> new RuntimeException("이메일 또는 비밀번호가 일치하지 않습니다"));
+        log.info("passwor: {}",passwordEncoder.encode(request.password()));
 
         if (!passwordEncoder.matches(request.password(), member.getPassword())) {
             throw new RuntimeException("이메일 또는 비밀번호가 일치하지 않습니다");

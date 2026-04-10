@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wisecan.b2c.config.JwtProvider;
 import com.wisecan.b2c.dto.AuthDto;
 import com.wisecan.b2c.exception.DuplicateEmailException;
+import com.wisecan.b2c.repository.ApiKeyRepository;
 import com.wisecan.b2c.service.AuthService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ class AuthControllerTest {
 
     @MockBean
     private JwtProvider jwtProvider;
+
+    @MockBean
+    private ApiKeyRepository apiKeyRepository;
 
     @Test
     @DisplayName("회원가입 성공 - 201 Created")

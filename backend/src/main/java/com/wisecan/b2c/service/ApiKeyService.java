@@ -56,7 +56,7 @@ public class ApiKeyService {
 
     @Transactional(readOnly = true)
     public List<ApiKeyDto.Response> getMyKeys(Long memberId) {
-        return apiKeyRepository.findByMemberIdOrderByCreatedAtDesc(memberId)
+        return apiKeyRepository.findByMemberIdOrderByCreatedAtDescIdDesc(memberId)
             .stream()
             .map(ApiKeyDto.Response::from)
             .toList();

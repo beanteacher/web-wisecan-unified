@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wisecan Message Tools Wireframe</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+      background: #F8FAFC;
+      color: #0F172A;
+      padding: 20px;
+      font-size: 13px;
+    }
+    h1 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .subtitle { color: #64748B; font-size: 12px; margin-bottom: 16px; }
+    .frames { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .frame-item {
+      display: flex; align-items: center; gap: 10px;
+      background: #FFFFFF; border: 1px solid #E2E8F0;
+      border-radius: 8px; padding: 10px 14px;
+    }
+    .frame-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #2563EB; flex-shrink: 0;
+    }
+    .frame-name { font-weight: 500; font-size: 12px; }
+    .frame-size { color: #94A3B8; font-size: 11px; margin-left: auto; }
+    .run-btn {
+      width: 100%;
+      background: #2563EB;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+    .run-btn:hover { background: #1D4ED8; }
+    .note {
+      color: #64748B; font-size: 11px; text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>메시지 도구 와이어프레임</h1>
+  <p class="subtitle">WBS 2.1.1-a — 발송 폼 / 결과 상세 / 발송 이력 검색</p>
+
+  <div class="frames">
+    <div class="frame-item">
+      <div class="frame-dot"></div>
+      <span class="frame-name">Message Send - PC</span>
+      <span class="frame-size">1440 × 900</span>
+    </div>
+    <div class="frame-item">
+      <div class="frame-dot"></div>
+      <span class="frame-name">Message Send - Mobile</span>
+      <span class="frame-size">375 × 812</span>
+    </div>
+    <div class="frame-item">
+      <div class="frame-dot"></div>
+      <span class="frame-name">Message Result - PC</span>
+      <span class="frame-size">1440 × 900</span>
+    </div>
+    <div class="frame-item">
+      <div class="frame-dot"></div>
+      <span class="frame-name">Message Result - Mobile</span>
+      <span class="frame-size">375 × 812</span>
+    </div>
+    <div class="frame-item">
+      <div class="frame-dot"></div>
+      <span class="frame-name">Message Search - PC</span>
+      <span class="frame-size">1440 × 900</span>
+    </div>
+    <div class="frame-item">
+      <div class="frame-dot"></div>
+      <span class="frame-name">Message Search - Mobile</span>
+      <span class="frame-size">375 × 812</span>
+    </div>
+  </div>
+
+  <button class="run-btn" onclick="runPlugin()">Figma에 프레임 생성</button>
+  <p class="note">클릭하면 현재 Figma 페이지에 6개 프레임이 생성됩니다.</p>
+
+  <script>
+    function runPlugin() {
+      parent.postMessage({ pluginMessage: { type: 'run' } }, '*');
+    }
+  </script>
+</body>
+</html>

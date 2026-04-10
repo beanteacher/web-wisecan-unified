@@ -1,8 +1,14 @@
 package com.wisecan.b2c.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wisecan.b2c.repository.ApiKeyRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.lang.Nullable;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -23,6 +29,22 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
+    private final ApiKeyRepository apiKeyRepository;
+    private final ObjectMapper objectMapper;
+
+    @Nullable
+    private StringRedisTemplate redisTemplate;
+
+    @Value("${wisecan.rate-limit.per-minute:60}")
+    private int rateLimitPerMinute;
+
+    @Value("${wisecan.rate-limit.mode:redis}")
+    private String rateLimitMode;
+
+    @Autowired(required = false)
+    public void setRedisTemplate(StringRedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -44,16 +66,28 @@ public class SecurityConfig {
     }
 
     @Bean
+    public ApiKeyAuthFilter apiKeyAuthFilter() {
+        return new ApiKeyAuthFilter(apiKeyRepository, objectMapper, rateLimitPerMinute, rateLimitMode, redisTemplate);
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                // 공개 경로: 인증 없이 접근 가능
                 .requestMatchers("/api/v1/auth/**", "/actuator/**").permitAll()
+                // MCP 도구 경로: ApiKeyAuthFilter가 인증 처리 (permitAll로 JWT 필터 통과 허용)
+                .requestMatchers("/api/v1/tools/**").permitAll()
+                // 나머지: JWT 인증 필요
                 .anyRequest().authenticated()
             )
+            // JWT 필터: /api/v1/auth/**, /api/v1/api-keys/** 등 JWT 경로에 적용
             .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
+            // ApiKey 필터: /api/v1/tools/** 경로에만 적용 (JWT 필터 이후)
+            .addFilterAfter(apiKeyAuthFilter(), JwtAuthenticationFilter.class)
             .build();
     }
 }

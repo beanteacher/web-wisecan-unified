@@ -11,7 +11,7 @@ public interface ApiKeyRepository extends JpaRepository<ApiKey, Long> {
 
     List<ApiKey> findByMemberIdAndStatus(Long memberId, ApiKeyStatus status);
 
-    List<ApiKey> findByMemberIdOrderByCreatedAtDesc(Long memberId);
+    List<ApiKey> findByMemberIdOrderByCreatedAtDescIdDesc(Long memberId);
 
     Optional<ApiKey> findByKeyHash(String keyHash);
 }

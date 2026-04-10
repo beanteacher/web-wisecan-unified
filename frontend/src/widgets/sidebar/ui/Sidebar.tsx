@@ -2,11 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Key, X } from 'lucide-react';
+import { LayoutDashboard, Key, MessageSquare, BarChart2, Settings, X } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: '대시보드', icon: LayoutDashboard },
-  { href: '/dashboard/api-keys', label: 'API 키 관리', icon: Key },
+  { href: '/dashboard/api-keys', label: 'API Keys', icon: Key },
+  { href: '/dashboard/message-tools', label: '메시지 도구', icon: MessageSquare },
+  { href: '/dashboard/message-stats', label: '메시지 통계', icon: BarChart2 },
+  { href: '/dashboard/settings', label: '설정', icon: Settings },
 ];
 
 interface SidebarProps {

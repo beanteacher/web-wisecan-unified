@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wisecan.b2c.config.JwtProvider;
 import com.wisecan.b2c.domain.ApiKeyStatus;
 import com.wisecan.b2c.domain.Member;
+import com.wisecan.b2c.repository.ApiKeyRepository;
 import com.wisecan.b2c.domain.MemberRole;
 import com.wisecan.b2c.domain.MemberStatus;
 import com.wisecan.b2c.dto.ApiKeyDto;
@@ -48,6 +49,9 @@ class ApiKeyControllerTest {
 
     @MockBean
     private JwtProvider jwtProvider;
+
+    @MockBean
+    private ApiKeyRepository apiKeyRepository;
 
     private Member stubMember() {
         Member member = Member.builder()

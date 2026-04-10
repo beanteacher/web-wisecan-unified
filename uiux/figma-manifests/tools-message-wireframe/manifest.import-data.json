@@ -1,0 +1,810 @@
+{
+  "meta": {
+    "wbs": "2.1.1-a",
+    "title": "메시지 도구 와이어프레임",
+    "description": "메시지 발송 폼, 발송 결과 상세, 다중 조건 검색 3개 화면 와이어프레임 — 에러/로딩/빈 상태 포함",
+    "reference": "shadcn/ui Blocks → Dashboard + shadcn/ui Form 패턴",
+    "framework": "Next.js + Tailwind CSS v4 + shadcn/ui",
+    "lastUpdated": "2026-04-10"
+  },
+
+  "sharedLayout": {
+    "sidebar": {
+      "width": "240px",
+      "collapsedWidth": "64px",
+      "bg": "#FFFFFF",
+      "border": "1px solid #E2E8F0",
+      "zIndex": 40
+    },
+    "contentArea": {
+      "bg": "#F8FAFC",
+      "padding": "32px",
+      "maxWidth": "1200px"
+    },
+    "topbar": {
+      "height": "56px",
+      "bg": "#FFFFFF",
+      "border": "1px solid #E2E8F0",
+      "mobileOnly": true
+    }
+  },
+
+  "navigation": {
+    "logo": {
+      "text": "Wisecan",
+      "icon": "Zap",
+      "iconColor": "#2563EB",
+      "textColor": "#0F172A",
+      "fontSize": "18px",
+      "fontWeight": 700
+    },
+    "items": [
+      { "id": "dashboard", "label": "대시보드", "icon": "LayoutDashboard", "href": "/dashboard" },
+      { "id": "api-keys", "label": "API Keys", "icon": "Key", "href": "/dashboard/api-keys" },
+      { "id": "message-tools", "label": "메시지 도구", "icon": "MessageSquare", "href": "/dashboard/message-tools", "active": true },
+      { "id": "message-stats", "label": "메시지 통계", "icon": "BarChart2", "href": "/dashboard/message-stats" },
+      { "id": "file-convert", "label": "파일 변환", "icon": "FileText", "href": "/dashboard/file-convert" },
+      { "id": "settings", "label": "설정", "icon": "Settings", "href": "/dashboard/settings" }
+    ]
+  },
+
+  "frames": [
+    {
+      "id": "frame-msg-send-pc",
+      "name": "Message Send - PC (1440px)",
+      "viewport": { "width": 1440, "height": 900 },
+      "category": "form",
+      "layout": "사이드바(240px) + 콘텐츠 영역. 콘텐츠 내 2컬럼 분할: 좌측 발송 폼(flex-1), 우측 미리보기 패널(360px)",
+      "components": ["Sidebar", "PageHeader", "Card", "Input", "Textarea", "Select", "Button", "Badge", "Label", "Separator"],
+      "spacing": "sidebar 240px, content padding 32px, form gap-4, card padding 24px",
+      "typography": "페이지 제목 H1(24px Bold), 섹션 레이블 Body2(14px Medium), 입력 힌트 Caption(12px)",
+      "responsive": "mobile 375px 프레임 별도 — 사이드바 숨김, 탑바 표시, 단일 컬럼 폼",
+      "blocks": [
+        {
+          "id": "send-sidebar",
+          "type": "sidebar",
+          "activeItem": "message-tools"
+        },
+        {
+          "id": "send-content",
+          "type": "content-area",
+          "padding": "32px",
+          "sections": [
+            {
+              "id": "send-page-header",
+              "type": "page-header",
+              "content": {
+                "title": "메시지 도구",
+                "subtitle": "MCP 채널을 통해 메시지를 발송하고 결과를 확인하세요",
+                "tabs": [
+                  { "id": "send", "label": "메시지 발송", "active": true },
+                  { "id": "history", "label": "발송 이력", "active": false }
+                ]
+              },
+              "spacing": { "mb": "24px" }
+            },
+            {
+              "id": "send-form-area",
+              "type": "two-column-layout",
+              "gap": "24px",
+              "left": {
+                "flex": 1,
+                "id": "send-form-card",
+                "type": "form-card",
+                "bg": "#FFFFFF",
+                "border": "1px solid #E2E8F0",
+                "borderRadius": "12px",
+                "padding": "24px",
+                "content": {
+                  "title": "메시지 발송",
+                  "fields": [
+                    {
+                      "id": "recipient",
+                      "label": "수신자 *",
+                      "type": "text",
+                      "placeholder": "예) user@example.com 또는 @slack-user",
+                      "hint": "이메일, Slack 핸들, 전화번호 등 채널별 수신자 식별자",
+                      "required": true
+                    },
+                    {
+                      "id": "channel",
+                      "label": "채널 *",
+                      "type": "select",
+                      "placeholder": "발송 채널을 선택하세요",
+                      "required": true,
+                      "options": [
+                        { "value": "email", "label": "이메일" },
+                        { "value": "slack", "label": "Slack" },
+                        { "value": "sms", "label": "SMS" },
+                        { "value": "kakao", "label": "카카오톡" }
+                      ]
+                    },
+                    {
+                      "id": "subject",
+                      "label": "제목",
+                      "type": "text",
+                      "placeholder": "예) [Wisecan] 알림 메시지",
+                      "hint": "이메일 채널에서만 사용됩니다",
+                      "conditionalShow": "channel === 'email'"
+                    },
+                    {
+                      "id": "body",
+                      "label": "본문 *",
+                      "type": "textarea",
+                      "placeholder": "발송할 메시지 내용을 입력하세요. 최대 2,000자까지 입력 가능합니다.",
+                      "hint": "남은 글자수 표시: 1,847 / 2,000",
+                      "rows": 6,
+                      "required": true
+                    },
+                    {
+                      "id": "attachment",
+                      "label": "첨부 파일",
+                      "type": "file-upload",
+                      "placeholder": "파일을 드래그하거나 클릭하여 업로드",
+                      "hint": "PDF, PNG, JPG, DOCX 지원. 파일당 최대 10MB",
+                      "accept": ".pdf,.png,.jpg,.docx",
+                      "maxSize": "10MB",
+                      "multiple": false
+                    }
+                  ],
+                  "errorState": {
+                    "visible": false,
+                    "message": "수신자 이메일 형식이 올바르지 않습니다",
+                    "icon": "AlertCircle",
+                    "style": {
+                      "bg": "#FEF2F2",
+                      "border": "1px solid #FECACA",
+                      "text": "#DC2626",
+                      "borderRadius": "8px",
+                      "padding": "12px 16px"
+                    }
+                  },
+                  "actions": [
+                    { "label": "발송", "variant": "primary", "icon": "Send", "height": "44px", "loadingLabel": "발송 중..." },
+                    { "label": "초기화", "variant": "ghost", "height": "44px" }
+                  ]
+                }
+              },
+              "right": {
+                "width": "360px",
+                "id": "send-preview-card",
+                "type": "preview-card",
+                "bg": "#FFFFFF",
+                "border": "1px solid #E2E8F0",
+                "borderRadius": "12px",
+                "padding": "24px",
+                "content": {
+                  "title": "미리보기",
+                  "emptyState": {
+                    "icon": "MessageSquare",
+                    "title": "내용을 입력하면 미리보기가 표시됩니다",
+                    "subtitle": "채널, 수신자, 본문을 입력해보세요",
+                    "bg": "#F8FAFC",
+                    "borderRadius": "8px",
+                    "padding": "32px 24px"
+                  },
+                  "previewContent": {
+                    "channelBadge": { "label": "이메일", "variant": "blue" },
+                    "recipient": "kim@example.com",
+                    "subject": "[Wisecan] 알림 메시지",
+                    "body": "안녕하세요. Wisecan에서 보내드리는 알림입니다.",
+                    "attachmentCount": 0
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "frame-msg-send-mobile",
+      "name": "Message Send - Mobile (375px)",
+      "viewport": { "width": 375, "height": 812 },
+      "category": "form",
+      "layout": "단일 컬럼. 탑바(56px) + 스크롤 영역. 미리보기 패널 없음(탭 전환으로 대체)",
+      "components": ["MobileTopbar", "Sheet", "Input", "Textarea", "Select", "Button", "FileUpload"],
+      "spacing": "content padding 16px, field gap-4, button height 48px",
+      "typography": "페이지 제목 H2(20px Bold), 레이블 Body2(14px Medium)",
+      "responsive": "PC 우측 미리보기 → 하단 '미리보기' 버튼 탭으로 전환",
+      "blocks": [
+        {
+          "id": "mobile-send-topbar",
+          "type": "mobile-topbar",
+          "height": "56px",
+          "bg": "#FFFFFF",
+          "border": "1px solid #E2E8F0",
+          "content": {
+            "left": { "type": "hamburger-button", "icon": "Menu" },
+            "center": { "type": "text", "text": "메시지 도구" },
+            "right": { "type": "none" }
+          }
+        },
+        {
+          "id": "mobile-send-tabs",
+          "type": "tab-bar",
+          "items": [
+            { "id": "send", "label": "발송", "active": true },
+            { "id": "preview", "label": "미리보기", "active": false },
+            { "id": "history", "label": "이력", "active": false }
+          ],
+          "style": { "borderBottom": "1px solid #E2E8F0", "bg": "#FFFFFF", "height": "44px" }
+        },
+        {
+          "id": "mobile-send-form",
+          "type": "form-panel",
+          "padding": "16px",
+          "content": {
+            "fields": [
+              { "id": "recipient", "label": "수신자 *", "placeholder": "예) user@example.com" },
+              { "id": "channel", "label": "채널 *", "type": "select", "placeholder": "발송 채널 선택" },
+              { "id": "body", "label": "본문 *", "type": "textarea", "rows": 5, "placeholder": "메시지 내용을 입력하세요" },
+              { "id": "attachment", "label": "첨부 파일", "type": "file-upload", "placeholder": "파일 선택" }
+            ],
+            "actions": [
+              { "label": "발송", "variant": "primary", "width": "100%", "height": "48px" }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "frame-msg-result-pc",
+      "name": "Message Result - PC (1440px)",
+      "viewport": { "width": 1440, "height": 900 },
+      "category": "detail",
+      "layout": "사이드바(240px) + 콘텐츠 영역. 콘텐츠 내 단일 컬럼. 페이지 헤더 > 상태 카드 > 상세 정보 카드 > 에러 섹션(조건부)",
+      "components": ["Sidebar", "PageHeader", "Badge", "Card", "Separator", "Alert", "Button", "CopyButton"],
+      "spacing": "content padding 32px, card padding 24px, section gap-6",
+      "typography": "msgId 모노스페이스(14px), 상태 배지, 응답시간 수치(16px Bold), 레이블 Caption(12px Muted)",
+      "responsive": "mobile 375px 프레임 별도 — 카드 단일 컬럼, 패딩 16px",
+      "blocks": [
+        {
+          "id": "result-sidebar",
+          "type": "sidebar",
+          "activeItem": "message-tools"
+        },
+        {
+          "id": "result-content",
+          "type": "content-area",
+          "padding": "32px",
+          "sections": [
+            {
+              "id": "result-page-header",
+              "type": "page-header",
+              "content": {
+                "title": "발송 결과 상세",
+                "breadcrumb": ["메시지 도구", "발송 이력", "상세"],
+                "actions": [
+                  { "label": "이력으로 돌아가기", "variant": "ghost", "icon": "ArrowLeft" }
+                ]
+              },
+              "spacing": { "mb": "24px" }
+            },
+            {
+              "id": "result-status-card",
+              "type": "status-summary-card",
+              "bg": "#FFFFFF",
+              "border": "1px solid #E2E8F0",
+              "borderRadius": "12px",
+              "padding": "24px",
+              "layout": "4컬럼 그리드 (msgId | 상태 | 응답시간 | 발송 시각)",
+              "content": {
+                "fields": [
+                  {
+                    "label": "메시지 ID",
+                    "value": "msg_a1b2c3d4e5f6",
+                    "type": "monospace",
+                    "copyable": true
+                  },
+                  {
+                    "label": "발송 상태",
+                    "value": "성공",
+                    "type": "badge",
+                    "variant": "success"
+                  },
+                  {
+                    "label": "응답시간",
+                    "value": "234ms",
+                    "type": "metric"
+                  },
+                  {
+                    "label": "발송 시각",
+                    "value": "2026-04-10 14:23:05",
+                    "type": "text"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "result-detail-card",
+              "type": "detail-info-card",
+              "bg": "#FFFFFF",
+              "border": "1px solid #E2E8F0",
+              "borderRadius": "12px",
+              "padding": "24px",
+              "spacing": { "mt": "16px" },
+              "content": {
+                "title": "발송 정보",
+                "rows": [
+                  { "label": "채널", "value": "이메일", "type": "badge", "variant": "blue" },
+                  { "label": "수신자", "value": "kim@example.com", "type": "text" },
+                  { "label": "제목", "value": "[Wisecan] 알림 메시지", "type": "text" },
+                  { "label": "본문", "value": "안녕하세요. Wisecan에서 보내드리는 알림입니다.", "type": "text-multiline" },
+                  { "label": "첨부 파일", "value": "없음", "type": "text" },
+                  { "label": "API Key", "value": "wc_a1b2c3d4 (프로덕션 키)", "type": "monospace" }
+                ]
+              }
+            },
+            {
+              "id": "result-error-card",
+              "type": "error-detail-card",
+              "bg": "#FEF2F2",
+              "border": "1px solid #FECACA",
+              "borderRadius": "12px",
+              "padding": "24px",
+              "spacing": { "mt": "16px" },
+              "conditionalShow": "status === 'error'",
+              "note": "발송 실패 시에만 표시되는 에러 상세 섹션",
+              "content": {
+                "title": "에러 정보",
+                "icon": "AlertTriangle",
+                "iconColor": "#DC2626",
+                "rows": [
+                  { "label": "에러 코드", "value": "ERR_CHANNEL_TIMEOUT", "type": "code" },
+                  { "label": "에러 메시지", "value": "채널 연결 시간이 초과되었습니다. 채널 설정을 확인하거나 잠시 후 재시도하세요.", "type": "text-multiline" },
+                  { "label": "발생 시각", "value": "2026-04-10 14:23:05.834", "type": "text" }
+                ],
+                "actions": [
+                  { "label": "재발송", "variant": "primary", "icon": "RefreshCw" },
+                  { "label": "지원 문의", "variant": "ghost", "icon": "HelpCircle" }
+                ]
+              }
+            },
+            {
+              "id": "result-loading-state",
+              "type": "loading-state",
+              "conditionalShow": "status === 'loading'",
+              "note": "발송 처리 중 로딩 상태 프레임",
+              "content": {
+                "skeleton": [
+                  { "type": "rect", "width": "100%", "height": "80px", "borderRadius": "12px", "bg": "#F1F5F9" },
+                  { "type": "rect", "width": "100%", "height": "200px", "borderRadius": "12px", "bg": "#F1F5F9", "mt": "16px" }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "frame-msg-result-mobile",
+      "name": "Message Result - Mobile (375px)",
+      "viewport": { "width": 375, "height": 812 },
+      "category": "detail",
+      "layout": "단일 컬럼. 탑바(56px) + 스크롤. 상태 카드 → 발송 정보 카드 → 에러 카드(조건부) 순서",
+      "components": ["MobileTopbar", "Badge", "Card", "Alert", "Button", "CopyButton"],
+      "spacing": "content padding 16px, card padding 16px, section gap-3",
+      "typography": "msgId 모노스페이스(12px), 상태 배지, 수치 Bold, 레이블 Caption Muted",
+      "responsive": "PC 4컬럼 상태 카드 → 2x2 그리드. 상세 정보 전체 표시",
+      "blocks": [
+        {
+          "id": "mobile-result-topbar",
+          "type": "mobile-topbar",
+          "height": "56px",
+          "content": {
+            "left": { "type": "back-button", "icon": "ArrowLeft" },
+            "center": { "type": "text", "text": "발송 결과 상세" },
+            "right": { "type": "none" }
+          }
+        },
+        {
+          "id": "mobile-result-status",
+          "type": "status-summary-card",
+          "padding": "16px",
+          "layout": "2x2 그리드 (msgId/상태/응답시간/발송시각)",
+          "content": {
+            "msgId": "msg_a1b2c3d4e5f6",
+            "status": { "label": "성공", "variant": "success" },
+            "responseTime": "234ms",
+            "sentAt": "2026-04-10 14:23:05"
+          }
+        },
+        {
+          "id": "mobile-result-detail",
+          "type": "detail-info-card",
+          "padding": "16px",
+          "content": {
+            "rows": [
+              { "label": "채널", "value": "이메일" },
+              { "label": "수신자", "value": "kim@example.com" },
+              { "label": "제목", "value": "[Wisecan] 알림 메시지" },
+              { "label": "본문", "value": "안녕하세요. Wisecan에서 보내드리는 알림입니다." }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "frame-msg-search-pc",
+      "name": "Message Search - PC (1440px)",
+      "viewport": { "width": 1440, "height": 900 },
+      "category": "list",
+      "layout": "사이드바(240px) + 콘텐츠 영역. 콘텐츠 내 상단 필터 바 + 테이블 + 페이지네이션",
+      "components": ["Sidebar", "PageHeader", "DateRangePicker", "Select", "Input", "Button", "Table", "Badge", "Pagination", "EmptyState"],
+      "spacing": "content padding 32px, filter bar gap-3, table row height 52px",
+      "typography": "필터 레이블 Caption(12px), 테이블 헤더 Body2(13px Medium), 테이블 셀 Body2(14px)",
+      "responsive": "mobile 375px 프레임 별도 — 필터 접기/펼치기, 테이블 → 카드 리스트",
+      "blocks": [
+        {
+          "id": "search-sidebar",
+          "type": "sidebar",
+          "activeItem": "message-tools"
+        },
+        {
+          "id": "search-content",
+          "type": "content-area",
+          "padding": "32px",
+          "sections": [
+            {
+              "id": "search-page-header",
+              "type": "page-header",
+              "content": {
+                "title": "발송 이력",
+                "subtitle": "채널, 상태, 기간 조건으로 발송 이력을 검색하세요",
+                "tabs": [
+                  { "id": "send", "label": "메시지 발송", "active": false },
+                  { "id": "history", "label": "발송 이력", "active": true }
+                ]
+              },
+              "spacing": { "mb": "16px" }
+            },
+            {
+              "id": "search-filter-bar",
+              "type": "filter-bar",
+              "bg": "#FFFFFF",
+              "border": "1px solid #E2E8F0",
+              "borderRadius": "12px",
+              "padding": "16px 24px",
+              "layout": "inline 5컬럼: 기간 선택 | 상태 | 채널 | 검색어 | 검색 버튼",
+              "spacing": { "mb": "16px" },
+              "content": {
+                "filters": [
+                  {
+                    "id": "dateRange",
+                    "label": "기간",
+                    "type": "date-range-picker",
+                    "placeholder": "시작일 ~ 종료일",
+                    "defaultValue": "최근 7일",
+                    "width": "220px"
+                  },
+                  {
+                    "id": "status",
+                    "label": "상태",
+                    "type": "select",
+                    "placeholder": "전체",
+                    "width": "140px",
+                    "options": [
+                      { "value": "", "label": "전체" },
+                      { "value": "success", "label": "성공" },
+                      { "value": "failed", "label": "실패" },
+                      { "value": "pending", "label": "처리중" }
+                    ]
+                  },
+                  {
+                    "id": "channel",
+                    "label": "채널",
+                    "type": "select",
+                    "placeholder": "전체",
+                    "width": "140px",
+                    "options": [
+                      { "value": "", "label": "전체" },
+                      { "value": "email", "label": "이메일" },
+                      { "value": "slack", "label": "Slack" },
+                      { "value": "sms", "label": "SMS" },
+                      { "value": "kakao", "label": "카카오톡" }
+                    ]
+                  },
+                  {
+                    "id": "keyword",
+                    "label": "수신자 검색",
+                    "type": "search-input",
+                    "placeholder": "수신자 이메일 또는 ID",
+                    "width": "200px"
+                  },
+                  {
+                    "id": "search-btn",
+                    "type": "button",
+                    "label": "검색",
+                    "variant": "primary",
+                    "icon": "Search"
+                  }
+                ],
+                "activeFilters": [
+                  { "label": "기간: 최근 7일", "removable": true },
+                  { "label": "상태: 성공", "removable": true }
+                ],
+                "resetButton": { "label": "초기화", "variant": "ghost" }
+              }
+            },
+            {
+              "id": "search-result-table",
+              "type": "data-table",
+              "bg": "#FFFFFF",
+              "border": "1px solid #E2E8F0",
+              "borderRadius": "12px",
+              "padding": "0px",
+              "content": {
+                "header": {
+                  "title": "검색 결과",
+                  "totalCount": "총 47건",
+                  "padding": "20px 24px"
+                },
+                "columns": [
+                  { "id": "msgId", "label": "메시지 ID", "width": "160px", "type": "monospace" },
+                  { "id": "channel", "label": "채널", "width": "100px", "type": "badge" },
+                  { "id": "recipient", "label": "수신자", "width": "200px", "type": "text" },
+                  { "id": "status", "label": "상태", "width": "100px", "type": "badge" },
+                  { "id": "responseTime", "label": "응답시간", "width": "100px", "type": "text", "align": "right" },
+                  { "id": "sentAt", "label": "발송 시각", "width": "160px", "type": "text" },
+                  { "id": "actions", "label": "", "width": "80px", "type": "actions", "align": "right" }
+                ],
+                "rows": [
+                  {
+                    "msgId": "msg_a1b2c3d4",
+                    "channel": { "label": "이메일", "variant": "blue" },
+                    "recipient": "kim@example.com",
+                    "status": { "label": "성공", "variant": "success" },
+                    "responseTime": "234ms",
+                    "sentAt": "2026-04-10 14:23:05",
+                    "actions": [{ "label": "상세", "variant": "ghost", "icon": "ChevronRight" }]
+                  },
+                  {
+                    "msgId": "msg_e5f6g7h8",
+                    "channel": { "label": "Slack", "variant": "purple" },
+                    "recipient": "@lee.devteam",
+                    "status": { "label": "성공", "variant": "success" },
+                    "responseTime": "89ms",
+                    "sentAt": "2026-04-10 13:45:22",
+                    "actions": [{ "label": "상세", "variant": "ghost" }]
+                  },
+                  {
+                    "msgId": "msg_i9j0k1l2",
+                    "channel": { "label": "SMS", "variant": "green" },
+                    "recipient": "010-1234-5678",
+                    "status": { "label": "실패", "variant": "error" },
+                    "responseTime": "1,203ms",
+                    "sentAt": "2026-04-10 12:11:44",
+                    "actions": [{ "label": "상세", "variant": "ghost" }]
+                  },
+                  {
+                    "msgId": "msg_m3n4o5p6",
+                    "channel": { "label": "카카오톡", "variant": "yellow" },
+                    "recipient": "park.wisecan",
+                    "status": { "label": "성공", "variant": "success" },
+                    "responseTime": "312ms",
+                    "sentAt": "2026-04-10 11:30:01",
+                    "actions": [{ "label": "상세", "variant": "ghost" }]
+                  },
+                  {
+                    "msgId": "msg_q7r8s9t0",
+                    "channel": { "label": "이메일", "variant": "blue" },
+                    "recipient": "choi@company.io",
+                    "status": { "label": "처리중", "variant": "warning" },
+                    "responseTime": "-",
+                    "sentAt": "2026-04-10 10:58:17",
+                    "actions": [{ "label": "상세", "variant": "ghost" }]
+                  }
+                ],
+                "emptyState": {
+                  "icon": "Inbox",
+                  "title": "검색 결과가 없습니다",
+                  "subtitle": "조건을 변경하거나 초기화 후 다시 검색해보세요",
+                  "action": { "label": "필터 초기화", "variant": "ghost" }
+                },
+                "pagination": {
+                  "show": true,
+                  "currentPage": 1,
+                  "totalPages": 10,
+                  "perPage": 5,
+                  "totalItems": 47
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "frame-msg-search-mobile",
+      "name": "Message Search - Mobile (375px)",
+      "viewport": { "width": 375, "height": 812 },
+      "category": "list",
+      "layout": "단일 컬럼. 탑바(56px) + 접기/펼치기 필터 섹션 + 카드 리스트 + 페이지네이션",
+      "components": ["MobileTopbar", "FilterAccordion", "Select", "DatePicker", "Input", "Button", "CardList", "Badge", "Pagination"],
+      "spacing": "content padding 16px, card gap-3, filter section padding 12px",
+      "typography": "필터 레이블 Caption(12px), 카드 제목 Body2(14px Medium), 보조 정보 Caption(12px Muted)",
+      "responsive": "PC 인라인 필터 → 접기/펼치기 아코디언. 테이블 → 카드 리스트",
+      "blocks": [
+        {
+          "id": "mobile-search-topbar",
+          "type": "mobile-topbar",
+          "height": "56px",
+          "content": {
+            "left": { "type": "hamburger-button", "icon": "Menu" },
+            "center": { "type": "text", "text": "발송 이력" },
+            "right": { "type": "icon-button", "icon": "SlidersHorizontal", "label": "필터" }
+          }
+        },
+        {
+          "id": "mobile-search-filter",
+          "type": "filter-accordion",
+          "collapsed": false,
+          "bg": "#FFFFFF",
+          "border": "1px solid #E2E8F0",
+          "padding": "12px 16px",
+          "content": {
+            "filters": [
+              { "id": "dateRange", "label": "기간", "type": "select", "placeholder": "최근 7일" },
+              { "id": "status", "label": "상태", "type": "select", "placeholder": "전체" },
+              { "id": "channel", "label": "채널", "type": "select", "placeholder": "전체" }
+            ],
+            "actions": [
+              { "label": "검색", "variant": "primary", "width": "50%" },
+              { "label": "초기화", "variant": "ghost", "width": "50%" }
+            ]
+          }
+        },
+        {
+          "id": "mobile-search-result-count",
+          "type": "result-count-bar",
+          "padding": "8px 16px",
+          "content": {
+            "text": "총 47건",
+            "color": "#64748B",
+            "fontSize": "12px"
+          }
+        },
+        {
+          "id": "mobile-search-card-list",
+          "type": "card-list",
+          "padding": "16px",
+          "gap": "12px",
+          "content": {
+            "cards": [
+              {
+                "msgId": "msg_a1b2c3d4",
+                "channel": { "label": "이메일", "variant": "blue" },
+                "recipient": "kim@example.com",
+                "status": { "label": "성공", "variant": "success" },
+                "sentAt": "2026-04-10 14:23:05",
+                "responseTime": "234ms",
+                "cardLayout": "상단: msgId(mono) + 상태 배지 | 중간: 채널 배지 + 수신자 | 하단: 발송시각 + 응답시간 | 우측: '상세 >' 링크"
+              },
+              {
+                "msgId": "msg_e5f6g7h8",
+                "channel": { "label": "Slack", "variant": "purple" },
+                "recipient": "@lee.devteam",
+                "status": { "label": "성공", "variant": "success" },
+                "sentAt": "2026-04-10 13:45:22",
+                "responseTime": "89ms"
+              },
+              {
+                "msgId": "msg_i9j0k1l2",
+                "channel": { "label": "SMS", "variant": "green" },
+                "recipient": "010-1234-5678",
+                "status": { "label": "실패", "variant": "error" },
+                "sentAt": "2026-04-10 12:11:44",
+                "responseTime": "1,203ms"
+              }
+            ],
+            "emptyState": {
+              "icon": "Inbox",
+              "title": "검색 결과가 없습니다",
+              "subtitle": "조건을 변경하거나 초기화 후 다시 검색해보세요"
+            },
+            "pagination": {
+              "show": true,
+              "currentPage": 1,
+              "totalPages": 10
+            }
+          }
+        }
+      ]
+    }
+  ],
+
+  "designTokens": {
+    "colors": {
+      "primary": "#2563EB",
+      "primaryLight": "#EFF6FF",
+      "success": "#22C55E",
+      "successLight": "#F0FDF4",
+      "error": "#DC2626",
+      "errorLight": "#FEF2F2",
+      "warning": "#F59E0B",
+      "warningLight": "#FFFBEB",
+      "surface": "#FFFFFF",
+      "bg": "#F8FAFC",
+      "border": "#E2E8F0",
+      "textPrimary": "#0F172A",
+      "textSecondary": "#64748B",
+      "textMuted": "#94A3B8"
+    },
+    "typography": {
+      "h1": { "size": "24px", "weight": 700, "lineHeight": "32px" },
+      "h2": { "size": "20px", "weight": 600, "lineHeight": "28px" },
+      "body1": { "size": "16px", "weight": 400, "lineHeight": "24px" },
+      "body2": { "size": "14px", "weight": 400, "lineHeight": "20px" },
+      "caption": { "size": "12px", "weight": 400, "lineHeight": "16px" }
+    },
+    "spacing": {
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "2xl": "48px"
+    },
+    "borderRadius": {
+      "sm": "6px",
+      "md": "8px",
+      "lg": "12px",
+      "xl": "16px"
+    }
+  },
+
+  "componentLibrary": {
+    "shadcnComponents": [
+      "Sidebar", "SidebarMenu", "SidebarMenuItem",
+      "Card", "CardHeader", "CardContent",
+      "Input", "Textarea", "Select", "Button", "Label",
+      "Table", "TableHeader", "TableBody", "TableRow", "TableCell",
+      "Badge", "Alert", "Separator", "Tabs", "TabsList", "TabsTrigger",
+      "Sheet", "SheetContent",
+      "Accordion", "AccordionItem", "AccordionContent",
+      "Pagination"
+    ],
+    "icons": "lucide-react (Send, Search, Filter, MessageSquare, ArrowLeft, RefreshCw, HelpCircle, ChevronRight, SlidersHorizontal, Inbox, AlertCircle, AlertTriangle, CheckCircle2, Clock, X, Copy, Check)"
+  },
+
+  "statesCoverage": {
+    "MessageSend": ["normal (empty form)", "filled form with preview", "loading (sending)", "success redirect", "validation error"],
+    "MessageResult": ["success state", "error state with retry", "loading skeleton"],
+    "MessageSearch": ["normal with results", "empty state (no results)", "loading state", "filtered results with active filter badges"]
+  },
+
+  "accessibilityNotes": [
+    "폼 필드: htmlFor-id 연결, 에러 시 aria-describedby로 에러 메시지 연결",
+    "발송 버튼 로딩: aria-busy='true', aria-label='발송 중'",
+    "배지 색상: 색상 외 텍스트로도 상태 구분 (성공/실패/처리중)",
+    "테이블: role='table', th scope='col', caption 포함",
+    "빈 상태: role='status' aria-live='polite'",
+    "파일 업로드: aria-describedby로 허용 형식/크기 힌트 연결",
+    "모바일 필터 아코디언: aria-expanded, aria-controls 연결"
+  ],
+
+  "responsiveSummary": {
+    "sidebar": {
+      "pc": "항상 표시 (240px fixed left)",
+      "mobile": "숨김 → 햄버거 → Sheet drawer"
+    },
+    "sendForm": {
+      "pc": "2컬럼 (폼 + 미리보기)",
+      "mobile": "단일 컬럼, 미리보기 탭 전환"
+    },
+    "resultDetail": {
+      "pc": "4컬럼 상태 카드 + 상세 카드",
+      "mobile": "2x2 그리드 상태 + 단일 컬럼 상세"
+    },
+    "searchTable": {
+      "pc": "인라인 필터 바 + 전체 컬럼 테이블",
+      "mobile": "접기/펼치기 필터 + 카드 리스트"
+    }
+  }
+}

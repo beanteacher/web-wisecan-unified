@@ -60,7 +60,7 @@ class ApiKeyRepositoryTest {
             .build());
         entityManager.flush();
 
-        List<ApiKey> result = apiKeyRepository.findByMemberIdOrderByCreatedAtDesc(member.getId());
+        List<ApiKey> result = apiKeyRepository.findByMemberIdOrderByCreatedAtDescIdDesc(member.getId());
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getId()).isEqualTo(key2.getId());

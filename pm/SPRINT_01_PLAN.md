@@ -95,18 +95,18 @@ Sprint 1 (2주)
 
 ## 완료기준 (Sprint DoD)
 
-- [ ] 디자인 시스템 manifest 완료
-- [ ] 랜딩/인증/대시보드/API Key 와이어프레임 manifest + handoff 완료
-- [ ] 회원가입/로그인 API 동작 + JWT 인증 정상
-- [ ] API Key 발급/목록/비활성화 API 동작
-- [ ] 사용 이력 기록/조회 API 동작
-- [ ] 랜딩 페이지 반응형 구현 완료
-- [ ] 인증 페이지 API 연동 완료
-- [ ] API Key 관리 페이지 API 연동 완료
-- [ ] 대시보드 페이지 API 연동 완료
-- [ ] Backend `./gradlew build` 성공
-- [ ] Frontend `pnpm build` 성공
-- [ ] 주요 API 단위+통합 테스트 통과
+- [x] 디자인 시스템 manifest 완료
+- [x] 랜딩/인증/대시보드/API Key 와이어프레임 manifest + handoff 완료
+- [x] 회원가입/로그인 API 동작 + JWT 인증 정상
+- [x] API Key 발급/목록/비활성화 API 동작
+- [x] 사용 이력 기록/조회 API 동작
+- [x] 랜딩 페이지 반응형 구현 완료
+- [x] 인증 페이지 API 연동 완료
+- [x] API Key 관리 페이지 API 연동 완료
+- [x] 대시보드 페이지 API 연동 완료
+- [x] Backend `./gradlew build` 성공
+- [x] Frontend `pnpm build` 성공
+- [x] 주요 API 단위+통합 테스트 통과
 
 ## 리스크
 

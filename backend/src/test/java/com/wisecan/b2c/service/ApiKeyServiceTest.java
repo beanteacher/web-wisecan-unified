@@ -100,7 +100,7 @@ class ApiKeyServiceTest {
             .member(member).keyName("키1").keyPrefix("wc_xxxx")
             .keyHash("hash1").status(ApiKeyStatus.ACTIVE).build();
 
-        given(apiKeyRepository.findByMemberIdOrderByCreatedAtDesc(1L)).willReturn(List.of(key));
+        given(apiKeyRepository.findByMemberIdOrderByCreatedAtDescIdDesc(1L)).willReturn(List.of(key));
 
         List<ApiKeyDto.Response> result = apiKeyService.getMyKeys(1L);
 

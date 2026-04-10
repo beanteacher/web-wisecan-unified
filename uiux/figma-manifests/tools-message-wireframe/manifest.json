@@ -1,0 +1,7 @@
+{
+  "name": "Wisecan Message Tools Wireframe",
+  "id": "wisecan-tools-message-wireframe",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": ["figma"]
+}

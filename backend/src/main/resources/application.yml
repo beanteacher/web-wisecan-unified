@@ -34,6 +34,14 @@ jwt:
   access-expiration: 3600000    # 1시간
   refresh-expiration: 604800000 # 7일
 
+wisecan:
+  mcp:
+    command: node mcp-server/index.js
+    timeout-ms: 10000
+  rate-limit:
+    per-minute: 60
+    mode: redis   # redis | memory
+
 management:
   endpoints:
     web:

@@ -2,6 +2,7 @@ package com.wisecan.b2c.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wisecan.b2c.repository.ApiKeyRepository;
+import com.wisecan.b2c.service.TokenBlacklistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +32,7 @@ public class SecurityConfig {
     private final JwtProvider jwtProvider;
     private final ApiKeyRepository apiKeyRepository;
     private final ObjectMapper objectMapper;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Nullable
     private StringRedisTemplate redisTemplate;
@@ -85,7 +87,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             // JWT 필터: /api/v1/auth/**, /api/v1/api-keys/** 등 JWT 경로에 적용
-            .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, tokenBlacklistService), UsernamePasswordAuthenticationFilter.class)
             // ApiKey 필터: /api/v1/tools/** 경로에만 적용 (JWT 필터 이후)
             .addFilterAfter(apiKeyAuthFilter(), JwtAuthenticationFilter.class)
             .build();

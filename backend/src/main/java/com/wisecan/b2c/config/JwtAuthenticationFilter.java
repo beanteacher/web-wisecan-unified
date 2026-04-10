@@ -1,5 +1,6 @@
 package com.wisecan.b2c.config;
 
+import com.wisecan.b2c.service.TokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -25,7 +27,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String token = extractToken(request);
 
-        if (StringUtils.hasText(token) && jwtProvider.validateToken(token)) {
+        if (StringUtils.hasText(token)
+            && jwtProvider.validateToken(token)
+            && !tokenBlacklistService.isBlacklisted(token)) {
             String email = jwtProvider.getEmail(token);
             String role = jwtProvider.getRole(token);
 

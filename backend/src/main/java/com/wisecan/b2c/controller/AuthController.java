@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,5 +33,20 @@ public class AuthController {
         @RequestBody @Valid AuthDto.LoginRequest request
     ) {
         return ResponseEntity.ok(ApiResponse.success(authService.login(request)));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(
+        @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        authService.logout(extractBearer(authHeader));
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    private String extractBearer(String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        return null;
     }
 }

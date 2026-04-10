@@ -22,6 +22,7 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final TokenBlacklistService tokenBlacklistService;
 
     public AuthDto.TokenResponse register(AuthDto.RegisterRequest request) {
         if (memberRepository.existsByEmail(request.email())) {
@@ -56,5 +57,13 @@ public class AuthService {
         String refreshToken = jwtProvider.generateRefreshToken(member.getEmail());
 
         return new AuthDto.TokenResponse(accessToken, refreshToken, member.getEmail(), member.getName());
+    }
+
+    public void logout(String token) {
+        if (token == null || token.isBlank() || !jwtProvider.validateToken(token)) {
+            return;
+        }
+        long ttl = jwtProvider.getExpiration(token).getTime() - System.currentTimeMillis();
+        tokenBlacklistService.blacklist(token, ttl);
     }
 }

@@ -6,6 +6,7 @@ import com.wisecan.b2c.dto.AuthDto;
 import com.wisecan.b2c.exception.DuplicateEmailException;
 import com.wisecan.b2c.repository.ApiKeyRepository;
 import com.wisecan.b2c.service.AuthService;
+import com.wisecan.b2c.service.TokenBlacklistService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -39,6 +42,9 @@ class AuthControllerTest {
 
     @MockBean
     private ApiKeyRepository apiKeyRepository;
+
+    @MockBean
+    private TokenBlacklistService tokenBlacklistService;
 
     @Test
     @DisplayName("회원가입 성공 - 201 Created")
@@ -131,5 +137,29 @@ class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    @DisplayName("로그아웃 - 200 OK 및 토큰 블랙리스트 등록")
+    @WithMockUser
+    void logout_success() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/logout")
+                .with(csrf())
+                .header("Authorization", "Bearer valid-token"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true));
+
+        verify(authService).logout(eq("valid-token"));
+    }
+
+    @Test
+    @DisplayName("Authorization 헤더 없이 로그아웃 호출 - 200 OK")
+    @WithMockUser
+    void logout_noHeader_success() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/logout").with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true));
+
+        verify(authService).logout(null);
     }
 }

@@ -21,4 +21,6 @@ export const authApi = {
 
   register: (email: string, password: string, name: string) =>
     api.post('auth/register', { json: { email, password, name } }).json<RegisterResponse>(),
+
+  logout: () => api.post('auth/logout').json<void>(),
 };

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Key, MessageSquare, BarChart2, Settings, X } from 'lucide-react';
+import { LogoutButton } from '@/features/auth';
 
 const navItems = [
   { href: '/dashboard', label: '대시보드', icon: LayoutDashboard },
@@ -70,6 +71,10 @@ export function Sidebar({ open = true, onClose }: SidebarProps) {
             );
           })}
         </nav>
+
+        <div className="border-t border-zinc-200 px-3 py-4 dark:border-zinc-800">
+          <LogoutButton />
+        </div>
       </aside>
     </>
   );

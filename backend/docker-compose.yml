@@ -2,8 +2,9 @@ version: '3.8'
 services:
   mysql:
     image: mysql:8.0
+    container_name: wisecan-b2c-mysql
     ports:
-      - "3306:3306"
+      - "3309:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: wisecan_b2c
@@ -12,6 +13,7 @@ services:
 
   redis:
     image: redis:7-alpine
+    container_name: wisecan-b2c-redis
     ports:
       - "6379:6379"
 

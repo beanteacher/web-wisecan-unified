@@ -5,6 +5,7 @@ import com.wisecan.b2c.domain.Member;
 import com.wisecan.b2c.domain.MemberRole;
 import com.wisecan.b2c.domain.MemberStatus;
 import com.wisecan.b2c.dto.AuthDto;
+import com.wisecan.b2c.exception.DuplicateEmailException;
 import com.wisecan.b2c.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,7 +23,7 @@ public class AuthService {
 
     public AuthDto.TokenResponse register(AuthDto.RegisterRequest request) {
         if (memberRepository.existsByEmail(request.email())) {
-            throw new RuntimeException("이미 사용 중인 이메일입니다.");
+            throw new DuplicateEmailException(request.email());
         }
 
         Member member = Member.builder()

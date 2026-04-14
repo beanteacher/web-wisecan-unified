@@ -1,8 +1,7 @@
 # MCP DESIGN — Wisecan Unified MCP Server
 
-> 본 문서는 Wisecan Unified Messaging Platform 의 **MCP (Model Context Protocol) 서버 개발 설계서**입니다.
-> 상위 설계: `pm/design/OVERALL_DESIGN.md`
-> 기존 `backend/.../mcp/PingTool.java` 는 데모용이며 본 설계에 따라 전체 재구성합니다.
+> 본 문서는 Wisecan Unified Messaging Platform 의 **MCP (Model Context Protocol) 서버 개발 설계서**입니다.<br>
+> 상위 설계: `pm/design/OVERALL_DESIGN.md`<br>
 > 작성일: 2026-04-14
 
 ---

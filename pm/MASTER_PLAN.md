@@ -97,7 +97,7 @@ MCP(Model Context Protocol) 기반 메시지 발송·에이전트 진단·파일
 |--------|------|--------|
 | MCP 서버 연동 복잡도 | 일정 지연 | Backend에서 MCP를 직접 호출하지 않고 REST 래핑 |
 | ky 등 프론트 라이브러리 Breaking Change | 빌드 실패 | 버전 고정 + 빌드 검증 |
-| DB 스키마 충돌 (기존 MCP 테이블) | 데이터 무결성 | 별도 스키마(wisecan_b2c)로 분리 |
+| DB 스키마 충돌 (기존 MCP 테이블) | 데이터 무결성 | 별도 스키마(wisecan_unified)로 분리 |
 
 ## 기술 아키텍처
 
@@ -118,7 +118,7 @@ MCP(Model Context Protocol) 기반 메시지 발송·에이전트 진단·파일
          ├── /api/v1/tools/**    → 도구 프록시 (MCP 래핑)
          └── /api/v1/usage/**    → 사용량 조회
          │
-         ├── MySQL (wisecan_b2c) → 회원, API Key, 사용 이력
+         ├── MySQL (wisecan_unified) → 회원, API Key, 사용 이력
          ├── Redis              → 세션 캐시, Rate Limiting
          └── MCP Server (stdio) → 실제 도구 실행
 ```

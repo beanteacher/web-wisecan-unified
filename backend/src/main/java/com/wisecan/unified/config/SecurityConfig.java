@@ -43,6 +43,9 @@ public class SecurityConfig {
     @Value("${wisecan.rate-limit.mode:redis}")
     private String rateLimitMode;
 
+    @Value("${wisecan.cors.allowed-origins}")
+    private List<String> corsAllowedOrigins;
+
     @Autowired(required = false)
     public void setRedisTemplate(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
@@ -56,7 +59,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        config.setAllowedOrigins(corsAllowedOrigins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

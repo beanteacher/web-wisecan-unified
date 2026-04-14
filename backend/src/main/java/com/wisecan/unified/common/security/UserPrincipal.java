@@ -6,6 +6,10 @@ public record UserPrincipal(Long memberId, String email, Set<String> roles) impl
     @Override public String id() {
         return memberId != null ? "user:" + memberId : "user:" + email;
     }
-    @Override public String channel() { return "REST"; }
-    @Override public Set<String> scopes() { return roles; }
+    @Override public String channel() {
+        return "REST";
+    }
+    @Override public Set<String> scopes() {
+        return roles;
+    }
 }

@@ -3,11 +3,11 @@ server:
 
 spring:
   application:
-    name: wisecan-b2c
+    name: wisecan-unified
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
   datasource:
-    url: jdbc:mysql://localhost:3309/wisecan_b2c?useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3309/wisecan_unified?useSSL=false&allowPublicKeyRetrieval=true
     username: ${DB_USER:root}
     password: ${DB_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -30,7 +30,7 @@ spring:
       time-to-live: 3600000  # 1시간
 
 jwt:
-  secret: wisecan-b2c-jwt-secret-key-must-be-at-least-256-bits-long-for-hs256
+  secret: wisecan-unified-jwt-secret-key-must-be-at-least-256-bits-long-for-hs256
   access-expiration: 3600000    # 1시간
   refresh-expiration: 604800000 # 7일
 
@@ -38,7 +38,7 @@ spring.ai:
   mcp:
     server:
       enabled: true
-      name: wisecan-b2c-mcp
+      name: wisecan-unified-mcp
       version: 0.0.1
       protocol: STREAMABLE          # SSE | STREAMABLE | STATELESS
       sse-message-endpoint: /mcp    # Streamable HTTP 엔드포인트 (기본 /mcp)
@@ -73,26 +73,9 @@ logging:
     console: "%clr(%d{HH:mm:ss.SSS}){faded} %clr(%-5level) %clr([%thread]){faded} %clr(%-40.40logger{39}){cyan} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
   file:
-    name: logs/wisecan-b2c.log
+    name: logs/wisecan-unified.log
   logback:
     rollingpolicy:
       max-file-size: 10MB
       max-history: 30
 
----
-# 로컬 개발 프로파일 — SQL / 바인딩 / Security 상세 로그
-spring:
-  config:
-    activate:
-      on-profile: local
-  jpa:
-    hibernate:
-      ddl-auto: update
-
-logging:
-  level:
-    com.wisecan.unified: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE
-    org.springframework.security: DEBUG
-    org.springframework.web.cors: DEBUG

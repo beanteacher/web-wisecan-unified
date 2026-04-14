@@ -11,8 +11,7 @@ public class ApiKeyDto {
     public record CreateRequest(
         @NotBlank(message = "키 이름은 필수입니다")
         @Size(max = 100, message = "키 이름은 100자 이하여야 합니다")
-        String keyName
-    ) {}
+        String keyName) {}
 
     public record Response(
         Long id,
@@ -20,8 +19,7 @@ public class ApiKeyDto {
         String keyPrefix,
         String status,
         LocalDateTime lastUsedAt,
-        LocalDateTime createdAt
-    ) {
+        LocalDateTime createdAt) {
         public static Response from(ApiKey apiKey) {
             return new Response(
                 apiKey.getId(),

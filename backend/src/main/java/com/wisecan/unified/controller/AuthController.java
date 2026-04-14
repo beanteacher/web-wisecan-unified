@@ -21,24 +21,18 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<AuthDto.TokenResponse>> register(
-        @RequestBody @Valid AuthDto.RegisterRequest request
-    ) {
+    public ResponseEntity<ApiResponse<AuthDto.TokenResponse>> register(@RequestBody @Valid AuthDto.RegisterRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.success(authService.register(request)));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthDto.TokenResponse>> login(
-        @RequestBody @Valid AuthDto.LoginRequest request
-    ) {
+    public ResponseEntity<ApiResponse<AuthDto.TokenResponse>> login(@RequestBody @Valid AuthDto.LoginRequest request) {
         return ResponseEntity.ok(ApiResponse.success(authService.login(request)));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(
-        @RequestHeader(value = "Authorization", required = false) String authHeader
-    ) {
+    public ResponseEntity<ApiResponse<Void>> logout(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         authService.logout(extractBearer(authHeader));
         return ResponseEntity.ok(ApiResponse.success(null));
     }

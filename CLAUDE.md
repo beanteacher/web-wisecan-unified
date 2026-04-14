@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-web-wisecan-b2c is a B2C web application with a monorepo structure containing separate backend and frontend directories.
+web-wisecan-unified is a B2C web application with a monorepo structure containing separate backend and frontend directories.
 
 ## Repository Structure
 
@@ -13,7 +13,7 @@ web-wisecan-b2c is a B2C web application with a monorepo structure containing se
 
 ## Remote Repository
 
-- GitHub: https://github.com/beanteacher/web-wisecan-b2c
+- GitHub: https://github.com/beanteacher/web-wisecan-unified
 - Default branch: `main`
 
 ## 주요 규칙

@@ -14,8 +14,7 @@ public class UsageDto {
         String status,
         int responseTimeMs,
         String errorMessage,
-        LocalDateTime calledAt
-    ) {
+        LocalDateTime calledAt) {
         public static Response from(ApiUsage usage) {
             return new Response(
                 usage.getId(),

@@ -107,9 +107,9 @@
 | PG-TPL-001 | `/templates/kakao` | 회원 + `template:read` | RQ-TPL-005~008·010 |
 | PG-TPL-002 | `/templates/rcs-brand` | 회원 + `brand:read` | RQ-TPL-001~003 |
 | PG-PAY-001 | `/billing/charge` (충전) | 회원 | RQ-PAY-001~005 |
-| PG-PAY-002 | `/billing/auto-charge` (자동충전 — A안) | 회원 | RQ-PAY-101~109 |
-| PG-PAY-003 | `/billing/postpaid` (후불 — A안) | 회원 | RQ-PAY-201~206 |
-| PG-PAY-004 | `/billing/subscriptions` (구독 — A안) | 회원 | RQ-PAY-401~411 |
+| PG-PAY-002 | `/billing/auto-charge` (자동충전) | 회원 | RQ-PAY-101~109 |
+| PG-PAY-003 | `/billing/postpaid` (후불) | 회원 | RQ-PAY-201~206 |
+| PG-PAY-004 | `/billing/subscriptions` (구독) | 회원 | RQ-PAY-401~411 |
 | PG-PAY-005 | `/billing/refunds` | 회원 | RQ-PAY-501~503 |
 | PG-PAY-006 | `/billing/tax` (세금계산서·현금영수증) | 회원 | RQ-PAY-504~507 |
 | PG-INQUIRY-001 | `/inquiries` (1:1 문의) | 회원 | RQ-OPS-002~004 |
@@ -225,7 +225,7 @@
         전체 취소 선택  → 적재 중단
 ```
 
-### 3.6. 구독 가입 → 쿨링오프 → 해지 (§C A안 도입 시)
+### 3.6. 구독 가입 → 쿨링오프 → 해지
 
 ```
 [회원] /billing/subscriptions → 등급 선택 → 가입 (RQ-PAY-402)
@@ -253,13 +253,13 @@ Company (회사)              Account (계정 — MEMBER / COMPANY_MASTER / COMP
    ├─ N ApiKey (test/prod, scopes[])
    ├─ N Send (발송 — 발송 테이블; 외부 발송 시스템이 polling)
    ├─ 1 CashBalance
-   ├─ 0..1 PointBalance (구독 — §C A안)
-   ├─ 0..1 AutoChargeSetting (자동충전 — §B A안)
-   └─ 0..1 PostpaidContract (후불 — §E A안)
+   ├─ 0..1 PointBalance (구독)
+   ├─ 0..1 AutoChargeSetting (자동충전)
+   └─ 0..1 PostpaidContract (후불)
 
 KakaoTemplate / RcsBrand — Company 단위 등록·심사 상태 보유
-SubscriptionPlan / Subscription — §C A안 도입 시
-Invoice / BillingCycle — §E A안 도입 시
+SubscriptionPlan / Subscription — 구독 1차 도입
+Invoice / BillingCycle — 후불 1차 도입
 ```
 
 ### 4.2. 회사 마스터 모델 — A안 (권한 부여형) DB 스키마 ✅ (확정)
@@ -338,9 +338,9 @@ CREATE TABLE caller_ids (
 
 | 옵션 | 도입 조건 | 추가 테이블 |
 |---|---|---|
-| **자동충전 (§B A안)** | RQ-PAY-101 활성화 | `auto_charge_setting (account_id, threshold, payment_method, daily_limit, monthly_limit)` |
-| **후불 (§E A안)** | RQ-PAY-201 신청·승인 | `postpaid_contract`, `billing_cycle`, `invoice`, `credit_limit`, `collateral` |
-| **구독 (§C A안)** | RQ-PAY-402 가입 | `subscription_plan (tier, monthly_fee, points_granted)`, `subscription (account_id, plan_id, started_at, status, period_end)`, `point_balance (account_id, balance, refilled_at)`, `cash_balance (account_id, balance)` 분리 |
+| **자동충전** (1차 도입) | RQ-PAY-101 활성화 | `auto_charge_setting (account_id, threshold, payment_method, daily_limit, monthly_limit)` |
+| **후불** (1차 도입) | RQ-PAY-201 신청·승인 | `postpaid_contract`, `billing_cycle`, `invoice`, `credit_limit`, `collateral` |
+| **구독** (1차 도입) | RQ-PAY-402 가입 | `subscription_plan (tier, monthly_fee, points_granted)`, `subscription (account_id, plan_id, started_at, status, period_end)`, `point_balance (account_id, balance, refilled_at)`, `cash_balance (account_id, balance)` 분리 |
 
 차감 우선순위: 포인트 → 캐시 (RQ-PAY-407).
 
@@ -724,7 +724,7 @@ wsc snippet python send-sms      # 정적 코드 스니펫, 무인증
      └─ 회원 취소 ──► [CANCELLED]  (처리 전에만 가능)
 ```
 
-### 8.7. 구독 (§C A안)
+### 8.7. 구독
 
 ```
 [ACTIVE]
@@ -921,31 +921,31 @@ HTTP 207 (Multi-Status)
 | **세분 권한 추가** | 유연 (역할 추가) | 트리 1단 고정 → 정책 분기 |
 | **감사 추적** | `account_role.granted_by` | 마스터 비밀번호 변경 이력 |
 
-### 13.2. §B 자동 충전
+### 13.2. §B 자동 충전 — 1차 도입 확정 ✅
 
-| 도입 | 미도입 |
-|---|---|
-| `auto_charge_setting (account_id, threshold, payment_method, daily_limit, monthly_limit, started_at)` | `balance_alert_setting (account_id, threshold, channel)` |
-| PG 정기결제 계약 + 30일 제한 | 단건 결제만 |
-| 운영자 모니터링 페이지 (RQ-ADMIN-509) | — |
+| 1차 도입 구현 |
+|---|
+| `auto_charge_setting (account_id, threshold, payment_method, daily_limit, monthly_limit, started_at)` |
+| PG 정기결제 계약 + 30일 제한 |
+| 운영자 모니터링 페이지 (RQ-ADMIN-509) |
 
-### 13.3. §C 구독
+### 13.3. §C 구독 — 1차 도입 확정 ✅
 
-| 도입 | 미도입 |
-|---|---|
-| `subscription_plan`, `subscription`, `point_balance`, `cash_balance` 분리 | `cash_balance` 단일 |
-| 차감 우선순위 = 포인트 → 캐시 (RQ-PAY-407) | 캐시만 |
-| 쿨링 오프 환불 (1일 / RQ-PAY-408) — 사용분 차감 후 잔액 환불 | — |
-| 결제 주기 종료까지 사용 보장 (RQ-PAY-410) | — |
-| 운영자 포인트 조정·초기화 (RQ-ADMIN-512~516) | — |
+| 1차 도입 구현 |
+|---|
+| `subscription_plan`, `subscription`, `point_balance`, `cash_balance` 분리 |
+| 차감 우선순위 = 포인트 → 캐시 (RQ-PAY-407) |
+| 쿨링 오프 환불 (1일 / RQ-PAY-408) — 사용분 차감 후 잔액 환불 |
+| 결제 주기 종료까지 사용 보장 (RQ-PAY-410) |
+| 운영자 포인트 조정·초기화 (RQ-ADMIN-512~516) |
 
-### 13.4. §E 후불
+### 13.4. §E 후불 — 1차 도입 확정 ✅
 
-| 도입 | 미도입 |
-|---|---|
-| `postpaid_contract`, `billing_cycle`, `invoice`, `credit_limit`, `collateral` | 추가 없음 |
-| 신용 검증 + 보증보험 등록 (RQ-PAY-202·203) | — |
-| 청구서·연체 운영 (RQ-ADMIN-510, RQ-PAY-206) | — |
+| 1차 도입 구현 |
+|---|
+| `postpaid_contract`, `billing_cycle`, `invoice`, `credit_limit`, `collateral` |
+| 신용 검증 + 보증보험 등록 (RQ-PAY-202·203) |
+| 청구서·연체 운영 (RQ-ADMIN-510, RQ-PAY-206) |
 
 ---
 
@@ -955,3 +955,4 @@ HTTP 207 (Multi-Status)
 |---|---|---|
 | 2026-04-30 | 오민성 (1차) | SRS v20에서 "어떻게 구현하나" 영역(§5.3 스코프 카탈로그 매핑·§6 토큰 경제학 표·§6.3 CLI 명령 syntax·§6.4 MCP↔CLI 매트릭스·§7.4 발송 시퀀스·§14 A/B 데이터 모델 비교)을 본 FS로 이전. 페이지 인벤토리·사용자 플로우·도메인 모델·상태 머신·권한 매트릭스·에러 코드 사전·입력 검증·비기능 요구사항 신규 작성. |
 | 2026-04-30 | 오민성 (v2) | **표준 분류 정렬**. v1의 "WHAT vs HOW" 분리는 IEEE 830 / ISO/IEC/IEEE 29148 표준상 부정확한 표현으로 폐기. (1) 본 FS를 표준 정의의 **Functional Requirements Specification(FRS) — 기능 요구사항만** 다루는 명세서로 재정의. 별도 DS/TS 문서를 두지 않고 본 FS가 기능 설계 영역(페이지·API·CLI·상태 머신)까지 흡수하는 한국 실무 관행 명시. (2) 헤더에 SRS / FRS / NFR / PRD 4문서 관계와 본 FS의 영역·비영역을 명시. (3) **§12 비기능 요구사항 표를 NFR.md (§2~§13)로 모두 이전**, 본 절은 참조 인덱스 + 매핑표로 축약. (4) §1 "SRS와 FS의 관계" 표를 표준 정의 기반(SRS·NFR·PRD 3축)으로 갱신, "WHAT/HOW" 표현 제거. (5) RQ-* 및 페이지 ID 변경 없음 — 모든 인용처 그대로 호환. |
+| 2026-04-30 | 오민성 (v3) | **경로 명사·복수형 통일 + callback/destaddr 명명 + §B/§C/§E 도입 확정 반영**. (1) **페이지 경로 일괄 정리**: `/my/*` → `/dashboard·/profile·/withdrawal·/security/two-factor`, `/callers` → `/callbacks`, `/send/*` → `/messages/*`, `/history` → `/histories`, `/billing/subscription` → `/billing/subscriptions`, `/billing/refund` → `/billing/refunds`, `/ask` → `/inquiries`, `/notice` → `/notices`, `/download/*` → `/downloads/*`, `/admin/review/caller` → `/admin/review/callback`, `/admin/policy` → `/admin/policies`, `/trial` → `/try`. PG-* ID 일부도 함께 명사화 (PG-MY-* → PG-DASHBOARD/PROFILE/WITHDRAWAL/SECURITY-001, PG-CALLER-* → PG-CALLBACK-*, PG-SEND-* → PG-MESSAGE-*, PG-OPS-001 → PG-INQUIRY-001). (2) **발신번호 = callback / 수신번호 = destaddr** — 페이지 경로·스코프(callback:read·manage)·발송 테이블 컬럼(from_number/to_number → callback/destaddr)·CLI 옵션(--from/--to → --callback/--destaddr)·SDK 매개변수(from_/to → callback/destaddr)·MCP 도구·CSV 헤더 일괄 치환. (3) **§13.2 / §13.3 / §13.4 §B/§C/§E 표를 단일 안(1차 도입)만 남기고 미도입 컬럼 제거**. §3.6 / §4.4 / §8.7 헤딩에서 "(§? A안 도입 시)" 분기 표기 제거. (4) `/login`·`/find-id`·`/reset-password`·`/billing/charge`·`/billing/auto-charge`·`/billing/postpaid` 등 관례·명사 표현은 보존. RQ-* / NFR-* ID 변경 없음 — 모든 인용처 호환. |

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>환불 — WiseCan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="_shared/tw-config.js"></script>
+  <link rel="stylesheet" href="_shared/style.css">
+</head>
+<body class="bg-white">
+
+<!-- 상단 헤더 -->
+<header class="fixed top-0 inset-x-0 h-16 bg-white border-b border-line flex items-center px-6 z-30">
+  <a href="01.index.html" class="font-semibold text-lg tracking-tight text-ink mr-10">WiseCan</a>
+  <nav class="flex items-center gap-6 text-sm">
+    <a href="#" class="nav-link">대시보드</a>
+    <a href="#" class="nav-link">발송</a>
+    <a href="#" class="nav-link">이력</a>
+    <a href="#" class="nav-link">템플릿</a>
+    <a href="#" class="nav-link font-semibold text-ink">결제</a>
+  </nav>
+  <div class="ml-auto flex items-center gap-4">
+    <span class="text-sm text-stone">잔액 <strong class="text-ink">₩123,450</strong></span>
+    <button class="btn btn-primary text-sm px-4 py-1.5 rounded-lg">충전</button>
+    <div class="w-8 h-8 rounded-full bg-psblue-wash flex items-center justify-center text-psblue-main text-sm font-semibold">김</div>
+  </div>
+</header>
+
+<main class="pt-16">
+  <div class="flex">
+    <!-- 사이드바 -->
+    <div data-member-sidebar data-active="21.billing-refunds.html"></div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="flex-1 p-8 min-w-0">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-xl font-semibold text-ink">환불</h1>
+          <p class="text-sm text-stone mt-0.5">미사용 잔액을 원결제 수단으로 환불 신청합니다</p>
+        </div>
+        <button class="btn btn-primary text-sm px-4 py-2 rounded-lg flex items-center gap-2" onclick="document.getElementById('refund-form').classList.toggle('hidden')">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          환불 신청
+        </button>
+      </div>
+
+      <div class="max-w-2xl space-y-6">
+        <!-- 환불 신청 폼 -->
+        <div class="surface rounded-xl p-6" id="refund-form">
+          <h2 class="text-sm font-semibold text-ink mb-4">환불 신청</h2>
+
+          <div class="p-3 bg-psblue-wash rounded-lg text-sm text-psblue-deep mb-5 flex gap-2">
+            <svg class="w-4 h-4 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            환불 가능 잔액: <strong>₩123,450</strong> (충전 후 미사용분)
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="field-label block mb-1">환불 금액</label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-stone text-sm">₩</span>
+                <input type="number" class="input pl-7 text-sm" placeholder="10,000" min="1000">
+              </div>
+              <p class="help">최소 ₩1,000 · 환불 가능 잔액 이내</p>
+            </div>
+
+            <div>
+              <label class="field-label block mb-1">환불 사유</label>
+              <select class="input text-sm mb-2">
+                <option>서비스 이용 종료</option>
+                <option>과다 충전</option>
+                <option>기타</option>
+              </select>
+              <textarea class="input text-sm resize-none" rows="3" placeholder="상세 사유를 입력해 주세요 (선택)"></textarea>
+            </div>
+
+            <div class="p-4 bg-cloud rounded-lg text-xs text-stone space-y-1">
+              <p class="font-medium text-graphite mb-1">환불 안내</p>
+              <ul class="list-disc list-inside space-y-0.5">
+                <li>환불은 원결제 수단으로 자동 처리됩니다.</li>
+                <li>카드 결제분은 카드 취소로, 계좌이체·가상계좌는 계좌 입금으로 처리됩니다.</li>
+                <li>현금영수증 발급 건은 마이너스 발행이 자동으로 처리됩니다.</li>
+                <li>충전일로부터 5년이 경과한 건은 환불이 불가합니다.</li>
+                <li>처리까지 영업일 2~5일이 소요될 수 있습니다.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="flex gap-3 mt-5">
+            <button class="btn btn-primary text-sm px-5 py-2.5 rounded-lg">신청하기</button>
+            <button class="btn btn-secondary text-sm px-4 py-2.5 rounded-lg" onclick="document.getElementById('refund-form').classList.add('hidden')">취소</button>
+          </div>
+        </div>
+
+        <!-- 신청 목록 -->
+        <div class="surface rounded-xl overflow-hidden">
+          <div class="px-5 py-4 border-b border-line">
+            <h2 class="text-sm font-semibold text-ink">환불 신청 내역</h2>
+          </div>
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-cloud border-b border-line">
+                <th class="text-left px-4 py-3 font-medium text-stone">신청일</th>
+                <th class="text-left px-4 py-3 font-medium text-stone">신청 금액</th>
+                <th class="text-left px-4 py-3 font-medium text-stone">환불 수단</th>
+                <th class="text-left px-4 py-3 font-medium text-stone">상태</th>
+                <th class="text-left px-4 py-3 font-medium text-stone">처리일</th>
+                <th class="text-left px-4 py-3 font-medium text-stone">액션</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-line">
+              <tr class="hover:bg-cloud/50">
+                <td class="px-4 py-3 text-graphite">2026-06-01</td>
+                <td class="px-4 py-3 font-medium text-ink">₩50,000</td>
+                <td class="px-4 py-3 text-stone text-xs">신용카드</td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700">처리 중</span>
+                </td>
+                <td class="px-4 py-3 text-stone">—</td>
+                <td class="px-4 py-3">
+                  <button class="text-xs text-psred-main hover:underline">취소</button>
+                </td>
+              </tr>
+              <tr class="hover:bg-cloud/50">
+                <td class="px-4 py-3 text-graphite">2026-04-15</td>
+                <td class="px-4 py-3 font-medium text-ink">₩30,000</td>
+                <td class="px-4 py-3 text-stone text-xs">계좌이체</td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">완료</span>
+                </td>
+                <td class="px-4 py-3 text-stone">2026-04-17</td>
+                <td class="px-4 py-3 text-stone text-xs">—</td>
+              </tr>
+              <tr class="hover:bg-cloud/50">
+                <td class="px-4 py-3 text-graphite">2026-02-10</td>
+                <td class="px-4 py-3 font-medium text-ink">₩100,000</td>
+                <td class="px-4 py-3 text-stone text-xs">신용카드</td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cloud text-stone border border-line">취소됨</span>
+                </td>
+                <td class="px-4 py-3 text-stone">—</td>
+                <td class="px-4 py-3 text-stone text-xs">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty state (내역 없음) -->
+        <div class="hidden surface rounded-xl p-12 text-center">
+          <svg class="w-10 h-10 text-stone mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <p class="font-medium text-ink mb-1">환불 신청 내역이 없습니다</p>
+          <p class="text-sm text-stone">위 [환불 신청] 버튼을 눌러 신청을 시작하세요</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="_shared/site.js"></script>
+</body>
+</html>

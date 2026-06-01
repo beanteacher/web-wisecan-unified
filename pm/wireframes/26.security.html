@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>2차 인증·신뢰 IP — WiseCan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="_shared/tw-config.js"></script>
+  <link rel="stylesheet" href="_shared/style.css">
+</head>
+<body>
+<div data-site-header></div>
+<main class="pt-16">
+  <div class="flex">
+    <div data-member-sidebar data-active="26.security.html"></div>
+    <div class="flex-1 p-8 bg-cloud min-h-screen">
+
+      <div class="mb-8">
+        <p class="eyebrow">account</p>
+        <h1 class="text-2xl font-semibold text-ink mt-1">2차 인증 · 신뢰 IP</h1>
+      </div>
+
+      <div class="max-w-3xl space-y-6">
+
+        <!-- 2차 인증 토글 카드 -->
+        <div class="surface rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-base font-semibold text-graphite">2차 인증</h2>
+              <p class="text-sm text-slate2 mt-1">로그인 시 비밀번호 외 추가 인증을 요구합니다.</p>
+            </div>
+            <!-- 토글 ON -->
+            <button class="w-12 h-6 rounded-full bg-psblue-main relative flex-shrink-0" style="transition:background 180ms;">
+              <span class="absolute right-1 top-1 w-4 h-4 rounded-full bg-white shadow"></span>
+            </button>
+          </div>
+
+          <!-- 인증 수단 선택 (2차 인증 활성 시) -->
+          <div class="border-t border-mist pt-5">
+            <p class="field-label mb-3">인증 수단</p>
+            <div class="space-y-3">
+              <label class="flex items-start gap-3 cursor-pointer p-3 rounded-xl border border-psblue-main bg-psblue-wash">
+                <span class="radio checked mt-0.5"></span>
+                <div>
+                  <p class="text-sm font-medium text-graphite">문자 인증 (SMS)</p>
+                  <p class="text-xs text-slate2 mt-0.5">등록된 휴대폰 010-****-5678로 인증 번호를 발송합니다.</p>
+                </div>
+              </label>
+              <label class="flex items-start gap-3 cursor-pointer p-3 rounded-xl border border-line">
+                <span class="radio mt-0.5"></span>
+                <div>
+                  <p class="text-sm font-medium text-graphite">OTP 인증 앱</p>
+                  <p class="text-xs text-slate2 mt-0.5">Google Authenticator 등 OTP 앱을 사용합니다.</p>
+                </div>
+              </label>
+            </div>
+            <div class="mt-4 flex justify-end">
+              <button class="btn btn-primary px-5 py-2.5 rounded-full text-sm">저장</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 신뢰 IP 표 -->
+        <div class="surface rounded-2xl overflow-hidden">
+          <div class="flex items-center justify-between px-6 py-4 border-b border-mist">
+            <div>
+              <h2 class="text-base font-semibold text-graphite">신뢰 IP</h2>
+              <p class="text-sm text-slate2 mt-0.5">등록된 IP에서 접속 시 2차 인증을 생략합니다.</p>
+            </div>
+            <button class="btn btn-primary px-4 py-2 rounded-full text-sm flex items-center gap-2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+              IP 추가
+            </button>
+          </div>
+
+          <table class="w-full text-sm">
+            <thead class="bg-cloud text-xs text-stone uppercase tracking-widest">
+              <tr>
+                <th class="text-left px-6 py-3 font-semibold border-b border-mist">IP 주소</th>
+                <th class="text-left px-6 py-3 font-semibold border-b border-mist">메모</th>
+                <th class="text-left px-6 py-3 font-semibold border-b border-mist">마지막 사용</th>
+                <th class="px-6 py-3 border-b border-mist"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-mist">
+              <tr>
+                <td class="px-6 py-3 font-mono text-sm text-graphite">203.0.113.10</td>
+                <td class="px-6 py-3 text-slate2">사무실 네트워크</td>
+                <td class="px-6 py-3 text-slate2 text-xs">2026-06-01 14:32</td>
+                <td class="px-6 py-3 text-right">
+                  <button class="text-xs text-psred-main hover:text-psred-deep font-medium">삭제</button>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-mono text-sm text-graphite">192.168.1.0/24</td>
+                <td class="px-6 py-3 text-slate2">재택 근무 VPN</td>
+                <td class="px-6 py-3 text-slate2 text-xs">2026-05-30 09:15</td>
+                <td class="px-6 py-3 text-right">
+                  <button class="text-xs text-psred-main hover:text-psred-deep font-medium">삭제</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Empty 상태 -->
+          <!-- <div class="px-6 py-12 text-center text-sm text-slate2">
+            <p>등록된 신뢰 IP가 없습니다.</p>
+            <p class="mt-1 text-xs text-stone">신뢰 IP를 등록하면 해당 IP에서 2차 인증을 생략할 수 있습니다.</p>
+          </div> -->
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+<div data-site-footer data-page-id="PG-SECURITY-001"></div>
+<script src="_shared/site.js"></script>
+</body>
+</html>

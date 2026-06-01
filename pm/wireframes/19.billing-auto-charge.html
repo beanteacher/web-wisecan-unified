@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>자동충전 — WiseCan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="_shared/tw-config.js"></script>
+  <link rel="stylesheet" href="_shared/style.css">
+</head>
+<body class="bg-white">
+
+<!-- 상단 헤더 -->
+<header class="fixed top-0 inset-x-0 h-16 bg-white border-b border-line flex items-center px-6 z-30">
+  <a href="01.index.html" class="font-semibold text-lg tracking-tight text-ink mr-10">WiseCan</a>
+  <nav class="flex items-center gap-6 text-sm">
+    <a href="#" class="nav-link">대시보드</a>
+    <a href="#" class="nav-link">발송</a>
+    <a href="#" class="nav-link">이력</a>
+    <a href="#" class="nav-link">템플릿</a>
+    <a href="#" class="nav-link font-semibold text-ink">결제</a>
+  </nav>
+  <div class="ml-auto flex items-center gap-4">
+    <span class="text-sm text-stone">잔액 <strong class="text-ink">₩123,450</strong></span>
+    <button class="btn btn-primary text-sm px-4 py-1.5 rounded-lg">충전</button>
+    <div class="w-8 h-8 rounded-full bg-psblue-wash flex items-center justify-center text-psblue-main text-sm font-semibold">김</div>
+  </div>
+</header>
+
+<main class="pt-16">
+  <div class="flex">
+    <!-- 사이드바 -->
+    <div data-member-sidebar data-active="19.billing-auto-charge.html"></div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="flex-1 p-8 min-w-0">
+      <div class="mb-6">
+        <h1 class="text-xl font-semibold text-ink">자동충전</h1>
+        <p class="text-sm text-stone mt-0.5">잔액이 임계치 이하로 떨어지면 자동으로 충전됩니다</p>
+      </div>
+
+      <div class="max-w-2xl space-y-6">
+        <!-- 활성 토글 카드 -->
+        <div class="surface rounded-xl p-5 flex items-center justify-between">
+          <div>
+            <p class="font-semibold text-ink">자동충전 사용</p>
+            <p class="text-sm text-stone mt-0.5">현재 <strong class="text-green-600">활성</strong> 상태입니다</p>
+          </div>
+          <!-- 토글 스위치 -->
+          <button class="relative inline-flex h-6 w-11 items-center rounded-full bg-psblue-main transition-colors focus:outline-none" role="switch" aria-checked="true">
+            <span class="inline-block h-4 w-4 transform translate-x-6 rounded-full bg-white shadow transition-transform"></span>
+          </button>
+        </div>
+
+        <!-- 설정 카드 -->
+        <div class="surface rounded-xl p-6 space-y-5">
+          <h2 class="text-sm font-semibold text-ink">충전 조건 설정</h2>
+
+          <div>
+            <label class="field-label block mb-1">잔액 임계치</label>
+            <p class="text-xs text-stone mb-2">잔액이 이 금액 이하일 때 자동충전이 실행됩니다</p>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-stone text-sm">₩</span>
+              <input type="number" class="input pl-7 text-sm" value="10000">
+            </div>
+          </div>
+
+          <div>
+            <label class="field-label block mb-1">1회 충전 한도</label>
+            <p class="text-xs text-stone mb-2">1회 자동충전 시 최대 결제 금액</p>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-stone text-sm">₩</span>
+              <input type="number" class="input pl-7 text-sm" value="50000">
+            </div>
+          </div>
+
+          <div>
+            <label class="field-label block mb-1">1일 충전 한도</label>
+            <p class="text-xs text-stone mb-2">하루 동안 자동충전으로 결제되는 최대 금액</p>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-stone text-sm">₩</span>
+              <input type="number" class="input pl-7 text-sm" value="200000">
+            </div>
+          </div>
+
+          <div>
+            <label class="field-label block mb-1">결제 수단</label>
+            <select class="input text-sm">
+              <option>신용카드 (KB 1234-****-****-5678)</option>
+              <option>+ 새 카드 등록</option>
+            </select>
+          </div>
+
+          <div class="flex items-start gap-3 p-4 bg-cloud rounded-lg">
+            <label class="flex items-start gap-2 cursor-pointer">
+              <span class="check checked mt-0.5 shrink-0"></span>
+              <div>
+                <p class="text-sm font-medium text-ink">30일 제한 옵션</p>
+                <p class="text-xs text-stone mt-0.5">30일 이내 동일 금액 자동충전이 3회 이상 발생하면 알림을 보냅니다</p>
+              </div>
+            </label>
+          </div>
+
+          <button class="btn btn-primary text-sm px-6 py-2.5 rounded-lg">설정 저장</button>
+        </div>
+
+        <!-- 자동충전 이력 -->
+        <div class="surface rounded-xl overflow-hidden">
+          <div class="px-5 py-4 border-b border-line flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-ink">자동충전 이력</h2>
+            <span class="text-xs text-stone">최근 3개월</span>
+          </div>
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-cloud border-b border-line">
+                <th class="text-left px-4 py-3 font-medium text-stone">일시</th>
+                <th class="text-left px-4 py-3 font-medium text-stone">충전 금액</th>
+                <th class="text-left px-4 py-3 font-medium text-stone">결제 수단</th>
+                <th class="text-left px-4 py-3 font-medium text-stone">결과</th>
+                <th class="text-left px-4 py-3 font-medium text-stone">트리거 잔액</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-line">
+              <tr class="hover:bg-cloud/50">
+                <td class="px-4 py-3 text-graphite">2026-06-01 09:12</td>
+                <td class="px-4 py-3 font-medium text-ink">₩50,000</td>
+                <td class="px-4 py-3 text-stone text-xs">신용카드 ****5678</td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center gap-1.5 text-green-700 text-xs">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>성공
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-stone text-xs">₩8,230</td>
+              </tr>
+              <tr class="hover:bg-cloud/50">
+                <td class="px-4 py-3 text-graphite">2026-05-28 14:45</td>
+                <td class="px-4 py-3 font-medium text-ink">₩50,000</td>
+                <td class="px-4 py-3 text-stone text-xs">신용카드 ****5678</td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center gap-1.5 text-green-700 text-xs">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>성공
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-stone text-xs">₩9,100</td>
+              </tr>
+              <tr class="hover:bg-cloud/50">
+                <td class="px-4 py-3 text-graphite">2026-05-15 22:03</td>
+                <td class="px-4 py-3 font-medium text-ink">₩50,000</td>
+                <td class="px-4 py-3 text-stone text-xs">신용카드 ****5678</td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center gap-1.5 text-psred-main text-xs">
+                    <span class="w-1.5 h-1.5 rounded-full bg-psred-main inline-block"></span>실패
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-stone text-xs">₩7,500</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 결제 실패 안내 (결제 실패 시 노출) -->
+        <div class="border border-psred-main/30 bg-red-50 rounded-xl p-4 flex gap-3">
+          <svg class="w-5 h-5 text-psred-main shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div class="text-sm">
+            <p class="font-semibold text-psred-main">자동충전 실패</p>
+            <p class="text-stone mt-0.5">2026-05-15 결제가 실패했습니다. 카드 한도 초과 또는 카드 정보가 변경되었을 수 있습니다. 결제 수단을 확인하세요.</p>
+            <button class="mt-2 text-psblue-main text-xs font-medium hover:underline">결제 수단 변경</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="_shared/site.js"></script>
+</body>
+</html>

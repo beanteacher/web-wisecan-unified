@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>공지사항 — WiseCan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="_shared/tw-config.js"></script>
+  <link rel="stylesheet" href="_shared/style.css">
+</head>
+<body>
+<div data-site-header></div>
+
+<main class="pt-16">
+
+  <!-- ── PAGE HEADER ─────────────────────────────────── -->
+  <section class="border-b border-mist">
+    <div class="max-w-5xl mx-auto px-8 pt-16 pb-10">
+      <p class="eyebrow text-center">notice</p>
+      <h1 class="display text-3xl md:text-4xl mt-5 text-center">공지사항</h1>
+
+      <!-- 검색바 -->
+      <div class="max-w-xl mx-auto mt-8 relative">
+        <svg class="absolute left-4 top-1/2 -translate-y-1/2 text-stone" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="search" class="input pl-11 pr-4 py-3 rounded-full text-sm" placeholder="공지사항 검색">
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CONTENT ──────────────────────────────────────── -->
+  <section>
+    <div class="max-w-5xl mx-auto px-8 py-14">
+
+      <!-- 필터 + 정렬 -->
+      <div class="flex items-center justify-between mb-6 gap-4 flex-wrap">
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-stone">카테고리</span>
+          <select class="input w-auto text-sm py-1.5 px-3 rounded-lg" style="width:auto;">
+            <option>전체</option>
+            <option>서비스 업데이트</option>
+            <option>점검 안내</option>
+            <option>정책 변경</option>
+            <option>이벤트</option>
+          </select>
+        </div>
+        <p class="text-xs text-stone">전체 <span class="font-medium text-graphite">18건</span></p>
+      </div>
+
+      <!-- 공지 목록 표 -->
+      <div class="surface rounded-2xl overflow-hidden">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-cloud border-b border-mist">
+              <th class="text-left px-5 py-3.5 font-semibold text-graphite w-8/12">제목</th>
+              <th class="text-left px-4 py-3.5 font-semibold text-graphite hidden md:table-cell">카테고리</th>
+              <th class="text-left px-4 py-3.5 font-semibold text-graphite hidden sm:table-cell">작성일</th>
+              <th class="text-center px-4 py-3.5 font-semibold text-graphite hidden lg:table-cell">알림 발송</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-mist">
+
+            <!-- 고정 공지 (배경 강조) -->
+            <tr class="hover:bg-cloud transition-colors cursor-pointer" style="background:#f1f7fd;">
+              <td class="px-5 py-4">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-psblue-main text-white flex-shrink-0">필독</span>
+                  <span class="font-medium text-graphite">이용약관 및 개인정보처리방침 개정 안내 (2026.06.15 시행)</span>
+                </div>
+              </td>
+              <td class="px-4 py-4 text-slate2 hidden md:table-cell">정책 변경</td>
+              <td class="px-4 py-4 text-slate2 hidden sm:table-cell">2026-06-01</td>
+              <td class="px-4 py-4 text-center hidden lg:table-cell">
+                <svg class="mx-auto text-psblue-main" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+              </td>
+            </tr>
+
+            <tr class="hover:bg-cloud transition-colors cursor-pointer">
+              <td class="px-5 py-4">
+                <span class="font-medium text-graphite">카카오 알림톡 발송 API 응답 구조 변경 안내</span>
+              </td>
+              <td class="px-4 py-4 text-slate2 hidden md:table-cell">서비스 업데이트</td>
+              <td class="px-4 py-4 text-slate2 hidden sm:table-cell">2026-05-28</td>
+              <td class="px-4 py-4 text-center hidden lg:table-cell">
+                <svg class="mx-auto text-psblue-main" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+              </td>
+            </tr>
+
+            <tr class="hover:bg-cloud transition-colors cursor-pointer">
+              <td class="px-5 py-4">
+                <span class="font-medium text-graphite">정기 점검 안내 (2026.05.25 02:00~04:00)</span>
+              </td>
+              <td class="px-4 py-4 text-slate2 hidden md:table-cell">점검 안내</td>
+              <td class="px-4 py-4 text-slate2 hidden sm:table-cell">2026-05-22</td>
+              <td class="px-4 py-4 text-center text-stone hidden lg:table-cell">—</td>
+            </tr>
+
+            <tr class="hover:bg-cloud transition-colors cursor-pointer">
+              <td class="px-5 py-4">
+                <span class="font-medium text-graphite">RCS 발송 기능 베타 오픈 안내</span>
+              </td>
+              <td class="px-4 py-4 text-slate2 hidden md:table-cell">서비스 업데이트</td>
+              <td class="px-4 py-4 text-slate2 hidden sm:table-cell">2026-05-15</td>
+              <td class="px-4 py-4 text-center hidden lg:table-cell">
+                <svg class="mx-auto text-psblue-main" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+              </td>
+            </tr>
+
+            <tr class="hover:bg-cloud transition-colors cursor-pointer">
+              <td class="px-5 py-4">
+                <span class="font-medium text-graphite">발신번호 사전등록 정책 변경 안내 (KISA 기준)</span>
+              </td>
+              <td class="px-4 py-4 text-slate2 hidden md:table-cell">정책 변경</td>
+              <td class="px-4 py-4 text-slate2 hidden sm:table-cell">2026-05-10</td>
+              <td class="px-4 py-4 text-center text-stone hidden lg:table-cell">—</td>
+            </tr>
+
+            <tr class="hover:bg-cloud transition-colors cursor-pointer">
+              <td class="px-5 py-4">
+                <span class="font-medium text-graphite">자동충전 기능 출시 안내</span>
+              </td>
+              <td class="px-4 py-4 text-slate2 hidden md:table-cell">서비스 업데이트</td>
+              <td class="px-4 py-4 text-slate2 hidden sm:table-cell">2026-04-28</td>
+              <td class="px-4 py-4 text-center hidden lg:table-cell">
+                <svg class="mx-auto text-psblue-main" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+              </td>
+            </tr>
+
+            <tr class="hover:bg-cloud transition-colors cursor-pointer">
+              <td class="px-5 py-4">
+                <span class="font-medium text-graphite">MMS 이미지 첨부 용량 기준 변경 안내</span>
+              </td>
+              <td class="px-4 py-4 text-slate2 hidden md:table-cell">서비스 업데이트</td>
+              <td class="px-4 py-4 text-slate2 hidden sm:table-cell">2026-04-10</td>
+              <td class="px-4 py-4 text-center text-stone hidden lg:table-cell">—</td>
+            </tr>
+
+            <tr class="hover:bg-cloud transition-colors cursor-pointer">
+              <td class="px-5 py-4">
+                <span class="font-medium text-graphite">서비스 오픈 안내 — WiseCan 통합 메시징 서비스를 시작합니다</span>
+              </td>
+              <td class="px-4 py-4 text-slate2 hidden md:table-cell">서비스 업데이트</td>
+              <td class="px-4 py-4 text-slate2 hidden sm:table-cell">2026-03-01</td>
+              <td class="px-4 py-4 text-center hidden lg:table-cell">
+                <svg class="mx-auto text-psblue-main" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 페이지네이션 -->
+      <div class="flex justify-center gap-1 mt-8">
+        <button class="w-8 h-8 rounded-lg text-sm text-stone hover:bg-cloud flex items-center justify-center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="w-8 h-8 rounded-lg text-sm font-semibold bg-psblue-main text-white flex items-center justify-center">1</button>
+        <button class="w-8 h-8 rounded-lg text-sm text-slate2 hover:bg-cloud flex items-center justify-center">2</button>
+        <button class="w-8 h-8 rounded-lg text-sm text-slate2 hover:bg-cloud flex items-center justify-center">3</button>
+        <button class="w-8 h-8 rounded-lg text-sm text-stone hover:bg-cloud flex items-center justify-center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+
+      <!-- Empty 상태 예시 -->
+      <div class="mt-10 py-12 text-center border border-dashed border-line rounded-xl hidden">
+        <svg class="mx-auto mb-3 text-stone" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <p class="text-sm font-medium text-graphite">검색 결과가 없습니다</p>
+        <p class="text-sm text-slate2 mt-1">다른 검색어로 시도해 주세요.</p>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<div data-site-footer data-page-id="PG-PUB-007"></div>
+<script src="_shared/site.js"></script>
+</body>
+</html>

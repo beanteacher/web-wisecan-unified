@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>카카오·RCS 라우팅 — WiseCan Admin</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../_shared/tw-config.js"></script>
+  <link rel="stylesheet" href="../_shared/style.css">
+  <style>
+    body { background: #f0f2f5; }
+    .card { background:#ffffff; border:1px solid #e4e8ec; border-radius:12px; }
+    .tab-btn { padding:8px 18px; border-radius:8px; font-size:0.85rem; font-weight:500; color:#5b6470; transition:background 150ms, color 150ms; cursor:pointer; }
+    .tab-btn.active { background:#0070D1; color:#ffffff; }
+    .badge-blue { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .badge-green { background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .badge-yellow { background:#fffbeb; color:#92400e; border:1px solid #fde68a; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .badge-red { background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .badge-gray { background:#f3f4f6; color:#374151; border:1px solid #e5e7eb; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .tbl th { font-size:0.78rem; font-weight:600; color:#5b6470; padding:10px 14px; background:#f6f8fa; border-bottom:1px solid #e4e8ec; text-align:left; }
+    .tbl td { font-size:0.85rem; color:#16191f; padding:10px 14px; border-bottom:1px solid #f0f2f5; }
+    .tbl tr:last-child td { border-bottom:none; }
+    .carrier-pill { display:inline-flex; align-items:center; gap:5px; background:#f6f8fa; border:1px solid #e4e8ec; border-radius:6px; padding:3px 10px; font-size:0.78rem; font-weight:500; }
+    .board-col { background:#f6f8fa; border:1px solid #e4e8ec; border-radius:10px; padding:12px; min-height:240px; }
+    .board-card { background:#ffffff; border:1px solid #e4e8ec; border-radius:8px; padding:10px 12px; margin-bottom:8px; }
+  </style>
+</head>
+<body class="text-ink">
+
+<!-- 상단 바 -->
+<header class="admin-topbar fixed top-0 inset-x-0 z-40 h-16 flex items-center px-6 gap-4">
+  <span class="text-base font-semibold text-graphite">WiseCan<span style="color:#0070D1">.</span></span>
+  <span class="text-xs text-gray-500 ml-1">Admin Console</span>
+  <!-- 현재 메뉴 위치 -->
+  <nav class="flex items-center gap-1.5 text-xs ml-3" aria-label="현재 메뉴 위치">
+    <svg class="w-3 h-3 text-stone" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    <span class="text-slate2">발송 운영</span>
+    <svg class="w-3 h-3 text-stone" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    <span class="text-ink font-semibold">카카오·RCS 라우팅</span>
+  </nav>
+  <div class="ml-auto flex items-center gap-3">
+    <span class="text-xs text-slate2">운영자: admin@wisecan.com</span>
+    <button class="text-xs text-slate2 hover:text-graphite">로그아웃</button>
+  </div>
+</header>
+
+<main class="pt-16 flex">
+  <!-- 사이드바 -->
+  <div data-admin-sidebar data-active="09.admin-routing.html"></div>
+
+  <!-- 메인 콘텐츠 -->
+  <div class="flex-1 p-8 min-w-0">
+
+    <div class="mb-6">
+      <p class="eyebrow mb-1">발송 운영</p>
+      <h1 class="text-2xl font-semibold text-ink">카카오 · RCS 라우팅</h1>
+      <p class="text-sm text-slate2 mt-1">회원별 발송 중계사 매핑 및 카카오 템플릿 심사·이관을 관리합니다.</p>
+    </div>
+
+    <!-- 탭 -->
+    <div class="flex items-center gap-2 mb-6">
+      <button class="tab-btn active" onclick="showTab('mapping')">회원별 라우팅 매핑</button>
+      <button class="tab-btn" onclick="showTab('audit')">변경 이력</button>
+      <button class="tab-btn" onclick="showTab('template')">카카오 템플릿 심사·이관</button>
+    </div>
+
+    <!-- ── 탭1: 회원별 라우팅 매핑 ── -->
+    <div id="tab-mapping">
+      <div class="flex items-center gap-3 mb-4">
+        <input class="input w-72" placeholder="회원 이메일 또는 법인번호 검색" />
+        <select class="input w-44">
+          <option>전체 중계사</option>
+          <option>LG CNS</option>
+          <option>KT</option>
+          <option>인포뱅크</option>
+        </select>
+        <button class="btn btn-secondary text-sm px-3 py-2 rounded-lg">검색</button>
+        <button class="btn btn-primary text-sm px-4 py-2 rounded-lg ml-auto">+ 매핑 추가</button>
+      </div>
+      <div class="card overflow-hidden">
+        <table class="tbl w-full">
+          <thead>
+            <tr>
+              <th>회원</th>
+              <th>카카오 중계사</th>
+              <th>RCS 중계사</th>
+              <th>변경일</th>
+              <th>변경 운영자</th>
+              <th>조치</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <p class="font-medium text-sm">corp@example.com</p>
+                <p class="text-xs text-slate2">㈜예시기업 · 사업자</p>
+              </td>
+              <td>
+                <span class="carrier-pill">
+                  <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                  중계사 A
+                </span>
+              </td>
+              <td>
+                <span class="carrier-pill">
+                  <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                  중계사 B
+                </span>
+              </td>
+              <td class="text-xs text-slate2">2026-05-20</td>
+              <td class="text-xs text-slate2">admin01</td>
+              <td>
+                <button class="btn btn-secondary text-xs px-3 py-1 rounded-lg" onclick="openMappingModal()">변경</button>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="font-medium text-sm">startup@mail.com</p>
+                <p class="text-xs text-slate2">스타트업 · 개인사업자</p>
+              </td>
+              <td>
+                <span class="carrier-pill">
+                  <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                  중계사 A
+                </span>
+              </td>
+              <td>
+                <span class="text-xs text-slate2">미설정</span>
+              </td>
+              <td class="text-xs text-slate2">2026-04-15</td>
+              <td class="text-xs text-slate2">admin02</td>
+              <td>
+                <button class="btn btn-secondary text-xs px-3 py-1 rounded-lg" onclick="openMappingModal()">변경</button>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="font-medium text-sm">bigco@corporate.kr</p>
+                <p class="text-xs text-slate2">대기업㈜ · 법인</p>
+              </td>
+              <td>
+                <span class="carrier-pill">
+                  <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                  중계사 C
+                </span>
+              </td>
+              <td>
+                <span class="carrier-pill">
+                  <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                  중계사 C
+                </span>
+              </td>
+              <td class="text-xs text-slate2">2026-03-10</td>
+              <td class="text-xs text-slate2">admin01</td>
+              <td>
+                <button class="btn btn-secondary text-xs px-3 py-1 rounded-lg" onclick="openMappingModal()">변경</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mt-3 flex items-center justify-between px-1">
+        <p class="text-xs text-slate2">전체 128개 회원</p>
+        <div class="flex gap-1">
+          <button class="text-xs px-2 py-1 rounded border border-line text-slate2">이전</button>
+          <button class="text-xs px-2 py-1 rounded border border-psblue-main text-psblue-main bg-psblue-wash">1</button>
+          <button class="text-xs px-2 py-1 rounded border border-line text-slate2">2</button>
+          <button class="text-xs px-2 py-1 rounded border border-line text-slate2">다음</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 탭2: 변경 이력 ── -->
+    <div id="tab-audit" class="hidden">
+      <div class="flex items-center gap-3 mb-4">
+        <input class="input w-72" placeholder="회원·운영자 검색" />
+        <input type="date" class="input w-40" value="2026-06-01" />
+        <button class="btn btn-secondary text-sm px-3 py-2 rounded-lg">검색</button>
+        <button class="btn btn-secondary text-sm px-3 py-2 rounded-lg ml-auto">CSV 내보내기</button>
+      </div>
+      <div class="card overflow-hidden">
+        <table class="tbl w-full">
+          <thead>
+            <tr>
+              <th>일시</th>
+              <th>회원</th>
+              <th>변경 전</th>
+              <th>변경 후</th>
+              <th>채널</th>
+              <th>변경 운영자</th>
+              <th>사유</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-xs text-slate2">2026-06-01 09:30</td>
+              <td class="text-xs">corp@example.com</td>
+              <td class="text-xs text-slate2">중계사 B</td>
+              <td class="text-xs font-medium">중계사 A</td>
+              <td><span class="badge-blue">카카오</span></td>
+              <td class="text-xs">admin01</td>
+              <td class="text-xs text-slate2 max-w-[140px] truncate">회원 요청 — 안정성 개선</td>
+            </tr>
+            <tr>
+              <td class="text-xs text-slate2">2026-05-28 14:15</td>
+              <td class="text-xs">bigco@corporate.kr</td>
+              <td class="text-xs text-slate2">중계사 A</td>
+              <td class="text-xs font-medium">중계사 C</td>
+              <td><span class="badge-gray">RCS</span></td>
+              <td class="text-xs">admin02</td>
+              <td class="text-xs text-slate2 max-w-[140px] truncate">전용 계약 체결</td>
+            </tr>
+            <tr>
+              <td class="text-xs text-slate2">2026-05-20 11:00</td>
+              <td class="text-xs">startup@mail.com</td>
+              <td class="text-xs text-slate2">미설정</td>
+              <td class="text-xs font-medium">중계사 A</td>
+              <td><span class="badge-blue">카카오</span></td>
+              <td class="text-xs">admin01</td>
+              <td class="text-xs text-slate2 max-w-[140px] truncate">최초 매핑</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── 탭3: 카카오 템플릿 심사·이관 ── -->
+    <div id="tab-template" class="hidden">
+      <div class="grid grid-cols-4 gap-6">
+        <!-- 칸반 보드 -->
+        <div>
+          <p class="text-xs font-semibold text-slate2 uppercase tracking-wide mb-3">심사 대기 <span class="ml-1 badge-yellow">4</span></p>
+          <div class="board-col">
+            <div class="board-card">
+              <p class="text-xs font-semibold text-ink mb-0.5">주문 완료 알림</p>
+              <p class="text-xs text-slate2">corp@example.com</p>
+              <div class="mt-2 flex items-center justify-between">
+                <span class="badge-yellow">대기</span>
+                <button class="text-xs text-psblue-main hover:underline">검토</button>
+              </div>
+            </div>
+            <div class="board-card">
+              <p class="text-xs font-semibold text-ink mb-0.5">배송 출발 안내</p>
+              <p class="text-xs text-slate2">startup@mail.com</p>
+              <div class="mt-2 flex items-center justify-between">
+                <span class="badge-yellow">대기</span>
+                <button class="text-xs text-psblue-main hover:underline">검토</button>
+              </div>
+            </div>
+            <div class="board-card">
+              <p class="text-xs font-semibold text-ink mb-0.5">결제 확인 알림</p>
+              <p class="text-xs text-slate2">bigco@corporate.kr</p>
+              <div class="mt-2 flex items-center justify-between">
+                <span class="badge-yellow">대기</span>
+                <button class="text-xs text-psblue-main hover:underline">검토</button>
+              </div>
+            </div>
+            <div class="board-card">
+              <p class="text-xs font-semibold text-ink mb-0.5">회원가입 환영</p>
+              <p class="text-xs text-slate2">newcorp@mail.com</p>
+              <div class="mt-2 flex items-center justify-between">
+                <span class="badge-yellow">대기</span>
+                <button class="text-xs text-psblue-main hover:underline">검토</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-slate2 uppercase tracking-wide mb-3">카카오 심사 중 <span class="ml-1 badge-blue">2</span></p>
+          <div class="board-col">
+            <div class="board-card">
+              <p class="text-xs font-semibold text-ink mb-0.5">이벤트 당첨 알림</p>
+              <p class="text-xs text-slate2">corp@example.com</p>
+              <div class="mt-2 flex items-center justify-between">
+                <span class="badge-blue">심사 중</span>
+                <button class="text-xs text-slate2 hover:text-ink">확인</button>
+              </div>
+            </div>
+            <div class="board-card">
+              <p class="text-xs font-semibold text-ink mb-0.5">포인트 적립 안내</p>
+              <p class="text-xs text-slate2">startup@mail.com</p>
+              <div class="mt-2 flex items-center justify-between">
+                <span class="badge-blue">심사 중</span>
+                <button class="text-xs text-slate2 hover:text-ink">확인</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-slate2 uppercase tracking-wide mb-3">승인 완료 <span class="ml-1 badge-green">6</span></p>
+          <div class="board-col">
+            <div class="board-card">
+              <p class="text-xs font-semibold text-ink mb-0.5">인증번호 발송</p>
+              <p class="text-xs text-slate2">bigco@corporate.kr</p>
+              <div class="mt-2 flex items-center justify-between">
+                <span class="badge-green">승인</span>
+                <button class="text-xs text-psblue-main hover:underline">이관</button>
+              </div>
+            </div>
+            <div class="board-card">
+              <p class="text-xs font-semibold text-ink mb-0.5">비밀번호 재설정</p>
+              <p class="text-xs text-slate2">corp@example.com</p>
+              <div class="mt-2 flex items-center justify-between">
+                <span class="badge-green">승인</span>
+                <button class="text-xs text-psblue-main hover:underline">이관</button>
+              </div>
+            </div>
+            <p class="text-xs text-slate2 text-center mt-2">외 4건</p>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-slate2 uppercase tracking-wide mb-3">반려 <span class="ml-1 badge-red">1</span></p>
+          <div class="board-col">
+            <div class="board-card border-red-200">
+              <p class="text-xs font-semibold text-ink mb-0.5">광고 홍보 메시지</p>
+              <p class="text-xs text-slate2">spam@bad.com</p>
+              <p class="text-xs text-red-600 mt-1">광고 표기 누락</p>
+              <div class="mt-2 flex items-center justify-between">
+                <span class="badge-red">반려</span>
+                <button class="text-xs text-slate2 hover:text-ink">상세</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- 매핑 변경 모달 -->
+<div id="mapping-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+  <div class="card p-6 w-[480px]">
+    <p class="font-semibold text-ink mb-1">라우팅 매핑 변경</p>
+    <p class="text-xs text-slate2 mb-5">corp@example.com · ㈜예시기업</p>
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <div>
+        <label class="field-label block mb-1.5">카카오 중계사</label>
+        <select class="input">
+          <option>중계사 A</option>
+          <option>중계사 B</option>
+          <option>중계사 C</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label block mb-1.5">RCS 중계사</label>
+        <select class="input">
+          <option>중계사 B</option>
+          <option>중계사 A</option>
+          <option>중계사 C</option>
+          <option>미설정</option>
+        </select>
+      </div>
+    </div>
+    <div class="mb-5">
+      <label class="field-label block mb-1.5">변경 사유 <span class="text-red-500">*</span></label>
+      <textarea class="input h-20 resize-none" placeholder="변경 사유를 입력하세요 (감사 로그에 기록됩니다)"></textarea>
+    </div>
+    <div class="flex justify-end gap-2">
+      <button class="btn btn-secondary text-sm px-4 py-2 rounded-lg" onclick="closeMappingModal()">취소</button>
+      <button class="btn btn-primary text-sm px-4 py-2 rounded-lg">저장</button>
+    </div>
+  </div>
+</div>
+
+<script src="../_shared/site.js"></script>
+<script>
+function showTab(t) {
+  ['mapping','audit','template'].forEach(function(id) {
+    var el = document.getElementById('tab-'+id);
+    if (el) el.classList.toggle('hidden', id !== t);
+  });
+  document.querySelectorAll('.tab-btn').forEach(function(btn, i) {
+    btn.classList.toggle('active', ['mapping','audit','template'][i] === t);
+  });
+}
+function openMappingModal() { document.getElementById('mapping-modal').classList.remove('hidden'); }
+function closeMappingModal() { document.getElementById('mapping-modal').classList.add('hidden'); }
+</script>
+<!-- PG-AD-007 | §10.7 | RQ-ADMIN-401~405, RQ-SEND-308 -->
+</body>
+</html>

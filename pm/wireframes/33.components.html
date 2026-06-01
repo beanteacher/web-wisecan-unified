@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>디자인 컴포넌트 — WiseCan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="_shared/style.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="_shared/tw-config.js"></script>
+</head>
+<body>
+
+<div data-site-header></div>
+
+<main class="pt-16">
+
+  <div class="max-w-7xl mx-auto px-8 py-12 grid md:grid-cols-[200px_1fr] gap-10">
+
+    <!-- Side nav -->
+    <aside class="side-nav md:sticky md:top-24 h-fit">
+      <p class="text-xs font-semibold text-stone uppercase tracking-widest mb-3">컴포넌트</p>
+      <a href="#buttons" class="active">Button variants</a>
+      <a href="#alerts" class="">Alert 모달</a>
+      <a href="#fields" class="">Form fields</a>
+      <a href="#indicators" class="">Indicators</a>
+      <p class="text-[11px] text-stone mt-6 leading-relaxed px-2">
+        화면별 와이어프레임은 같은 폴더의 <code class="bg-mist px-1 rounded">01~32</code> 페이지를 참조하세요.
+        본 페이지는 컴포넌트 시각화·재사용 기준만 다룹니다.
+      </p>
+    </aside>
+
+    <!-- Content -->
+    <div>
+
+      <!-- ── Buttons ─────────────────────────────── -->
+      <section id="buttons" class="mb-16 scroll-mt-20">
+        <p class="eyebrow">component · pill button</p>
+        <h1 class="text-2xl md:text-3xl font-semibold mt-3">Button variants</h1>
+        <p class="text-slate2 mt-3 leading-relaxed">
+          PlayStation 팔레트 — Blue primary · Burgundy commerce · Transparent secondary · 모두 fully-rounded pill.
+          삭제·탈퇴 같은 destructive는 PS Red 단색 pill.
+        </p>
+
+        <!-- 라이트 캔버스 -->
+        <div class="mt-8 surface rounded-2xl p-6 md:p-8">
+          <div class="flex items-center justify-between mb-5">
+            <p class="eyebrow">light canvas</p>
+            <span class="text-xs text-stone">흰색 / 회색 surface 위</span>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <button class="btn btn-primary px-5 py-2.5 rounded-full text-sm">확인 · 주 액션</button>
+            <button class="btn btn-secondary px-5 py-2.5 rounded-full text-sm">취소 · 보조</button>
+            <button class="btn btn-destructive px-5 py-2.5 rounded-full text-sm">삭제 · 탈퇴</button>
+            <button class="btn btn-commerce px-5 py-2.5 rounded-full text-sm">결제 · 충전</button>
+            <button class="btn btn-primary px-5 py-2.5 rounded-full text-sm" disabled>비활성</button>
+          </div>
+        </div>
+
+        <!-- 의미 표 -->
+        <div class="mt-8 surface rounded-2xl overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-cloud text-slate2 text-xs uppercase tracking-widest">
+              <tr>
+                <th class="text-left px-5 py-3 font-semibold">클래스</th>
+                <th class="text-left px-5 py-3 font-semibold">의미</th>
+                <th class="text-left px-5 py-3 font-semibold">예</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-mist">
+              <tr>
+                <td class="px-5 py-3 font-mono text-xs">btn-primary</td>
+                <td class="px-5 py-3 text-graphite">확인 · 진행 · 주 액션</td>
+                <td class="px-5 py-3 text-slate2">동의하고 가입하기 · 발송하기 · 저장</td>
+              </tr>
+              <tr>
+                <td class="px-5 py-3 font-mono text-xs">btn-secondary</td>
+                <td class="px-5 py-3 text-graphite">취소 · 뒤로 · 보조</td>
+                <td class="px-5 py-3 text-slate2">취소 · 이전 단계 · 모달 닫기</td>
+              </tr>
+              <tr>
+                <td class="px-5 py-3 font-mono text-xs">btn-destructive</td>
+                <td class="px-5 py-3 text-graphite">삭제 · 탈퇴 · 되돌릴 수 없는 위험</td>
+                <td class="px-5 py-3 text-slate2">계정 탈퇴 · 발신번호 강제 회수 · 키 강제 폐기</td>
+              </tr>
+              <tr>
+                <td class="px-5 py-3 font-mono text-xs">btn-commerce</td>
+                <td class="px-5 py-3 text-graphite">결제 · 충전 · 스토어 액션</td>
+                <td class="px-5 py-3 text-slate2">10,000원 결제하기 · 자동충전 활성화</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="text-xs text-stone mt-5 leading-relaxed">
+          모든 버튼은 <code class="bg-mist px-1 rounded">rounded-full</code> pill. text size·padding 은 컨텍스트(헤더 / 본문 CTA / 모달 푸터)에 따라 조정하되 컬러·라운드는 고정.
+        </p>
+      </section>
+
+
+      <!-- ── Alerts ──────────────────────────────── -->
+      <section id="alerts" class="mb-16 scroll-mt-20">
+        <p class="eyebrow">component · modal</p>
+        <h1 class="text-2xl md:text-3xl font-semibold mt-3">Alert 모달</h1>
+        <p class="text-slate2 mt-3 leading-relaxed">
+          라이트 surface · 일반 글자 weight · 좌측 아이콘 + 우측 텍스트 · 푸터 우측 액션 · 아이콘은 inline SVG (Lucide 스타일) · 자동 사라짐 X — [확인] 강제.
+        </p>
+
+        <div class="grid md:grid-cols-2 gap-6 mt-8">
+
+          <!-- 1. Info -->
+          <div>
+            <p class="eyebrow mb-3">1. 정보 알림 — 확인 1개</p>
+            <div class="rounded-2xl p-8" style="background: rgba(94, 105, 122, .35); backdrop-filter: blur(3px);">
+              <div class="bg-white rounded-xl shadow-2xl overflow-hidden max-w-md mx-auto">
+                <div class="px-6 pt-5 pb-3 flex items-start gap-3">
+                  <span class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background:#e8f1fb; color:#0070D1;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                  </span>
+                  <div class="flex-1 pt-1">
+                    <h4 class="text-base font-semibold text-graphite">처리가 완료되었습니다</h4>
+                    <p class="text-sm text-slate2 mt-1.5 leading-relaxed">설명 한두 줄. 다음 행동이 명확하면 안내 문장 1개 포함.</p>
+                  </div>
+                </div>
+                <div class="px-6 py-3 bg-cloud border-t border-mist flex justify-end">
+                  <button class="btn btn-primary px-5 py-2 rounded-full text-sm">확인</button>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-stone mt-3 leading-relaxed">사용 예 — 가입 완료 · 저장 완료 · 발송 접수 · 비밀번호 변경</p>
+          </div>
+
+          <!-- 2. 확인 분기 -->
+          <div>
+            <p class="eyebrow mb-3">2. 확인 분기 — 취소 + 확인</p>
+            <div class="rounded-2xl p-8" style="background: rgba(94, 105, 122, .35); backdrop-filter: blur(3px);">
+              <div class="bg-white rounded-xl shadow-2xl overflow-hidden max-w-md mx-auto">
+                <div class="px-6 pt-5 pb-3 flex items-start gap-3">
+                  <span class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background:#fff4e0; color:#cf6a06;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                  </span>
+                  <div class="flex-1 pt-1">
+                    <h4 class="text-base font-semibold text-graphite">계속하시겠어요?</h4>
+                    <p class="text-sm text-slate2 mt-1.5 leading-relaxed">잠재 위험 / 비가역 결과를 한 문장으로 명시 후 회원 명시 확인 받음.</p>
+                  </div>
+                </div>
+                <div class="px-6 py-3 bg-cloud border-t border-mist flex justify-end gap-2">
+                  <button class="btn btn-secondary px-5 py-2 rounded-full text-sm">취소</button>
+                  <button class="btn btn-primary px-5 py-2 rounded-full text-sm">진행</button>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-stone mt-3 leading-relaxed">사용 예 — 동일 명의 안내 · 발송 시 광고 표기 동의 · 스코프 변경 확인</p>
+          </div>
+
+          <!-- 3. Destructive -->
+          <div>
+            <p class="eyebrow mb-3">3. Destructive — 취소 + 삭제</p>
+            <div class="rounded-2xl p-8" style="background: rgba(94, 105, 122, .35); backdrop-filter: blur(3px);">
+              <div class="bg-white rounded-xl shadow-2xl overflow-hidden max-w-md mx-auto">
+                <div class="px-6 pt-5 pb-3 flex items-start gap-3">
+                  <span class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background:#fde6ea; color:#cf0a2c;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  </span>
+                  <div class="flex-1 pt-1">
+                    <h4 class="text-base font-semibold text-graphite">정말 삭제하시겠어요?</h4>
+                    <p class="text-sm text-slate2 mt-1.5 leading-relaxed">되돌릴 수 없습니다. 영향 범위(연결된 리소스 N개)를 함께 명시.</p>
+                  </div>
+                </div>
+                <div class="px-6 py-3 bg-cloud border-t border-mist flex justify-end gap-2">
+                  <button class="btn btn-secondary px-5 py-2 rounded-full text-sm">취소</button>
+                  <button class="btn btn-destructive px-5 py-2 rounded-full text-sm">삭제</button>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-stone mt-3 leading-relaxed">사용 예 — 계정 탈퇴 · API Key 폐기 · 발신번호 삭제 · 하위 계정 삭제</p>
+          </div>
+
+          <!-- 4. Commerce -->
+          <div>
+            <p class="eyebrow mb-3">4. Commerce — 취소 + 결제</p>
+            <div class="rounded-2xl p-8" style="background: rgba(94, 105, 122, .35); backdrop-filter: blur(3px);">
+              <div class="bg-white rounded-xl shadow-2xl overflow-hidden max-w-md mx-auto">
+                <div class="px-6 pt-5 pb-3 flex items-start gap-3">
+                  <span class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background:#f5e6e9; color:#7c2532;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                  </span>
+                  <div class="flex-1 pt-1">
+                    <h4 class="text-base font-semibold text-graphite">결제를 진행할까요?</h4>
+                    <p class="text-sm text-slate2 mt-1.5 leading-relaxed">금액 · 결제수단 · 처리 후 상태(잔액 변화 등)를 명시 후 확인 받음.</p>
+                  </div>
+                </div>
+                <div class="px-6 py-3 bg-cloud border-t border-mist flex justify-end gap-2">
+                  <button class="btn btn-secondary px-5 py-2 rounded-full text-sm">취소</button>
+                  <button class="btn btn-commerce px-5 py-2 rounded-full text-sm">결제하기</button>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-stone mt-3 leading-relaxed">사용 예 — 캐시 충전 · 자동충전 활성 · 후불 청구서 결제</p>
+          </div>
+
+        </div>
+
+        <!-- 사용 규칙 -->
+        <div class="mt-8 surface rounded-2xl p-6 md:p-8 text-sm">
+          <p class="font-semibold text-graphite mb-3">사용 규칙</p>
+          <ul class="space-y-2 text-slate2 list-disc list-inside">
+            <li><strong class="text-graphite">자동 사라짐 없음</strong> — 회원이 [확인]을 누를 때까지 유지. 메시지 누락 방지.</li>
+            <li><strong class="text-graphite">아이콘 4종</strong> — Info(블루 check) · Warning(앰버 triangle) · Destructive(레드 trash) · Commerce(오렌지 card). 그 외 변형 금지.</li>
+            <li><strong class="text-graphite">제목은 한 문장 결론</strong> — "처리가 완료되었습니다" · "정말 삭제하시겠어요?". "처리 중 오류 발생" 같은 모호한 제목 금지.</li>
+            <li><strong class="text-graphite">버튼은 1~2개</strong>. 우측 정렬. 주 액션이 항상 마지막(오른쪽).</li>
+            <li><strong class="text-graphite">필드 단위 검증은 인라인</strong> — 이메일 형식 같은 입력 에러는 필드 옆 빨간 텍스트. 모달 남발 금지.</li>
+          </ul>
+        </div>
+      </section>
+
+
+      <!-- ── Form fields ─────────────────────────── -->
+      <section id="fields" class="mb-16 scroll-mt-20">
+        <p class="eyebrow">component · form</p>
+        <h1 class="text-2xl md:text-3xl font-semibold mt-3">Form fields</h1>
+        <p class="text-slate2 mt-3 leading-relaxed">텍스트 · 선택 · 체크 · 라디오 · 파일 업로드 표준. 라벨은 항상 필드 위. 헬퍼·에러는 항상 필드 아래.</p>
+
+        <div class="grid md:grid-cols-2 gap-5 mt-8">
+
+          <!-- Text - default -->
+          <div class="surface rounded-xl p-5">
+            <p class="eyebrow mb-3">Default</p>
+            <label class="field-label block mb-2">이름</label>
+            <input class="input" placeholder="홍길동">
+            <p class="help">2~30자 한글·영문</p>
+          </div>
+
+          <!-- Text - focused -->
+          <div class="surface rounded-xl p-5">
+            <p class="eyebrow mb-3">Focused</p>
+            <label class="field-label block mb-2">이메일</label>
+            <input class="input focused" value="hong@example.com">
+            <p class="help">가입 후 인증 메일이 발송됩니다.</p>
+          </div>
+
+          <!-- Text - error -->
+          <div class="surface rounded-xl p-5">
+            <p class="eyebrow mb-3">Error</p>
+            <label class="field-label block mb-2">이메일</label>
+            <input class="input error-state" value="hong@example.com">
+            <p class="help-error">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+              <span>이미 사용 중인 이메일입니다.</span>
+            </p>
+          </div>
+
+          <!-- Text - disabled -->
+          <div class="surface rounded-xl p-5">
+            <p class="eyebrow mb-3">Disabled</p>
+            <label class="field-label block mb-2">휴대폰</label>
+            <input class="input disabled-state" value="010-1234-5678" disabled>
+            <p class="help">본인 인증 정보로 자동 입력. 수정 불가.</p>
+          </div>
+
+          <!-- Password with reveal -->
+          <div class="surface rounded-xl p-5">
+            <p class="eyebrow mb-3">Password</p>
+            <label class="field-label block mb-2">비밀번호</label>
+            <div class="relative">
+              <input type="password" class="input pr-10" value="••••••••••">
+              <button class="absolute right-3 top-1/2 -translate-y-1/2 text-stone hover:text-graphite">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <p class="help">10자 이상 · 영문/숫자/특수문자 중 2종 이상</p>
+          </div>
+
+          <!-- Select -->
+          <div class="surface rounded-xl p-5">
+            <p class="eyebrow mb-3">Select</p>
+            <label class="field-label block mb-2">발신번호</label>
+            <div class="relative">
+              <select class="input appearance-none pr-10">
+                <option>02-1234-5678 (회사 대표번호)</option>
+                <option>010-1234-5678 (개인 휴대폰)</option>
+              </select>
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-stone pointer-events-none">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </span>
+            </div>
+          </div>
+
+          <!-- Textarea -->
+          <div class="surface rounded-xl p-5">
+            <p class="eyebrow mb-3">Textarea + byte counter</p>
+            <div class="flex justify-between items-baseline mb-2">
+              <label class="field-label">본문</label>
+              <span class="text-xs text-stone"><span class="font-mono">42</span> / 90 byte (EUC-KR)</span>
+            </div>
+            <textarea class="input" rows="3">[OO몰] 주문 #12345 가 발송되었습니다.</textarea>
+          </div>
+
+          <!-- Checkbox group -->
+          <div class="surface rounded-xl p-5">
+            <p class="eyebrow mb-3">Checkbox</p>
+            <div class="space-y-2.5">
+              <label class="flex items-start gap-3 cursor-pointer">
+                <span class="check checked mt-0.5"></span>
+                <span class="text-sm text-graphite">(필수) 이용약관 동의</span>
+              </label>
+              <label class="flex items-start gap-3 cursor-pointer">
+                <span class="check checked mt-0.5"></span>
+                <span class="text-sm text-graphite">(필수) 개인정보 수집·이용 동의</span>
+              </label>
+              <label class="flex items-start gap-3 cursor-pointer">
+                <span class="check mt-0.5"></span>
+                <span class="text-sm text-slate2">(선택) 마케팅 정보 수신 동의</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Radio group -->
+          <div class="surface rounded-xl p-5">
+            <p class="eyebrow mb-3">Radio group</p>
+            <p class="field-label block mb-2">발신번호 등록 유형</p>
+            <div class="space-y-2.5">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <span class="radio checked"></span>
+                <span class="text-sm text-graphite">개인 본인 휴대폰 (즉시 등록)</span>
+              </label>
+              <label class="flex items-center gap-3 cursor-pointer">
+                <span class="radio"></span>
+                <span class="text-sm text-slate2">개인 비-휴대폰 (별도 본인인증)</span>
+              </label>
+              <label class="flex items-center gap-3 cursor-pointer">
+                <span class="radio"></span>
+                <span class="text-sm text-slate2">임직원 본인 번호 (재직증명서 필요)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- File upload -->
+          <div class="surface rounded-xl p-5">
+            <p class="eyebrow mb-3">File upload — drop zone</p>
+            <label class="field-label block mb-2">사업자 등록증</label>
+            <div class="border-2 border-dashed border-line rounded-xl p-8 text-center cursor-pointer hover:border-psblue-main hover:bg-psblue-wash transition">
+              <svg class="mx-auto text-stone" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+              <p class="text-sm text-graphite mt-3 font-medium">파일을 드래그하거나 클릭하여 업로드</p>
+              <p class="text-xs text-stone mt-1">PDF · JPG · PNG · 최대 10MB</p>
+            </div>
+          </div>
+
+        </div>
+
+        <p class="text-xs text-stone mt-5 leading-relaxed">
+          접근성 — 모든 필드에 `&lt;label&gt;` 연결. 에러 메시지는 `aria-live=&quot;polite&quot;`. 색만으로 상태 구분 금지(아이콘·텍스트 병기).
+        </p>
+      </section>
+
+
+      <!-- ── Indicators ──────────────────────────── -->
+      <section id="indicators" class="mb-16 scroll-mt-20">
+        <p class="eyebrow">component · indicator</p>
+        <h1 class="text-2xl md:text-3xl font-semibold mt-3">Indicators</h1>
+        <p class="text-slate2 mt-3 leading-relaxed">스피너 · 상태 점 · 진행 막대 · 스텝퍼 · skeleton.</p>
+
+        <div class="grid md:grid-cols-2 gap-5 mt-8">
+
+          <!-- Spinner -->
+          <div class="surface rounded-xl p-6">
+            <p class="eyebrow mb-4">Spinner — 로딩 중</p>
+            <div class="flex items-center gap-6">
+              <div class="w-5 h-5 rounded-full border-2 border-psblue-main border-t-transparent animate-spin"></div>
+              <div class="w-7 h-7 rounded-full border-2 border-psblue-main border-t-transparent animate-spin"></div>
+              <div class="w-10 h-10 rounded-full border-[3px] border-psblue-main border-t-transparent animate-spin"></div>
+            </div>
+            <p class="help mt-4">원형 도넛 링. 네모 X. 라벨은 옆 또는 아래에 별도 텍스트로.</p>
+          </div>
+
+          <!-- Status dots -->
+          <div class="surface rounded-xl p-6">
+            <p class="eyebrow mb-4">Status dot</p>
+            <div class="space-y-2.5 text-sm">
+              <div class="flex items-center gap-2.5"><span class="status-dot live" style="background:#22c55e"></span><span>서비스 정상 · 모든 채널 운영 중</span></div>
+              <div class="flex items-center gap-2.5"><span class="status-dot" style="background:#f59e0b"></span><span>일부 지연 · 카카오 알림톡 평균 지연 +30s</span></div>
+              <div class="flex items-center gap-2.5"><span class="status-dot" style="background:#cf0a2c"></span><span>장애 · RCS 발송 중단</span></div>
+            </div>
+            <p class="help mt-4">정상 = 녹색 + ping. 주의 = 앰버. 장애 = 레드. universal 컨벤션.</p>
+          </div>
+
+          <!-- Progress bar -->
+          <div class="surface rounded-xl p-6">
+            <p class="eyebrow mb-4">Progress bar</p>
+            <div class="space-y-4">
+              <div>
+                <div class="flex justify-between text-xs mb-1.5">
+                  <span class="text-graphite font-medium">CSV 업로드</span>
+                  <span class="text-stone font-mono">68%</span>
+                </div>
+                <div class="progress"><div style="width:68%"></div></div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs mb-1.5">
+                  <span class="text-graphite font-medium">발송 적재</span>
+                  <span class="text-stone font-mono">100%</span>
+                </div>
+                <div class="progress"><div style="width:100%; background:#22c55e"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Skeleton -->
+          <div class="surface rounded-xl p-6">
+            <p class="eyebrow mb-4">Skeleton</p>
+            <div class="space-y-2">
+              <div class="h-3 w-full rounded-full" style="background: linear-gradient(90deg, #e2e8f0 0%, #f1f5f9 50%, #e2e8f0 100%); background-size: 200% 100%; animation: skl 1.4s infinite;"></div>
+              <div class="h-3 w-3/4 rounded-full" style="background: linear-gradient(90deg, #e2e8f0 0%, #f1f5f9 50%, #e2e8f0 100%); background-size: 200% 100%; animation: skl 1.4s infinite;"></div>
+              <div class="h-3 w-5/6 rounded-full" style="background: linear-gradient(90deg, #e2e8f0 0%, #f1f5f9 50%, #e2e8f0 100%); background-size: 200% 100%; animation: skl 1.4s infinite;"></div>
+            </div>
+            <p class="help mt-4">스피너 1개 보다 컨텐츠 형태가 보이는 skeleton 권장 (목록·카드·표 로딩 시).</p>
+            <style>@keyframes skl { 0%{background-position:200% 0} 100%{background-position:-200% 0} }</style>
+          </div>
+
+          <!-- Stepper -->
+          <div class="surface rounded-xl p-6 md:col-span-2">
+            <p class="eyebrow mb-5">Stepper — 다단계 폼</p>
+            <div class="stepper">
+              <div class="step done"><div class="dot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div><div class="label">본인 인증</div></div>
+              <div class="step-line"></div>
+              <div class="step current"><div class="dot">2</div><div class="label">정보 입력</div></div>
+              <div class="step-line"></div>
+              <div class="step"><div class="dot">3</div><div class="label">약관 동의</div></div>
+              <div class="step-line"></div>
+              <div class="step"><div class="dot">4</div><div class="label">완료</div></div>
+            </div>
+            <p class="help mt-5 text-center">완료 = PS 블루 + check icon · 현재 = 흰색 + 블루 보더 + ring · 미완료 = 옅은 회색.</p>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+</main>
+
+<script src="_shared/site.js"></script>
+</body>
+</html>

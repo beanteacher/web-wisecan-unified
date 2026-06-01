@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RCS 템플릿 — WiseCan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="_shared/tw-config.js"></script>
+  <link rel="stylesheet" href="_shared/style.css">
+</head>
+<body class="bg-white">
+
+<!-- 상단 헤더 -->
+<header class="fixed top-0 inset-x-0 h-16 bg-white border-b border-line flex items-center px-6 z-30">
+  <a href="01.index.html" class="font-semibold text-lg tracking-tight text-ink mr-10">WiseCan</a>
+  <nav class="flex items-center gap-6 text-sm">
+    <a href="#" class="nav-link">대시보드</a>
+    <a href="#" class="nav-link">발송</a>
+    <a href="#" class="nav-link">이력</a>
+    <a href="#" class="nav-link font-semibold text-ink">템플릿</a>
+    <a href="#" class="nav-link">결제</a>
+  </nav>
+  <div class="ml-auto flex items-center gap-4">
+    <span class="text-sm text-stone">잔액 <strong class="text-ink">₩123,450</strong></span>
+    <button class="btn btn-primary text-sm px-4 py-1.5 rounded-lg">충전</button>
+    <div class="w-8 h-8 rounded-full bg-psblue-wash flex items-center justify-center text-psblue-main text-sm font-semibold">김</div>
+  </div>
+</header>
+
+<main class="pt-16">
+  <div class="flex">
+    <!-- 사이드바 -->
+    <div data-member-sidebar data-active="17.templates-rcs.html"></div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="flex-1 p-8 min-w-0">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-xl font-semibold text-ink">RCS 템플릿</h1>
+          <p class="text-sm text-stone mt-0.5">이미지·버튼·카드를 담은 RCS 메시지 양식을 관리하세요</p>
+        </div>
+        <button class="btn btn-primary text-sm px-4 py-2 rounded-lg flex items-center gap-2">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          새 템플릿
+        </button>
+      </div>
+
+      <!-- 브랜드 컨텍스트 -->
+      <div class="surface rounded-xl p-4 mb-5 flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-psblue-wash flex items-center justify-center text-psblue-main font-bold">W</div>
+          <div>
+            <p class="text-sm font-medium text-ink">WiseCan 공식</p>
+            <p class="text-xs text-stone">BRD_001 · 승인된 브랜드</p>
+          </div>
+        </div>
+        <select class="input text-sm w-44 ml-auto">
+          <option>WiseCan 공식</option>
+          <option>스마트스토어 (심사 중)</option>
+        </select>
+      </div>
+
+      <!-- 필터바 -->
+      <div class="flex gap-3 mb-5 flex-wrap">
+        <div class="relative flex-1 max-w-sm min-w-[200px]">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" class="input pl-9 text-sm" placeholder="템플릿 이름 또는 ID 검색">
+        </div>
+        <select class="input text-sm w-40">
+          <option>전체 타입</option>
+          <option>텍스트</option>
+          <option>이미지형</option>
+          <option>카드형</option>
+          <option>캐러셀</option>
+        </select>
+        <select class="input text-sm w-36">
+          <option>전체 상태</option>
+          <option>신청</option>
+          <option>심사 중</option>
+          <option>승인</option>
+          <option>반려</option>
+        </select>
+      </div>
+
+      <!-- 템플릿 그리드 -->
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+
+        <!-- 1. 이미지형 + 버튼, 승인 -->
+        <div class="surface rounded-xl p-4 flex flex-col">
+          <div class="flex items-center justify-between mb-2">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-psblue-wash text-psblue-main">이미지형</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">승인</span>
+          </div>
+          <p class="font-semibold text-ink">주문 확정 안내</p>
+          <p class="text-xs text-stone font-mono mt-0.5">TPL_R01</p>
+
+          <!-- 미리보기 -->
+          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div class="px-3 py-2 flex items-center gap-2 border-b border-line">
+                <div class="w-6 h-6 rounded-full bg-psblue-main text-white text-[10px] flex items-center justify-center font-bold">W</div>
+                <span class="text-xs font-medium text-graphite">WiseCan 공식</span>
+                <svg class="ml-auto w-3.5 h-3.5 text-psblue-main" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3zm-1 14-4-4 1.4-1.4L11 13.2l5.6-5.6L18 9l-7 7z"/></svg>
+              </div>
+              <div class="aspect-[16/9] bg-gradient-to-br from-psblue-wash via-psblue-main/20 to-psblue-main/30 flex items-center justify-center">
+                <svg class="w-10 h-10 text-white/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>
+              </div>
+              <div class="px-3 py-2.5">
+                <p class="text-xs font-semibold text-ink leading-snug">주문이 확정되었습니다</p>
+                <p class="text-[11px] text-stone mt-1 leading-relaxed">주문번호 <span class="text-graphite">#{order_no}</span>의 처리가 완료되었어요. 배송이 시작되면 다시 알려드릴게요.</p>
+              </div>
+              <div class="px-3 pb-3 space-y-1.5">
+                <button class="w-full text-[11px] py-1.5 rounded-md bg-psblue-main text-white font-medium">주문 상세 보기</button>
+                <button class="w-full text-[11px] py-1.5 rounded-md border border-line text-graphite">고객센터 연결</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-xs text-stone mt-4 pt-3 border-t border-line flex justify-between">
+            <span>등록 2026-05-10</span>
+            <span class="text-green-700 inline-flex items-center gap-1">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>발송 가능
+            </span>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button class="btn btn-secondary text-xs px-3 py-1.5 rounded-md flex-1">수정</button>
+            <button class="text-xs text-graphite border border-line px-3 py-1.5 rounded-md hover:bg-cloud">복제</button>
+            <button class="text-xs text-stone hover:text-psred-main px-3 py-1.5 rounded-md border border-line hover:bg-red-50 transition-colors">삭제</button>
+          </div>
+        </div>
+
+        <!-- 2. 카드형, 심사 중 -->
+        <div class="surface rounded-xl p-4 flex flex-col">
+          <div class="flex items-center justify-between mb-2">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">카드형</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700">심사 중</span>
+          </div>
+          <p class="font-semibold text-ink">주간 베스트 상품</p>
+          <p class="text-xs text-stone font-mono mt-0.5">TPL_R02</p>
+
+          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div class="px-3 py-2 flex items-center gap-2 border-b border-line">
+                <div class="w-6 h-6 rounded-full bg-psblue-main text-white text-[10px] flex items-center justify-center font-bold">W</div>
+                <span class="text-xs font-medium text-graphite">WiseCan 공식</span>
+              </div>
+              <div class="p-3 space-y-2">
+                <p class="text-xs font-semibold text-ink">이번 주 베스트 셀러</p>
+                <div class="flex gap-2">
+                  <div class="flex-1 border border-line rounded-lg overflow-hidden">
+                    <div class="aspect-square bg-gradient-to-br from-amber-100 to-amber-200"></div>
+                    <div class="px-1.5 py-1">
+                      <p class="text-[10px] font-medium text-ink truncate">상품 A</p>
+                      <p class="text-[10px] text-psred-main font-semibold">₩29,900</p>
+                    </div>
+                  </div>
+                  <div class="flex-1 border border-line rounded-lg overflow-hidden">
+                    <div class="aspect-square bg-gradient-to-br from-emerald-100 to-emerald-200"></div>
+                    <div class="px-1.5 py-1">
+                      <p class="text-[10px] font-medium text-ink truncate">상품 B</p>
+                      <p class="text-[10px] text-psred-main font-semibold">₩19,500</p>
+                    </div>
+                  </div>
+                </div>
+                <button class="w-full text-[11px] py-1.5 rounded-md bg-psblue-main text-white font-medium">전체 보기</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-xs text-stone mt-4 pt-3 border-t border-line flex justify-between">
+            <span>등록 2026-05-28</span>
+            <span class="text-stone">예상 영업일 3~5일</span>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button class="btn btn-secondary text-xs px-3 py-1.5 rounded-md flex-1 opacity-50 cursor-not-allowed" disabled>수정</button>
+            <button class="text-xs text-graphite border border-line px-3 py-1.5 rounded-md hover:bg-cloud">복제</button>
+            <button class="text-xs link-blue px-3 py-1.5 rounded-md hover:bg-psblue-wash transition-colors border border-line">심사 보기</button>
+          </div>
+        </div>
+
+        <!-- 3. 텍스트 + 버튼, 승인 -->
+        <div class="surface rounded-xl p-4 flex flex-col">
+          <div class="flex items-center justify-between mb-2">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cloud text-graphite border border-line">텍스트</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">승인</span>
+          </div>
+          <p class="font-semibold text-ink">회원가입 환영 인사</p>
+          <p class="text-xs text-stone font-mono mt-0.5">TPL_R03</p>
+
+          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div class="px-3 py-2 flex items-center gap-2 border-b border-line">
+                <div class="w-6 h-6 rounded-full bg-psblue-main text-white text-[10px] flex items-center justify-center font-bold">W</div>
+                <span class="text-xs font-medium text-graphite">WiseCan 공식</span>
+              </div>
+              <div class="px-3 py-3">
+                <p class="text-xs font-semibold text-ink">환영합니다, {name}님!</p>
+                <p class="text-[11px] text-stone mt-1.5 leading-relaxed">WiseCan에 가입해 주셔서 감사합니다. 첫 발송에 사용할 수 있는 무료 크레딧을 드렸어요.</p>
+              </div>
+              <div class="px-3 pb-3">
+                <button class="w-full text-[11px] py-1.5 rounded-md bg-psblue-main text-white font-medium">대시보드로 이동</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-xs text-stone mt-4 pt-3 border-t border-line flex justify-between">
+            <span>등록 2026-04-12</span>
+            <span class="text-green-700 inline-flex items-center gap-1">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>발송 가능
+            </span>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button class="btn btn-secondary text-xs px-3 py-1.5 rounded-md flex-1">수정</button>
+            <button class="text-xs text-graphite border border-line px-3 py-1.5 rounded-md hover:bg-cloud">복제</button>
+            <button class="text-xs text-stone hover:text-psred-main px-3 py-1.5 rounded-md border border-line hover:bg-red-50 transition-colors">삭제</button>
+          </div>
+        </div>
+
+        <!-- 4. 캐러셀, 신청 -->
+        <div class="surface rounded-xl p-4 flex flex-col">
+          <div class="flex items-center justify-between mb-2">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">캐러셀</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cloud text-stone border border-line">신청</span>
+          </div>
+          <p class="font-semibold text-ink">여름 신상품 컬렉션</p>
+          <p class="text-xs text-stone font-mono mt-0.5">TPL_R04</p>
+
+          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div class="px-3 py-2 flex items-center gap-2 border-b border-line">
+                <div class="w-6 h-6 rounded-full bg-psblue-main text-white text-[10px] flex items-center justify-center font-bold">W</div>
+                <span class="text-xs font-medium text-graphite">WiseCan 공식</span>
+              </div>
+              <div class="p-3">
+                <p class="text-xs font-semibold text-ink mb-2">이번 여름, 새로운 컬렉션</p>
+                <div class="flex gap-1.5 overflow-hidden">
+                  <div class="w-28 flex-shrink-0 border border-line rounded-lg overflow-hidden">
+                    <div class="aspect-[4/5] bg-gradient-to-br from-sky-200 to-sky-400"></div>
+                    <div class="px-1.5 py-1">
+                      <p class="text-[10px] font-medium text-ink truncate">린넨 셔츠</p>
+                      <button class="w-full mt-1 text-[9px] py-0.5 rounded bg-psblue-main text-white">담기</button>
+                    </div>
+                  </div>
+                  <div class="w-28 flex-shrink-0 border border-line rounded-lg overflow-hidden">
+                    <div class="aspect-[4/5] bg-gradient-to-br from-rose-200 to-rose-400"></div>
+                    <div class="px-1.5 py-1">
+                      <p class="text-[10px] font-medium text-ink truncate">코튼 원피스</p>
+                      <button class="w-full mt-1 text-[9px] py-0.5 rounded bg-psblue-main text-white">담기</button>
+                    </div>
+                  </div>
+                  <div class="w-14 flex-shrink-0 border border-line border-dashed rounded-lg flex items-center justify-center">
+                    <span class="text-[10px] text-stone">+3</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-xs text-stone mt-4 pt-3 border-t border-line flex justify-between">
+            <span>등록 2026-06-01</span>
+            <span class="text-stone">심사 대기</span>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button class="btn btn-secondary text-xs px-3 py-1.5 rounded-md flex-1">수정</button>
+            <button class="text-xs text-graphite border border-line px-3 py-1.5 rounded-md hover:bg-cloud">복제</button>
+            <button class="text-xs text-stone hover:text-psred-main px-3 py-1.5 rounded-md border border-line hover:bg-red-50 transition-colors">삭제</button>
+          </div>
+        </div>
+
+        <!-- 5. 이미지형 + 쿠폰, 반려 -->
+        <div class="surface rounded-xl p-4 flex flex-col">
+          <div class="flex items-center justify-between mb-2">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-psblue-wash text-psblue-main">이미지형</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-psred-main">반려</span>
+          </div>
+          <p class="font-semibold text-ink">10% 할인 쿠폰 안내</p>
+          <p class="text-xs text-stone font-mono mt-0.5">TPL_R05</p>
+
+          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div class="px-3 py-2 flex items-center gap-2 border-b border-line">
+                <div class="w-6 h-6 rounded-full bg-psblue-main text-white text-[10px] flex items-center justify-center font-bold">W</div>
+                <span class="text-xs font-medium text-graphite">WiseCan 공식</span>
+              </div>
+              <div class="aspect-[16/9] bg-gradient-to-br from-psred-main/80 to-psred-deep flex items-center justify-center">
+                <p class="text-white font-bold text-2xl tracking-tight">10% OFF</p>
+              </div>
+              <div class="px-3 py-2.5">
+                <p class="text-xs font-semibold text-ink">단 하루, 전 상품 10% 할인</p>
+                <p class="text-[11px] text-stone mt-1 leading-relaxed">오늘만 사용 가능한 쿠폰이 도착했어요. 지금 바로 받아보세요.</p>
+              </div>
+              <div class="px-3 pb-3">
+                <button class="w-full text-[11px] py-1.5 rounded-md bg-psred-main text-white font-medium">쿠폰 받기</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-[11px] text-psred-main leading-relaxed">
+            <span class="font-medium">반려 사유</span> · 광고성 문구(쿠폰·할인) 포함 시 (광고) 표기와 수신 동의가 필요합니다.
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button class="btn btn-secondary text-xs px-3 py-1.5 rounded-md flex-1">수정 후 재신청</button>
+            <button class="text-xs text-graphite border border-line px-3 py-1.5 rounded-md hover:bg-cloud">복제</button>
+            <button class="text-xs text-stone hover:text-psred-main px-3 py-1.5 rounded-md border border-line hover:bg-red-50 transition-colors">삭제</button>
+          </div>
+        </div>
+
+        <!-- 6. 빈 카드 — 추가 유도 -->
+        <div class="border-2 border-dashed border-line rounded-xl p-5 flex flex-col items-center justify-center text-center min-h-[420px] hover:border-psblue-main/50 hover:bg-psblue-wash/20 transition-colors cursor-pointer group">
+          <div class="w-12 h-12 rounded-full bg-mist flex items-center justify-center mb-3 group-hover:bg-psblue-wash transition-colors">
+            <svg class="w-6 h-6 text-stone group-hover:text-psblue-main transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+          <p class="text-sm font-medium text-stone group-hover:text-psblue-main transition-colors">새 RCS 템플릿</p>
+          <p class="text-xs text-stone mt-1 max-w-[200px]">텍스트 · 이미지 · 카드 · 캐러셀 중 하나로<br>새 템플릿을 만들어 보세요</p>
+        </div>
+      </div>
+
+      <!-- 안내 박스 -->
+      <div class="mt-8 surface rounded-xl p-5 bg-cloud">
+        <div class="flex gap-3">
+          <svg class="w-5 h-5 text-psblue-main shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div class="text-sm text-graphite space-y-1">
+            <p class="font-medium">RCS 템플릿 등록 안내</p>
+            <ul class="text-stone space-y-0.5 list-disc list-inside text-xs leading-relaxed">
+              <li>RCS는 SMS와 달리 이미지·버튼·상품 카드·캐러셀 같은 멀티미디어 메시지를 보낼 수 있습니다.</li>
+              <li>발송에 사용하려면 먼저 <a href="#" class="link-blue">RCS 브랜드(채널)</a>를 등록하고, 그 브랜드 아래에 템플릿을 만들어야 합니다.</li>
+              <li>각 템플릿은 통신사 심사를 거치며, 영업일 기준 3~5일이 소요됩니다. 광고성 문구는 (광고) 표기와 수신 동의가 필요합니다.</li>
+              <li>승인된 템플릿만 실제 발송에 사용할 수 있습니다. 본문에 <span class="font-mono text-graphite">{name}</span>, <span class="font-mono text-graphite">{order_no}</span> 등 변수를 넣어 개인화할 수 있습니다.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="_shared/site.js"></script>
+</body>
+</html>

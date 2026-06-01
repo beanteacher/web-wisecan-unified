@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>발송 이력 상세 — WiseCan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="_shared/tw-config.js"></script>
+  <link rel="stylesheet" href="_shared/style.css">
+</head>
+<body class="bg-white">
+
+<!-- 상단 헤더 -->
+<header class="fixed top-0 inset-x-0 h-16 bg-white border-b border-line flex items-center px-6 z-30">
+  <a href="01.index.html" class="font-semibold text-lg tracking-tight text-ink mr-10">WiseCan</a>
+  <nav class="flex items-center gap-6 text-sm">
+    <a href="#" class="nav-link">대시보드</a>
+    <a href="#" class="nav-link">발송</a>
+    <a href="#" class="nav-link font-semibold text-ink">이력</a>
+    <a href="#" class="nav-link">템플릿</a>
+    <a href="#" class="nav-link">결제</a>
+  </nav>
+  <div class="ml-auto flex items-center gap-4">
+    <span class="text-sm text-stone">잔액 <strong class="text-ink">₩123,450</strong></span>
+    <button class="btn btn-primary text-sm px-4 py-1.5 rounded-lg">충전</button>
+    <div class="w-8 h-8 rounded-full bg-psblue-wash flex items-center justify-center text-psblue-main text-sm font-semibold">김</div>
+  </div>
+</header>
+
+<main class="pt-16">
+  <div class="flex">
+    <!-- 사이드바 -->
+    <div data-member-sidebar data-active="11.histories.html"></div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="flex-1 p-8 min-w-0">
+      <!-- 브레드크럼 -->
+      <div class="flex items-center gap-2 text-sm text-stone mb-4">
+        <a href="11.histories.html" class="link-blue">발송 이력</a>
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span class="text-ink">snd_abc123</span>
+      </div>
+
+      <div class="flex items-start justify-between mb-6">
+        <div>
+          <h1 class="text-xl font-semibold text-ink">발송 상세</h1>
+          <p class="text-sm text-stone mt-0.5 font-mono">snd_abc123</p>
+        </div>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700">
+          <span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span>성공
+        </span>
+      </div>
+
+      <!-- 발송 메타 카드 -->
+      <div class="surface rounded-xl p-6 mb-6">
+        <h2 class="text-sm font-semibold text-ink mb-4">발송 정보</h2>
+        <div class="grid grid-cols-2 gap-x-8 gap-y-4 lg:grid-cols-3">
+          <div>
+            <p class="text-xs text-stone mb-1">채널</p>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-psblue-wash text-psblue-main">SMS</span>
+          </div>
+          <div>
+            <p class="text-xs text-stone mb-1">발신번호</p>
+            <p class="text-sm font-medium text-ink">02-1234-5678</p>
+          </div>
+          <div>
+            <p class="text-xs text-stone mb-1">발송 일시</p>
+            <p class="text-sm font-medium text-ink">2026-06-01 14:23:07</p>
+          </div>
+          <div>
+            <p class="text-xs text-stone mb-1">총 수신자</p>
+            <p class="text-sm font-medium text-ink">3건</p>
+          </div>
+          <div>
+            <p class="text-xs text-stone mb-1">성공</p>
+            <p class="text-sm font-medium text-green-700">3건</p>
+          </div>
+          <div>
+            <p class="text-xs text-stone mb-1">실패</p>
+            <p class="text-sm font-medium text-stone">0건</p>
+          </div>
+          <div>
+            <p class="text-xs text-stone mb-1">차감 금액</p>
+            <p class="text-sm font-medium text-ink">₩30</p>
+          </div>
+          <div>
+            <p class="text-xs text-stone mb-1">광고성 여부</p>
+            <p class="text-sm text-stone">해당 없음</p>
+          </div>
+          <div>
+            <p class="text-xs text-stone mb-1">예약 발송</p>
+            <p class="text-sm text-stone">즉시 발송</p>
+          </div>
+        </div>
+        <!-- 본문 -->
+        <div class="mt-5 pt-5 border-t border-line">
+          <p class="text-xs text-stone mb-2">메시지 본문</p>
+          <div class="bg-cloud rounded-lg px-4 py-3 text-sm text-graphite leading-relaxed">
+            [WiseCan] 안녕하세요. 귀하의 주문이 정상적으로 접수되었습니다. 주문번호: ORD-20260601-001
+          </div>
+        </div>
+      </div>
+
+      <!-- 수신자별 결과 표 -->
+      <div class="surface rounded-xl overflow-hidden">
+        <div class="px-5 py-4 border-b border-line">
+          <h2 class="text-sm font-semibold text-ink">수신자별 결과</h2>
+        </div>
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-cloud border-b border-line">
+              <th class="text-left px-4 py-3 font-medium text-stone">수신번호</th>
+              <th class="text-left px-4 py-3 font-medium text-stone">상태</th>
+              <th class="text-left px-4 py-3 font-medium text-stone">처리 일시</th>
+              <th class="text-left px-4 py-3 font-medium text-stone">사유</th>
+              <th class="text-left px-4 py-3 font-medium text-stone">통신사</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-line">
+            <tr class="hover:bg-cloud/50">
+              <td class="px-4 py-3 text-graphite">010-****-1234</td>
+              <td class="px-4 py-3">
+                <span class="inline-flex items-center gap-1.5 text-green-700">
+                  <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>성공
+                </span>
+              </td>
+              <td class="px-4 py-3 text-stone">2026-06-01 14:23:09</td>
+              <td class="px-4 py-3 text-stone">—</td>
+              <td class="px-4 py-3 text-stone">SKT</td>
+            </tr>
+            <tr class="hover:bg-cloud/50">
+              <td class="px-4 py-3 text-graphite">010-****-5678</td>
+              <td class="px-4 py-3">
+                <span class="inline-flex items-center gap-1.5 text-green-700">
+                  <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>성공
+                </span>
+              </td>
+              <td class="px-4 py-3 text-stone">2026-06-01 14:23:10</td>
+              <td class="px-4 py-3 text-stone">—</td>
+              <td class="px-4 py-3 text-stone">KT</td>
+            </tr>
+            <tr class="hover:bg-cloud/50">
+              <td class="px-4 py-3 text-graphite">010-****-9012</td>
+              <td class="px-4 py-3">
+                <span class="inline-flex items-center gap-1.5 text-green-700">
+                  <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>성공
+                </span>
+              </td>
+              <td class="px-4 py-3 text-stone">2026-06-01 14:23:11</td>
+              <td class="px-4 py-3 text-stone">—</td>
+              <td class="px-4 py-3 text-stone">LGU+</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="_shared/site.js"></script>
+</body>
+</html>

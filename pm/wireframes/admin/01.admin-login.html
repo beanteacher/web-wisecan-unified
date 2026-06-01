@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>운영자 로그인 — WiseCan Admin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="../_shared/tw-config.js"></script>
+<link rel="stylesheet" href="../_shared/style.css">
+</head>
+<body class="min-h-screen bg-cloud flex items-center justify-center">
+
+<!-- PG-AD-001 · §10.1 -->
+<div class="w-full max-w-md px-4">
+
+  <!-- 로고 -->
+  <div class="text-center mb-8">
+    <p class="text-2xl font-semibold text-graphite">WiseCan<span style="color:#0070D1">.</span></p>
+    <p class="text-sm text-slate2 mt-1">Admin Console</p>
+  </div>
+
+  <!-- 로그인 카드 -->
+  <div class="bg-white rounded-2xl shadow-2xl p-8">
+    <h1 class="text-lg font-semibold text-ink mb-6">운영자 로그인</h1>
+
+    <!-- 신뢰 IP 경고 배너 (조건부 표시) -->
+    <div class="mb-5 rounded-lg border-l-4 border-psred-main bg-red-50 p-4 hidden" id="ip-warning">
+      <div class="flex items-start gap-3">
+        <svg class="w-5 h-5 text-psred-main flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        </svg>
+        <div>
+          <p class="text-sm font-semibold text-psred-main">접근 불가 IP</p>
+          <p class="text-xs text-red-700 mt-1">이 IP에서는 접근할 수 없습니다. SUPER_ADMIN에게 문의하세요.</p>
+          <p class="text-xs text-stone mt-1">현재 IP: <span class="font-mono">203.0.113.45</span></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 이메일 -->
+    <div class="mb-4">
+      <label class="field-label block mb-1.5">이메일</label>
+      <input type="email" class="input" placeholder="admin@wisecan.com">
+    </div>
+
+    <!-- 비밀번호 -->
+    <div class="mb-4">
+      <label class="field-label block mb-1.5">비밀번호</label>
+      <div class="relative">
+        <input type="password" class="input pr-10" placeholder="비밀번호 입력">
+        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-stone hover:text-ink">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2차 인증 코드 -->
+    <div class="mb-6">
+      <label class="field-label block mb-1.5">2차 인증 코드</label>
+      <input type="text" class="input font-mono tracking-widest" placeholder="000000" maxlength="6">
+      <p class="help">OTP 앱에서 6자리 코드를 입력하세요</p>
+    </div>
+
+    <!-- 로그인 버튼 -->
+    <button class="btn btn-primary w-full py-2.5 rounded-lg text-sm">
+      로그인
+    </button>
+
+    <!-- 신뢰 IP 확인 안내 -->
+    <div class="mt-5 pt-5 border-t border-mist">
+      <div class="flex items-center gap-2 text-xs text-stone">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+        </svg>
+        <span>등록된 신뢰 IP에서만 로그인이 허용됩니다</span>
+      </div>
+    </div>
+
+    <!-- 로딩 상태 예시 (숨김) -->
+    <div class="hidden mt-4 flex items-center gap-2 justify-center" id="loading-state">
+      <div class="w-5 h-5 rounded-full border-2 border-psblue-main border-t-transparent animate-spin"></div>
+      <span class="text-sm text-slate2">인증 확인 중...</span>
+    </div>
+  </div>
+
+  <!-- 에러 상태 예시 -->
+  <div class="mt-4 rounded-lg border-l-4 border-psred-main bg-red-50 p-4 hidden" id="error-banner">
+    <div class="flex items-center gap-3">
+      <svg class="w-4 h-4 text-psred-main flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+      </svg>
+      <p class="text-sm text-psred-main font-medium">이메일 또는 비밀번호가 올바르지 않습니다</p>
+    </div>
+  </div>
+
+  <!-- 트레이스 -->
+  <p class="text-center text-xs text-stone mt-6">PG-AD-001 · §10.1 · POST /admin/auth/login</p>
+</div>
+
+<script src="../_shared/site.js"></script>
+</body>
+</html>

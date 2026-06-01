@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>운영 대시보드 — WiseCan Admin</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../_shared/tw-config.js"></script>
+  <link rel="stylesheet" href="../_shared/style.css">
+  <style>
+    body { background:#f0f2f5; }
+    .card { background:#ffffff; border:1px solid #e4e8ec; border-radius:12px; }
+    .kpi-card { background:#ffffff; border:1px solid #e4e8ec; border-radius:12px; padding:20px; }
+    .chart-placeholder { background:#f6f8fa; border:1px dashed #d1d5db; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#9ca3af; font-size:0.85rem; }
+    .tab-btn { padding:6px 14px; border-radius:6px; font-size:0.82rem; font-weight:500; color:#5b6470; transition:background 150ms,color 150ms; cursor:pointer; }
+    .tab-btn.active { background:#0070D1; color:#ffffff; }
+    .badge-green  { background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .badge-yellow { background:#fffbeb; color:#92400e; border:1px solid #fde68a; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .badge-red    { background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .tbl th { font-size:0.78rem; font-weight:600; color:#5b6470; padding:8px 14px; background:#f6f8fa; border-bottom:1px solid #e4e8ec; text-align:left; }
+    .tbl td { font-size:0.85rem; color:#16191f; padding:8px 14px; border-bottom:1px solid #f0f2f5; }
+    .tbl tr:last-child td { border-bottom:none; }
+    .delay-badge { display:inline-flex; align-items:center; gap:4px; background:#fef9c3; color:#854d0e; border:1px solid #fde047; border-radius:6px; font-size:0.68rem; font-weight:600; padding:2px 7px; }
+  </style>
+</head>
+<body class="text-ink">
+
+<header class="admin-topbar fixed top-0 inset-x-0 z-40 h-16 flex items-center px-6 gap-4">
+  <span class="text-base font-semibold text-graphite">WiseCan<span style="color:#0070D1">.</span></span>
+  <span class="text-xs text-gray-500 ml-1">Admin Console</span>
+  <!-- 현재 메뉴 위치 -->
+  <nav class="flex items-center gap-1.5 text-xs ml-3" aria-label="현재 메뉴 위치">
+    <svg class="w-3 h-3 text-stone" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    <span class="text-slate2">운영 현황</span>
+    <svg class="w-3 h-3 text-stone" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    <span class="text-ink font-semibold">운영 대시보드</span>
+  </nav>
+  <div class="ml-auto flex items-center gap-3">
+    <span class="text-xs text-slate2" id="last-update">최근 갱신: 방금 전</span>
+    <button onclick="simulateDelay()" class="text-xs text-slate2 hover:text-ink border border-mist px-2 py-0.5 rounded">지연 시뮬레이션</button>
+    <span class="text-xs text-slate2">운영자: admin@wisecan.com</span>
+    <button class="text-xs text-slate2 hover:text-graphite">로그아웃</button>
+  </div>
+</header>
+
+<main class="pt-16 flex">
+  <div data-admin-sidebar data-active="02.admin-dashboard.html"></div>
+
+  <div class="flex-1 p-8 min-w-0">
+
+    <!-- 헤더 -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <p class="eyebrow mb-1">운영 현황</p>
+        <h1 class="text-2xl font-semibold text-ink">운영 대시보드</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <!-- 데이터 지연 배지 (숨김 기본) -->
+        <div id="delay-badge" class="hidden delay-badge">
+          <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          최근 5분 데이터 갱신 지연
+        </div>
+        <!-- 기간 선택 -->
+        <div class="flex items-center gap-1 bg-white border border-line rounded-lg p-1">
+          <button class="tab-btn active" onclick="setPeriod('day',this)">일</button>
+          <button class="tab-btn" onclick="setPeriod('week',this)">주</button>
+          <button class="tab-btn" onclick="setPeriod('month',this)">월</button>
+        </div>
+        <button class="btn btn-secondary text-xs px-3 py-1.5 rounded-lg">
+          <svg class="inline w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          새로고침
+        </button>
+      </div>
+    </div>
+
+    <!-- KPI 카드 행 1 -->
+    <div class="grid grid-cols-4 gap-4 mb-4">
+      <div class="kpi-card">
+        <p class="text-xs text-slate2 mb-1">오늘 총 발송</p>
+        <p class="text-3xl font-semibold text-ink">1,248,320</p>
+        <div class="flex items-center gap-1.5 mt-2">
+          <span class="text-xs text-green-600 font-medium">▲ 12.4%</span>
+          <span class="text-xs text-slate2">vs 어제</span>
+        </div>
+        <div class="skeleton h-1 mt-3 w-full rounded" style="animation:none; background:#e2e8f0"></div>
+        <div class="h-1 mt-0.5 rounded" style="width:62%; background:#0070D1"></div>
+      </div>
+      <div class="kpi-card">
+        <p class="text-xs text-slate2 mb-1">신규 가입 (오늘)</p>
+        <p class="text-3xl font-semibold text-ink">47</p>
+        <div class="flex items-center gap-1.5 mt-2">
+          <span class="text-xs text-green-600 font-medium">▲ 8.2%</span>
+          <span class="text-xs text-slate2">vs 어제</span>
+        </div>
+        <div class="skeleton h-1 mt-3 w-full rounded" style="animation:none; background:#e2e8f0"></div>
+        <div class="h-1 mt-0.5 rounded" style="width:35%; background:#0070D1"></div>
+      </div>
+      <div class="kpi-card">
+        <p class="text-xs text-slate2 mb-1">오늘 매출</p>
+        <p class="text-3xl font-semibold text-ink">₩4.2M</p>
+        <div class="flex items-center gap-1.5 mt-2">
+          <span class="text-xs text-red-500 font-medium">▼ 3.1%</span>
+          <span class="text-xs text-slate2">vs 어제</span>
+        </div>
+        <div class="skeleton h-1 mt-3 w-full rounded" style="animation:none; background:#e2e8f0"></div>
+        <div class="h-1 mt-0.5 rounded" style="width:55%; background:#0070D1"></div>
+      </div>
+      <div class="kpi-card">
+        <p class="text-xs text-slate2 mb-1">전체 발송 성공률</p>
+        <p class="text-3xl font-semibold text-ink">97.7%</p>
+        <div class="flex items-center gap-1.5 mt-2">
+          <span class="text-xs text-green-600 font-medium">▲ 0.3%p</span>
+          <span class="text-xs text-slate2">vs 어제</span>
+        </div>
+        <div class="skeleton h-1 mt-3 w-full rounded" style="animation:none; background:#e2e8f0"></div>
+        <div class="h-1 mt-0.5 rounded" style="width:97%; background:#22c55e"></div>
+      </div>
+    </div>
+
+    <!-- 메인 차트 + 채널별 성공률 -->
+    <div class="grid grid-cols-3 gap-4 mb-4">
+      <div class="col-span-2 card p-5">
+        <div class="flex items-center justify-between mb-4">
+          <p class="font-medium text-sm text-ink">일별 발송량 추이</p>
+          <div class="flex items-center gap-3 text-xs text-slate2">
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-psblue-main inline-block"></span> SMS/LMS/MMS</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-yellow-400 inline-block"></span> 카카오</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span> RCS</span>
+          </div>
+        </div>
+        <div class="chart-placeholder h-64">
+          <div class="text-center">
+            <svg class="w-12 h-12 mx-auto mb-2 text-stone" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
+            <p class="text-slate2 text-sm">영역 차트 — 채널별 발송량 (일/주/월 전환)</p>
+            <p class="text-slate2 text-xs mt-1">SMS: 980,000건 · 카카오: 210,000건 · RCS: 58,320건</p>
+          </div>
+        </div>
+      </div>
+      <div class="card p-5">
+        <p class="font-medium text-sm text-ink mb-4">채널별 성공률</p>
+        <div class="space-y-4">
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="font-medium">SMS</span>
+              <span class="font-semibold text-green-700">98.2%</span>
+            </div>
+            <div class="progress h-2"><div style="width:98.2%"></div></div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="font-medium">LMS</span>
+              <span class="font-semibold text-green-700">97.8%</span>
+            </div>
+            <div class="progress h-2"><div style="width:97.8%"></div></div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="font-medium">MMS</span>
+              <span class="font-semibold text-green-700">97.1%</span>
+            </div>
+            <div class="progress h-2"><div style="width:97.1%"></div></div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="font-medium">카카오 알림톡</span>
+              <span class="font-semibold text-green-700">98.5%</span>
+            </div>
+            <div class="progress h-2"><div style="width:98.5%"></div></div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="font-medium">RCS</span>
+              <span class="font-semibold text-yellow-700">94.3%</span>
+            </div>
+            <div class="progress h-2"><div style="width:94.3%; background:#eab308"></div></div>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-mist text-xs text-slate2 text-center">
+          RCS 성공률 주의 (목표 96% 미달)
+        </div>
+      </div>
+    </div>
+
+    <!-- 회원별 사용량 순위 + 체험 전환 위젯 -->
+    <div class="grid grid-cols-3 gap-4 mb-4">
+      <div class="col-span-2 card overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-mist">
+          <p class="font-medium text-sm text-ink">회원별 발송량 순위 (오늘)</p>
+          <button class="text-xs text-psblue-main hover:underline">전체 보기</button>
+        </div>
+        <table class="tbl w-full">
+          <thead>
+            <tr><th>순위</th><th>회원</th><th>발송량</th><th>성공률</th><th>채널</th><th>상태</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="font-bold text-lg text-psblue-main">1</td>
+              <td>
+                <p class="text-sm font-medium">bigco@corporate.kr</p>
+                <p class="text-xs text-slate2">대기업㈜</p>
+              </td>
+              <td class="font-semibold">248,320</td>
+              <td class="text-green-600 font-medium text-sm">98.9%</td>
+              <td class="text-xs text-slate2">SMS 위주</td>
+              <td><span class="badge-green">정상</span></td>
+            </tr>
+            <tr>
+              <td class="font-bold text-slate2">2</td>
+              <td>
+                <p class="text-sm font-medium">platform@service.com</p>
+                <p class="text-xs text-slate2">플랫폼서비스㈜</p>
+              </td>
+              <td class="font-semibold">185,000</td>
+              <td class="text-green-600 font-medium text-sm">97.3%</td>
+              <td class="text-xs text-slate2">카카오 위주</td>
+              <td><span class="badge-green">정상</span></td>
+            </tr>
+            <tr>
+              <td class="font-bold text-slate2">3</td>
+              <td>
+                <p class="text-sm font-medium">user@corp.com</p>
+                <p class="text-xs text-slate2">스타트업 ABC</p>
+              </td>
+              <td class="font-semibold text-orange-600">120,450</td>
+              <td class="text-orange-600 font-medium text-sm">82.1%</td>
+              <td class="text-xs text-slate2">혼합</td>
+              <td><span class="badge-yellow">주의</span></td>
+            </tr>
+            <tr>
+              <td class="font-bold text-slate2">4</td>
+              <td>
+                <p class="text-sm font-medium">notify@app.kr</p>
+                <p class="text-xs text-slate2">앱서비스㈜</p>
+              </td>
+              <td class="font-semibold">98,200</td>
+              <td class="text-green-600 font-medium text-sm">99.1%</td>
+              <td class="text-xs text-slate2">RCS 위주</td>
+              <td><span class="badge-green">정상</span></td>
+            </tr>
+            <tr>
+              <td class="font-bold text-slate2">5</td>
+              <td>
+                <p class="text-sm font-medium">sms@retail.co</p>
+                <p class="text-xs text-slate2">리테일㈜</p>
+              </td>
+              <td class="font-semibold">76,800</td>
+              <td class="text-green-600 font-medium text-sm">98.0%</td>
+              <td class="text-xs text-slate2">SMS</td>
+              <td><span class="badge-green">정상</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 체험 전환 위젯 (RQ-TRY-015) -->
+      <div class="card p-5">
+        <p class="font-medium text-sm text-ink mb-4">체험 모드 전환 현황</p>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between p-3 bg-cloud rounded-lg">
+            <div>
+              <p class="text-xs text-slate2">오늘 체험 진입</p>
+              <p class="text-xl font-semibold text-ink">234</p>
+            </div>
+            <svg class="w-8 h-8 text-psblue-main opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-cloud rounded-lg">
+            <div>
+              <p class="text-xs text-slate2">평균 체류 시간</p>
+              <p class="text-xl font-semibold text-ink">8분 24초</p>
+            </div>
+            <svg class="w-8 h-8 text-psblue-main opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-cloud rounded-lg">
+            <div>
+              <p class="text-xs text-slate2">체험→가입 전환율</p>
+              <p class="text-xl font-semibold text-green-700">18.4%</p>
+            </div>
+            <svg class="w-8 h-8 text-green-400 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-cloud rounded-lg">
+            <div>
+              <p class="text-xs text-slate2">오늘 전환 완료</p>
+              <p class="text-xl font-semibold text-ink">43명</p>
+            </div>
+            <svg class="w-8 h-8 text-psblue-main opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-mist">
+          <div class="chart-placeholder h-20 text-xs">
+            전환율 추이 라인 차트 (최근 7일)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 스켈레톤 로딩 예시 -->
+    <div id="skeleton-section" class="hidden card p-5 mb-4">
+      <p class="text-xs text-slate2 mb-3">데이터 로딩 중...</p>
+      <div class="space-y-3">
+        <div class="skeleton h-4 w-3/4 rounded"></div>
+        <div class="skeleton h-4 w-1/2 rounded"></div>
+        <div class="skeleton h-4 w-2/3 rounded"></div>
+        <div class="skeleton h-32 w-full rounded-lg"></div>
+      </div>
+    </div>
+
+    <!-- 심사 대기 요약 -->
+    <div class="grid grid-cols-3 gap-4">
+      <div class="card p-4">
+        <p class="text-xs text-slate2 mb-2">심사 대기 — 사업자 가입</p>
+        <p class="text-2xl font-semibold text-ink">12<span class="text-sm font-normal text-slate2 ml-1">건</span></p>
+        <a href="#" class="text-xs text-psblue-main hover:underline mt-2 block">심사 화면으로 →</a>
+      </div>
+      <div class="card p-4">
+        <p class="text-xs text-slate2 mb-2">심사 대기 — 발신번호</p>
+        <p class="text-2xl font-semibold text-ink">8<span class="text-sm font-normal text-slate2 ml-1">건</span></p>
+        <a href="#" class="text-xs text-psblue-main hover:underline mt-2 block">심사 화면으로 →</a>
+      </div>
+      <div class="card p-4">
+        <p class="text-xs text-slate2 mb-2">1:1 문의 미답변</p>
+        <p class="text-2xl font-semibold text-orange-600">7<span class="text-sm font-normal text-slate2 ml-1">건</span></p>
+        <a href="12.admin-cs.html" class="text-xs text-psblue-main hover:underline mt-2 block">CS 화면으로 →</a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="../_shared/site.js"></script>
+<script>
+function setPeriod(p, btn) {
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+function simulateDelay() {
+  document.getElementById('delay-badge').classList.toggle('hidden');
+  document.getElementById('last-update').textContent = '최근 갱신: 7분 전';
+}
+</script>
+<!-- PG-AD-013 | §10.13 | RQ-ADMIN-801~803, RQ-TRY-015 -->
+</body>
+</html>

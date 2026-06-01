@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WiseCan — 통합 메시징</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="_shared/style.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="_shared/tw-config.js"></script>
+</head>
+<body>
+
+<div data-site-header></div>
+
+<main class="pt-16">
+
+  <!-- ── HERO ─────────────────────────────────────── -->
+  <section class="hero">
+    <div class="relative max-w-6xl mx-auto px-8 pt-28 pb-32 text-center">
+      <p class="eyebrow">한국 메시지 발송 · AI 통합 친화</p>
+      <h1 class="display text-5xl md:text-7xl mt-6">
+        하나의 키로 보내는<br>
+        <span class="text-psblue-main">5채널 메시지</span>
+      </h1>
+      <p class="mt-7 text-lg md:text-xl text-slate2 max-w-2xl mx-auto leading-relaxed">
+        SMS · LMS · MMS · 카카오 알림톡 · RCS를 하나의 계정 · 하나의 잔액으로.
+        개발 도구가 함께 와서 AI 자동화 워크플로우에 그대로 끼워 넣습니다.
+      </p>
+      <div class="mt-10 flex items-center justify-center gap-3 flex-wrap">
+        <a href="02.try.html" class="cta-primary px-7 py-3.5 rounded-full text-sm font-semibold">체험하기</a>
+        <a href="03.signup.html" class="cta-ghost px-7 py-3.5 rounded-full text-sm font-semibold">회원가입</a>
+      </div>
+      <p class="mt-6 text-xs text-stone">신용카드 불요 · 더미 데이터로 모든 화면 즉시 사용</p>
+
+      <!-- Hero visual surface -->
+      <div class="relative mt-20 mx-auto max-w-5xl">
+        <div class="surface rounded-2xl p-2" style="box-shadow: 0 30px 80px -30px rgba(0, 55, 145, 0.20);">
+          <div class="code-console rounded-xl overflow-hidden">
+            <div class="topbar flex items-center gap-2 px-4 py-3">
+              <span class="w-2.5 h-2.5 rounded-full bg-line"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-line"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-line"></span>
+              <span class="ml-3 text-xs text-stone font-mono">$ wsc send sms ...</span>
+            </div>
+            <pre class="px-6 py-8 text-sm leading-7 font-mono text-left overflow-x-auto"><span class="comment"># 한 번 인증, 5채널 모두 발송</span>
+<span class="prompt">$</span> wsc auth login                          <span class="comment"># 키체인 저장</span>
+<span class="prompt">$</span> wsc send sms --callback 0212345678 \
+       --destaddr 01012345678 \
+       --text "주문 #12345 가 발송되었습니다"
+<span class="success">SEND_ID</span>=snd_01HQABC123  <span class="success">STATUS</span>=ACCEPTED  <span class="comment"># 평균 응답 500ms</span></pre>
+          </div>
+        </div>
+        <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] eyebrow">실제 응답 형식</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── THREE-SURFACE CHANNEL ─────────────────────── -->
+  <section id="channels" class="sec sec-tinted">
+    <div class="max-w-7xl mx-auto px-8 py-28">
+      <div class="flex items-end justify-between mb-12">
+        <div>
+          <p class="eyebrow">3 surface · choose your channel</p>
+          <h2 class="display-sub text-3xl md:text-4xl mt-3 max-w-2xl">필요한 만큼만, 필요한 형태로.</h2>
+        </div>
+        <a href="#docs" class="link-blue text-sm hidden md:inline">전체 문서 보기</a>
+      </div>
+
+      <div class="three-surface">
+
+        <!-- Surface 1 -->
+        <a href="#" class="channel-card surface rounded-2xl p-8 block">
+          <div class="flex items-start justify-between">
+            <span class="text-psblue-main text-xs font-semibold tracking-widest">01</span>
+            <span class="w-9 h-9 rounded-full border border-line flex items-center justify-center text-stone">→</span>
+          </div>
+          <h3 class="display-sub text-2xl mt-10">통합 메시지</h3>
+          <p class="text-slate2 text-sm mt-3 leading-relaxed">SMS · LMS · MMS · 카카오 알림톡 · RCS를 단일 API · 단일 잔액으로. 발신번호 KISA 사전 등록까지 자동 연계.</p>
+          <ul class="mt-8 space-y-2 text-sm text-graphite">
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> 5채널 단일 호출</li>
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> KISA 자동 연계</li>
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> 일괄 100k행 · 예약 발송</li>
+          </ul>
+        </a>
+
+        <!-- Surface 2 (signature) -->
+        <a href="#" class="channel-card surface-hi rounded-2xl p-8 block relative">
+          <span class="absolute -top-2.5 left-6 bg-psred-main text-white text-[10px] font-bold tracking-widest px-3 py-1 rounded-full">SIGNATURE</span>
+          <div class="flex items-start justify-between">
+            <span class="text-psblue-main text-xs font-semibold tracking-widest">02</span>
+            <span class="w-9 h-9 rounded-full border border-line flex items-center justify-center text-stone">→</span>
+          </div>
+          <h3 class="display-sub text-2xl mt-10">개발자 도구</h3>
+          <p class="text-slate2 text-sm mt-3 leading-relaxed">코드 한 줄, 셸 한 줄, AI 도구에서도 그대로. 회원이 만든 자동화에 끊김 없이 끼워 넣습니다.</p>
+          <ul class="mt-8 space-y-2 text-sm text-graphite">
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> Python 라이브러리</li>
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> 셸 명령 (macOS · Linux · Windows)</li>
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> AI 도구 통합</li>
+          </ul>
+        </a>
+
+        <!-- Surface 3 -->
+        <a href="#" class="channel-card surface rounded-2xl p-8 block">
+          <div class="flex items-start justify-between">
+            <span class="text-psblue-main text-xs font-semibold tracking-widest">03</span>
+            <span class="w-9 h-9 rounded-full border border-line flex items-center justify-center text-stone">→</span>
+          </div>
+          <h3 class="display-sub text-2xl mt-10">스마트 결제</h3>
+          <p class="text-slate2 text-sm mt-3 leading-relaxed">선불 · 자동충전 · 후불 · 부분 발송. 잔액 소진해도 일괄 차단 대신 옵션을 제시합니다.</p>
+          <ul class="mt-8 space-y-2 text-sm text-graphite">
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> 자동충전 (잔액 임계)</li>
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> 사업자 후불 (보증보험)</li>
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> 부분 발송 분기 (4 옵션)</li>
+          </ul>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CHANNELS list ──────────────────────────────── -->
+  <section class="sec">
+    <div class="max-w-7xl mx-auto px-8 py-20 text-center">
+      <p class="eyebrow">supported channels</p>
+      <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <span class="codechip px-5 py-2.5 rounded-full text-sm">SMS</span>
+        <span class="codechip px-5 py-2.5 rounded-full text-sm">LMS</span>
+        <span class="codechip px-5 py-2.5 rounded-full text-sm">MMS</span>
+        <span class="codechip px-5 py-2.5 rounded-full text-sm">카카오 알림톡</span>
+        <span class="codechip px-5 py-2.5 rounded-full text-sm">RCS</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PRICING ────────────────────────────────────── -->
+  <section id="pricing" class="sec sec-tinted">
+    <div class="max-w-7xl mx-auto px-8 py-28">
+      <div class="text-center mb-14">
+        <p class="eyebrow">pricing</p>
+        <h2 class="display-sub text-3xl md:text-4xl mt-3">건당 차감 · 숨은 비용 없음.</h2>
+      </div>
+      <div class="three-surface">
+        <div class="channel-card surface rounded-2xl p-8">
+          <p class="text-sm text-stone">기본</p>
+          <h3 class="display-sub text-2xl mt-2">선불</h3>
+          <p class="display text-4xl mt-6">건당 차감</p>
+          <p class="text-slate2 text-sm mt-4">충전 후 채널별 단가만큼.</p>
+          <ul class="mt-8 space-y-2 text-sm text-graphite">
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> 결제수단 7종</li>
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> 잔액 5년 유효</li>
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> FIFO 차감 (만료 임박 우선)</li>
+          </ul>
+        </div>
+        <div class="channel-card surface-hi rounded-2xl p-8 relative">
+          <span class="absolute -top-2.5 left-6 bg-psblue-main text-white text-[10px] font-bold tracking-widest px-3 py-1 rounded-full">RECOMMENDED</span>
+          <p class="text-sm text-stone">자동</p>
+          <h3 class="display-sub text-2xl mt-2">자동충전</h3>
+          <p class="display text-4xl mt-6">잔액 임계 자동</p>
+          <p class="text-slate2 text-sm mt-4">정기결제 등록 · 30일 제한.</p>
+          <ul class="mt-8 space-y-2 text-sm text-graphite">
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> 1회/1일 한도</li>
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> 실패 시 알림</li>
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> 운영 모니터링</li>
+          </ul>
+        </div>
+        <div class="channel-card surface rounded-2xl p-8">
+          <p class="text-sm text-stone">사업자</p>
+          <h3 class="display-sub text-2xl mt-2">후불</h3>
+          <p class="display text-4xl mt-6">월 청구</p>
+          <p class="text-slate2 text-sm mt-4">신용 검증 · 보증보험.</p>
+          <ul class="mt-8 space-y-2 text-sm text-graphite">
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> 정산 주기별 청구서</li>
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> 연체 시 발송 차단</li>
+            <li class="flex gap-2"><span class="text-psblue-main">·</span> 운영자 청구 관리</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── DOCS callout ──────────────────────────────── -->
+  <section id="docs" class="sec">
+    <div class="max-w-5xl mx-auto px-8 py-24 text-center">
+      <p class="eyebrow">documentation</p>
+      <h2 class="display-sub text-3xl md:text-4xl mt-3">3분 안에 첫 발송.</h2>
+      <p class="text-slate2 mt-5 max-w-xl mx-auto">코드, 셸, AI 도구 — 어느 곳에서 시작하든 같은 인증, 같은 인터페이스.</p>
+      <div class="mt-10 flex justify-center gap-3 flex-wrap">
+        <a class="cta-ghost px-5 py-2.5 rounded-full text-sm font-semibold" href="#">Python 가이드</a>
+        <a class="cta-ghost px-5 py-2.5 rounded-full text-sm font-semibold" href="#">셸 가이드</a>
+        <a class="cta-ghost px-5 py-2.5 rounded-full text-sm font-semibold" href="#">AI 통합 가이드</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── BUILT FOR KOREA ──────────────────────────── -->
+  <section class="sec hero">
+    <div class="relative max-w-4xl mx-auto px-8 py-28 text-center">
+      <p class="eyebrow">built for korea</p>
+      <h2 class="display text-4xl md:text-5xl mt-4">한국 메시징의 복잡함,<br>한 줄의 API 뒤로.</h2>
+      <p class="mt-6 text-slate2 max-w-xl mx-auto leading-relaxed">
+        EUC-KR 인코딩 · 광고 표기 · 발신번호 KISA 등록 · 카카오 템플릿 심사 —
+        한국에서 메시지 발송에 필요한 모든 규칙을 우리가 자동으로 처리합니다.
+      </p>
+      <div class="mt-12 flex flex-wrap justify-center gap-x-10 gap-y-4 text-sm">
+        <span class="inline-flex items-center gap-2 text-graphite font-medium">
+          <span class="inline-block w-1.5 h-1.5 rounded-full" style="background:#0070D1"></span>
+          5개 채널 · 1개 API
+        </span>
+        <span class="inline-flex items-center gap-2 text-graphite font-medium">
+          <span class="inline-block w-1.5 h-1.5 rounded-full" style="background:#0070D1"></span>
+          SDK · CLI · MCP 동시 제공
+        </span>
+        <span class="inline-flex items-center gap-2 text-graphite font-medium">
+          <span class="inline-block w-1.5 h-1.5 rounded-full" style="background:#0070D1"></span>
+          AI 에이전트 네이티브
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <div data-site-footer data-page-id="PG-PUB-001"></div>
+
+</main>
+
+<script src="_shared/site.js"></script>
+</body>
+</html>

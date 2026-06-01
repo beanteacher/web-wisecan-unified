@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>현금영수증 — WiseCan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="_shared/tw-config.js"></script>
+  <link rel="stylesheet" href="_shared/style.css">
+</head>
+<body class="bg-white">
+
+<!-- 상단 헤더 -->
+<header class="fixed top-0 inset-x-0 h-16 bg-white border-b border-line flex items-center px-6 z-30">
+  <a href="01.index.html" class="font-semibold text-lg tracking-tight text-ink mr-10">WiseCan</a>
+  <nav class="flex items-center gap-6 text-sm">
+    <a href="#" class="nav-link">대시보드</a>
+    <a href="#" class="nav-link">발송</a>
+    <a href="#" class="nav-link">이력</a>
+    <a href="#" class="nav-link">템플릿</a>
+    <a href="#" class="nav-link font-semibold text-ink">결제</a>
+  </nav>
+  <div class="ml-auto flex items-center gap-4">
+    <span class="text-sm text-stone">잔액 <strong class="text-ink">₩123,450</strong></span>
+    <button class="btn btn-primary text-sm px-4 py-1.5 rounded-lg">충전</button>
+    <div class="w-8 h-8 rounded-full bg-psblue-wash flex items-center justify-center text-psblue-main text-sm font-semibold">김</div>
+  </div>
+</header>
+
+<main class="pt-16">
+  <div class="flex">
+    <!-- 사이드바 -->
+    <div data-member-sidebar data-active="22.billing-tax.html"></div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="flex-1 p-8 min-w-0">
+      <div class="mb-6">
+        <h1 class="text-xl font-semibold text-ink">세금계산서 / 현금영수증</h1>
+        <p class="text-sm text-stone mt-0.5">결제 수단에 따른 증빙 서류를 신청하세요</p>
+      </div>
+
+      <!-- 탭 -->
+      <div class="flex gap-1 mb-6 border-b border-line">
+        <button class="px-4 py-2.5 text-sm font-medium text-stone border-b-2 border-transparent hover:text-ink transition-colors opacity-50 cursor-not-allowed relative">
+          세금계산서
+          <span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-mist text-stone font-medium">준비 중</span>
+        </button>
+        <button class="px-4 py-2.5 text-sm font-semibold text-psblue-main border-b-2 border-psblue-main">현금영수증</button>
+      </div>
+
+      <!-- 세금계산서 — 비활성 영역 (숨김 상태) -->
+      <div class="hidden surface rounded-xl p-10 text-center mb-6 opacity-60 select-none">
+        <svg class="w-10 h-10 text-stone mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <p class="font-semibold text-ink mb-1">세금계산서</p>
+        <p class="text-sm text-stone">준비 중 — 세무 검토 후 제공 예정입니다</p>
+      </div>
+
+      <!-- 현금영수증 탭 콘텐츠 -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+        <!-- 좌측: 발급 가능 충전 건 -->
+        <div class="surface rounded-xl overflow-hidden">
+          <div class="px-5 py-4 border-b border-line">
+            <h2 class="text-sm font-semibold text-ink">발급 가능 충전 건</h2>
+            <p class="text-xs text-stone mt-0.5">계좌이체·가상계좌·상품권·포인트 결제분만 발급 가능합니다</p>
+          </div>
+          <div class="divide-y divide-line">
+            <label class="flex items-center gap-3 px-4 py-3 hover:bg-cloud/50 cursor-pointer">
+              <span class="radio checked shrink-0"></span>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-ink">₩50,000</p>
+                <p class="text-xs text-stone">2026-05-28 · 계좌이체</p>
+              </div>
+              <span class="text-xs text-stone">미발급</span>
+            </label>
+            <label class="flex items-center gap-3 px-4 py-3 hover:bg-cloud/50 cursor-pointer">
+              <span class="radio shrink-0"></span>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-ink">₩30,000</p>
+                <p class="text-xs text-stone">2026-05-10 · 가상계좌</p>
+              </div>
+              <span class="text-xs text-stone">미발급</span>
+            </label>
+            <label class="flex items-center gap-3 px-4 py-3 hover:bg-cloud/50 cursor-pointer">
+              <span class="radio shrink-0"></span>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-ink">₩100,000</p>
+                <p class="text-xs text-stone">2026-04-20 · 계좌이체</p>
+              </div>
+              <span class="text-xs text-green-600">발급 완료</span>
+            </label>
+          </div>
+          <!-- Empty state -->
+          <div class="hidden px-5 py-10 text-center text-sm text-stone">
+            발급 가능한 충전 건이 없습니다<br>
+            <span class="text-xs">(계좌이체·가상계좌·상품권·포인트 사용분만 해당)</span>
+          </div>
+        </div>
+
+        <!-- 우측: 신청 폼 -->
+        <div class="surface rounded-xl p-5">
+          <h2 class="text-sm font-semibold text-ink mb-4">현금영수증 신청</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="field-label block mb-2">발급 유형</label>
+              <div class="space-y-2">
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <span class="radio checked shrink-0"></span>
+                  <span class="text-sm text-ink">소득공제용 (휴대폰 번호)</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <span class="radio shrink-0"></span>
+                  <span class="text-sm text-ink">지출증빙용 (사업자등록번호)</span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label class="field-label block mb-1">휴대폰 번호</label>
+              <input type="text" class="input text-sm" placeholder="010-1234-5678" value="010-9876-5432">
+            </div>
+            <div class="p-3 bg-cloud rounded-lg text-xs text-stone">
+              선택한 충전 건: <strong class="text-ink">2026-05-28 · ₩50,000</strong>
+            </div>
+            <button class="btn btn-primary text-sm w-full py-2.5 rounded-lg">발급 신청</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 발급 이력 -->
+      <div class="surface rounded-xl overflow-hidden">
+        <div class="px-5 py-4 border-b border-line">
+          <h2 class="text-sm font-semibold text-ink">발급 이력</h2>
+        </div>
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-cloud border-b border-line">
+              <th class="text-left px-4 py-3 font-medium text-stone">발급일</th>
+              <th class="text-left px-4 py-3 font-medium text-stone">충전 건</th>
+              <th class="text-left px-4 py-3 font-medium text-stone">금액</th>
+              <th class="text-left px-4 py-3 font-medium text-stone">유형</th>
+              <th class="text-left px-4 py-3 font-medium text-stone">식별번호</th>
+              <th class="text-left px-4 py-3 font-medium text-stone">승인번호</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-line">
+            <tr class="hover:bg-cloud/50">
+              <td class="px-4 py-3 text-graphite">2026-04-21</td>
+              <td class="px-4 py-3 text-stone text-xs">2026-04-20 · 계좌이체</td>
+              <td class="px-4 py-3 font-medium text-ink">₩100,000</td>
+              <td class="px-4 py-3 text-stone text-xs">소득공제</td>
+              <td class="px-4 py-3 text-stone text-xs font-mono">010-****-5432</td>
+              <td class="px-4 py-3 text-stone text-xs font-mono">AB123456</td>
+            </tr>
+            <tr class="hover:bg-cloud/50">
+              <td class="px-4 py-3 text-graphite">2026-03-12</td>
+              <td class="px-4 py-3 text-stone text-xs">2026-03-10 · 가상계좌</td>
+              <td class="px-4 py-3 font-medium text-ink">₩200,000</td>
+              <td class="px-4 py-3 text-stone text-xs">지출증빙</td>
+              <td class="px-4 py-3 text-stone text-xs font-mono">123-45-***90</td>
+              <td class="px-4 py-3 text-stone text-xs font-mono">CD789012</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="_shared/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CS 관리 — WiseCan Admin</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../_shared/tw-config.js"></script>
+  <link rel="stylesheet" href="../_shared/style.css">
+  <style>
+    body { background:#f0f2f5; }
+    .card { background:#ffffff; border:1px solid #e4e8ec; border-radius:12px; }
+    .tab-btn { padding:8px 16px; border-radius:8px; font-size:0.83rem; font-weight:500; color:#5b6470; transition:background 150ms,color 150ms; cursor:pointer; white-space:nowrap; }
+    .tab-btn.active { background:#0070D1; color:#ffffff; }
+    .badge-blue   { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .badge-green  { background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .badge-yellow { background:#fffbeb; color:#92400e; border:1px solid #fde68a; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .badge-red    { background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .badge-gray   { background:#f3f4f6; color:#374151; border:1px solid #e5e7eb; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .tbl th { font-size:0.78rem; font-weight:600; color:#5b6470; padding:10px 14px; background:#f6f8fa; border-bottom:1px solid #e4e8ec; text-align:left; }
+    .tbl td { font-size:0.85rem; color:#16191f; padding:10px 14px; border-bottom:1px solid #f0f2f5; }
+    .tbl tr:last-child td { border-bottom:none; }
+    /* 챗봇 트리 */
+    .tree-node { background:#ffffff; border:1px solid #e4e8ec; border-radius:8px; padding:10px 14px; min-width:160px; text-align:center; font-size:0.82rem; }
+    .tree-node.root { background:#e8f1fb; border-color:#93c5fd; font-weight:600; }
+    .tree-edge { width:1px; height:24px; background:#d1d5db; margin:0 auto; }
+    .tree-row { display:flex; gap:20px; justify-content:center; align-items:flex-start; }
+    .tree-branch { display:flex; flex-direction:column; align-items:center; }
+  </style>
+</head>
+<body class="text-ink">
+
+<header class="admin-topbar fixed top-0 inset-x-0 z-40 h-16 flex items-center px-6 gap-4">
+  <span class="text-base font-semibold text-graphite">WiseCan<span style="color:#0070D1">.</span></span>
+  <span class="text-xs text-gray-500 ml-1">Admin Console</span>
+  <!-- 현재 메뉴 위치 -->
+  <nav class="flex items-center gap-1.5 text-xs ml-3" aria-label="현재 메뉴 위치">
+    <svg class="w-3 h-3 text-stone" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    <span class="text-slate2">CS</span>
+    <svg class="w-3 h-3 text-stone" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    <span class="text-ink font-semibold">문의·챗봇·FAQ·공지</span>
+  </nav>
+  <div class="ml-auto flex items-center gap-3">
+    <span class="inline-flex items-center gap-1 bg-yellow-900/30 text-yellow-300 text-xs px-2 py-0.5 rounded-full border border-yellow-700">
+      1:1 문의 대기 <span class="font-bold ml-1">7</span>
+    </span>
+    <span class="text-xs text-slate2">운영자: admin@wisecan.com</span>
+    <button class="text-xs text-slate2 hover:text-graphite">로그아웃</button>
+  </div>
+</header>
+
+<main class="pt-16 flex">
+  <div data-admin-sidebar data-active="12.admin-cs.html"></div>
+
+  <div class="flex-1 p-8 min-w-0">
+
+    <div class="mb-6">
+      <p class="eyebrow mb-1">CS</p>
+      <h1 class="text-2xl font-semibold text-ink">CS 관리</h1>
+      <p class="text-sm text-slate2 mt-1">1:1 문의, 챗봇 시나리오, FAQ·공지 관리, 외주 CS 위탁 권한을 관리합니다.</p>
+    </div>
+
+    <!-- 탭 -->
+    <div class="flex items-center gap-2 mb-6 flex-wrap">
+      <button class="tab-btn active" onclick="showTab('inquiry')">
+        1:1 문의 큐
+        <span class="ml-1.5 inline-flex items-center justify-center w-4 h-4 bg-red-500 text-white rounded-full text-[10px] font-bold">7</span>
+      </button>
+      <button class="tab-btn" onclick="showTab('chatbot')">챗봇 시나리오</button>
+      <button class="tab-btn" onclick="showTab('faq')">FAQ</button>
+      <button class="tab-btn" onclick="showTab('notice')">공지사항</button>
+      <button class="tab-btn" onclick="showTab('delegation')">외주 위탁</button>
+    </div>
+
+    <!-- ── 탭1: 1:1 문의 큐 ── -->
+    <div id="tab-inquiry">
+      <div class="flex gap-6">
+        <!-- 문의 목록 -->
+        <div class="w-80 flex-shrink-0">
+          <div class="flex items-center gap-2 mb-3">
+            <input class="input text-sm" placeholder="검색" />
+            <select class="input w-32 text-sm">
+              <option>전체</option>
+              <option>대기 중</option>
+              <option>답변 완료</option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <div class="card p-3 border-l-4 border-psblue-main cursor-pointer bg-psblue-wash">
+              <div class="flex items-start justify-between">
+                <p class="text-sm font-semibold text-ink truncate max-w-[160px]">발신번호 등록이 안 돼요</p>
+                <span class="badge-yellow ml-1 flex-shrink-0">대기</span>
+              </div>
+              <p class="text-xs text-slate2 mt-0.5">user@corp.com</p>
+              <p class="text-xs text-stone mt-1">2026-06-01 10:22</p>
+            </div>
+            <div class="card p-3 cursor-pointer hover:bg-cloud">
+              <div class="flex items-start justify-between">
+                <p class="text-sm font-medium text-ink truncate max-w-[160px]">API 키 권한 오류</p>
+                <span class="badge-yellow ml-1 flex-shrink-0">대기</span>
+              </div>
+              <p class="text-xs text-slate2 mt-0.5">dev@startup.com</p>
+              <p class="text-xs text-stone mt-1">2026-06-01 09:48</p>
+            </div>
+            <div class="card p-3 cursor-pointer hover:bg-cloud">
+              <div class="flex items-start justify-between">
+                <p class="text-sm font-medium text-ink truncate max-w-[160px]">환불 처리 현황 문의</p>
+                <span class="badge-yellow ml-1 flex-shrink-0">대기</span>
+              </div>
+              <p class="text-xs text-slate2 mt-0.5">billing@big.co</p>
+              <p class="text-xs text-stone mt-1">2026-05-31 17:10</p>
+            </div>
+            <div class="card p-3 cursor-pointer hover:bg-cloud">
+              <div class="flex items-start justify-between">
+                <p class="text-sm font-medium text-ink truncate max-w-[160px]">카카오 템플릿 반려 사유</p>
+                <span class="badge-green ml-1 flex-shrink-0">완료</span>
+              </div>
+              <p class="text-xs text-slate2 mt-0.5">kakao@corp.com</p>
+              <p class="text-xs text-stone mt-1">2026-05-31 14:00</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 상세 패널 -->
+        <div class="flex-1">
+          <div class="card p-5">
+            <div class="flex items-start justify-between mb-4">
+              <div>
+                <p class="font-semibold text-ink">발신번호 등록이 안 돼요</p>
+                <p class="text-xs text-slate2 mt-0.5">user@corp.com · 2026-06-01 10:22 · 카테고리: 발신번호</p>
+              </div>
+              <span class="badge-yellow">대기 중</span>
+            </div>
+            <!-- 문의 내용 -->
+            <div class="bg-cloud rounded-lg p-4 mb-4 text-sm text-ink leading-relaxed">
+              안녕하세요. 발신번호 등록을 시도했는데 계속 심사 대기 상태에서 멈춰 있습니다. 서류는 모두 제출했는데 3일째 아무 연락이 없습니다. 확인 부탁드립니다.
+            </div>
+            <!-- 내부 메모 -->
+            <div class="mb-4">
+              <p class="field-label mb-1.5">내부 메모 (회원에게 비공개)</p>
+              <textarea class="input h-16 resize-none text-sm" placeholder="내부 참고 메모 입력..."></textarea>
+            </div>
+            <!-- 답변 작성 -->
+            <div class="mb-4">
+              <p class="field-label mb-1.5">답변 작성 <span class="text-red-500">*</span></p>
+              <textarea class="input h-28 resize-none text-sm" placeholder="회원에게 전송될 답변을 입력하세요...">안녕하세요, WiseCan 고객지원팀입니다.
+
+발신번호 심사 현황을 확인해 보겠습니다. 제출하신 서류를 검토 중이며, 영업일 1일 이내에 결과를 안내드리겠습니다.
+
+불편을 드려 죄송합니다.</textarea>
+            </div>
+            <div class="flex items-center gap-2 justify-end">
+              <button class="btn btn-secondary text-sm px-4 py-2 rounded-lg">임시저장</button>
+              <button class="btn btn-primary text-sm px-4 py-2 rounded-lg">답변 전송</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 탭2: 챗봇 시나리오 트리 ── -->
+    <div id="tab-chatbot" class="hidden">
+      <div class="flex items-center justify-between mb-5">
+        <p class="text-sm text-slate2">시나리오 트리를 클릭하여 노드를 편집하거나 분기를 추가합니다.</p>
+        <div class="flex gap-2">
+          <button class="btn btn-secondary text-xs px-3 py-1.5 rounded-lg">+ 루트 노드 추가</button>
+          <button class="btn btn-primary text-xs px-3 py-1.5 rounded-lg">변경 사항 저장</button>
+        </div>
+      </div>
+      <div class="card p-6 overflow-x-auto">
+        <!-- 트리 시각화 -->
+        <div class="flex flex-col items-center gap-0" style="min-width:600px">
+          <div class="tree-node root">WiseCan 챗봇 시작</div>
+          <div class="tree-edge"></div>
+          <div class="tree-row">
+            <div class="tree-branch">
+              <div class="tree-node">발송 문의</div>
+              <div class="tree-edge"></div>
+              <div class="tree-row">
+                <div class="tree-branch">
+                  <div class="tree-node" style="font-size:0.75rem">SMS/LMS 문의</div>
+                </div>
+                <div class="tree-branch">
+                  <div class="tree-node" style="font-size:0.75rem">카카오 문의</div>
+                </div>
+                <div class="tree-branch">
+                  <div class="tree-node" style="font-size:0.75rem">RCS 문의</div>
+                </div>
+              </div>
+            </div>
+            <div class="tree-branch">
+              <div class="tree-node">결제·충전</div>
+              <div class="tree-edge"></div>
+              <div class="tree-row">
+                <div class="tree-branch">
+                  <div class="tree-node" style="font-size:0.75rem">충전 방법</div>
+                </div>
+                <div class="tree-branch">
+                  <div class="tree-node" style="font-size:0.75rem">환불 안내</div>
+                </div>
+              </div>
+            </div>
+            <div class="tree-branch">
+              <div class="tree-node">발신번호</div>
+              <div class="tree-edge"></div>
+              <div class="tree-row">
+                <div class="tree-branch">
+                  <div class="tree-node" style="font-size:0.75rem">등록 방법</div>
+                </div>
+                <div class="tree-branch">
+                  <div class="tree-node" style="font-size:0.75rem">심사 현황</div>
+                </div>
+              </div>
+            </div>
+            <div class="tree-branch">
+              <div class="tree-node">상담사 연결</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 노드 편집 패널 -->
+      <div class="card p-5 mt-4">
+        <p class="font-medium text-sm text-ink mb-3">노드 편집 — "발송 문의"</p>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="field-label block mb-1">노드 레이블</label>
+            <input class="input" value="발송 문의" />
+          </div>
+          <div>
+            <label class="field-label block mb-1">응답 메시지</label>
+            <input class="input" value="어떤 채널 발송에 대해 문의하시겠어요?" />
+          </div>
+        </div>
+        <div class="mt-3 flex justify-end gap-2">
+          <button class="btn btn-destructive text-xs px-3 py-1.5 rounded-lg">노드 삭제</button>
+          <button class="btn btn-secondary text-xs px-3 py-1.5 rounded-lg">+ 자식 노드 추가</button>
+          <button class="btn btn-primary text-xs px-3 py-1.5 rounded-lg">저장</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 탭3: FAQ ── -->
+    <div id="tab-faq" class="hidden">
+      <div class="flex items-center gap-3 mb-4">
+        <input class="input w-72" placeholder="FAQ 검색" />
+        <select class="input w-40">
+          <option>전체 카테고리</option>
+          <option>발송</option>
+          <option>결제·환불</option>
+          <option>발신번호</option>
+          <option>API Key</option>
+          <option>계정</option>
+        </select>
+        <button class="btn btn-primary text-sm px-4 py-2 rounded-lg ml-auto">+ FAQ 추가</button>
+      </div>
+      <div class="card overflow-hidden mb-4">
+        <table class="tbl w-full">
+          <thead>
+            <tr><th>카테고리</th><th>질문</th><th>최종 수정일</th><th>조회수</th><th>공개</th><th>조치</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge-blue">발신번호</span></td>
+              <td class="font-medium text-sm">발신번호 등록에 필요한 서류는 무엇인가요?</td>
+              <td class="text-xs text-slate2">2026-05-20</td>
+              <td class="text-xs text-slate2">1,240</td>
+              <td><span class="badge-green">공개</span></td>
+              <td>
+                <button class="text-xs text-psblue-main hover:underline mr-2">수정</button>
+                <button class="text-xs text-red-500 hover:underline">삭제</button>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge-blue">결제·환불</span></td>
+              <td class="font-medium text-sm">충전한 캐시는 환불이 가능한가요?</td>
+              <td class="text-xs text-slate2">2026-05-15</td>
+              <td class="text-xs text-slate2">872</td>
+              <td><span class="badge-green">공개</span></td>
+              <td>
+                <button class="text-xs text-psblue-main hover:underline mr-2">수정</button>
+                <button class="text-xs text-red-500 hover:underline">삭제</button>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge-blue">API Key</span></td>
+              <td class="font-medium text-sm">테스트 키와 운영 키의 차이는 무엇인가요?</td>
+              <td class="text-xs text-slate2">2026-04-10</td>
+              <td class="text-xs text-slate2">3,102</td>
+              <td><span class="badge-green">공개</span></td>
+              <td>
+                <button class="text-xs text-psblue-main hover:underline mr-2">수정</button>
+                <button class="text-xs text-red-500 hover:underline">삭제</button>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge-gray">발송</span></td>
+              <td class="font-medium text-sm">카카오 알림톡 발송 실패 시 대체 발송이 되나요? (초안)</td>
+              <td class="text-xs text-slate2">2026-06-01</td>
+              <td class="text-xs text-slate2">—</td>
+              <td><span class="badge-yellow">비공개</span></td>
+              <td>
+                <button class="text-xs text-psblue-main hover:underline mr-2">수정</button>
+                <button class="text-xs text-green-600 hover:underline mr-2">공개</button>
+                <button class="text-xs text-red-500 hover:underline">삭제</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- FAQ 작성/편집 -->
+      <div class="card p-5">
+        <p class="font-medium text-sm text-ink mb-4">FAQ 작성</p>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="field-label block mb-1">카테고리</label>
+            <select class="input"><option>발송</option><option>결제·환불</option><option>발신번호</option><option>API Key</option><option>계정</option></select>
+          </div>
+          <div>
+            <label class="field-label block mb-1">공개 여부</label>
+            <select class="input"><option>공개</option><option>비공개</option></select>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="field-label block mb-1">질문</label>
+          <input class="input" placeholder="자주 묻는 질문을 입력하세요" />
+        </div>
+        <div class="mb-4">
+          <label class="field-label block mb-1">답변 (마크다운 지원)</label>
+          <textarea class="md-editor" rows="6" placeholder="답변을 마크다운 형식으로 작성하세요"></textarea>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button class="btn btn-secondary text-sm px-4 py-2 rounded-lg">취소</button>
+          <button class="btn btn-primary text-sm px-4 py-2 rounded-lg">저장</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 탭4: 공지사항 ── -->
+    <div id="tab-notice" class="hidden">
+      <div class="flex items-center gap-3 mb-4">
+        <input class="input w-72" placeholder="공지 검색" />
+        <button class="btn btn-primary text-sm px-4 py-2 rounded-lg ml-auto">+ 공지 작성</button>
+      </div>
+      <div class="card overflow-hidden mb-4">
+        <table class="tbl w-full">
+          <thead>
+            <tr><th>제목</th><th>카테고리</th><th>작성일</th><th>공개일</th><th>조회수</th><th>푸시 발송</th><th>조치</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="font-medium text-sm">2026년 6월 정기 점검 안내</td>
+              <td><span class="badge-yellow">점검</span></td>
+              <td class="text-xs text-slate2">2026-05-28</td>
+              <td class="text-xs text-slate2">2026-06-05</td>
+              <td class="text-xs text-slate2">2,840</td>
+              <td><span class="badge-green">발송 완료</span></td>
+              <td>
+                <button class="text-xs text-psblue-main hover:underline mr-2">수정</button>
+                <button class="text-xs text-red-500 hover:underline">삭제</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-sm">카카오 알림톡 심사 기준 업데이트</td>
+              <td><span class="badge-blue">업데이트</span></td>
+              <td class="text-xs text-slate2">2026-05-20</td>
+              <td class="text-xs text-slate2">2026-05-20</td>
+              <td class="text-xs text-slate2">5,120</td>
+              <td><span class="badge-green">발송 완료</span></td>
+              <td>
+                <button class="text-xs text-psblue-main hover:underline mr-2">수정</button>
+                <button class="text-xs text-red-500 hover:underline">삭제</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-sm">RCS 브랜드 등록 가이드 개편 (초안)</td>
+              <td><span class="badge-gray">가이드</span></td>
+              <td class="text-xs text-slate2">2026-06-01</td>
+              <td class="text-xs text-slate2">미정</td>
+              <td class="text-xs text-slate2">—</td>
+              <td>
+                <button class="btn btn-secondary text-xs px-2 py-1 rounded-lg">푸시 발송</button>
+              </td>
+              <td>
+                <button class="text-xs text-psblue-main hover:underline mr-2">수정</button>
+                <button class="text-xs text-red-500 hover:underline">삭제</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- 공지 작성 -->
+      <div class="card p-5">
+        <p class="font-medium text-sm text-ink mb-4">공지 작성</p>
+        <div class="grid grid-cols-3 gap-4 mb-4">
+          <div>
+            <label class="field-label block mb-1">카테고리</label>
+            <select class="input"><option>공지</option><option>점검</option><option>업데이트</option><option>가이드</option></select>
+          </div>
+          <div>
+            <label class="field-label block mb-1">공개일</label>
+            <input class="input" type="date" value="2026-06-01" />
+          </div>
+          <div>
+            <label class="field-label block mb-1">푸시 발송</label>
+            <select class="input"><option>발송 안 함</option><option>즉시 발송</option><option>공개일에 발송</option></select>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="field-label block mb-1">제목</label>
+          <input class="input" placeholder="공지 제목" />
+        </div>
+        <div class="mb-4">
+          <label class="field-label block mb-1">내용 (마크다운 지원)</label>
+          <textarea class="md-editor" rows="6" placeholder="공지 내용을 마크다운 형식으로 작성하세요"></textarea>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button class="btn btn-secondary text-sm px-4 py-2 rounded-lg">임시저장</button>
+          <button class="btn btn-primary text-sm px-4 py-2 rounded-lg">저장·공개</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 탭5: 외주 위탁 ── -->
+    <div id="tab-delegation" class="hidden">
+      <div class="card p-6 mb-4">
+        <p class="font-semibold text-ink mb-1">외주 CS 위탁 권한 관리</p>
+        <p class="text-sm text-slate2 mb-5">외부 CS 업체 계정에 제한된 문의 처리 권한을 부여합니다. 회원 개인정보 및 결제 정보 접근은 차단됩니다.</p>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="field-label block mb-1.5">위탁 업체 이메일 <span class="text-red-500">*</span></label>
+            <input class="input" placeholder="outsource@cscompany.com" />
+          </div>
+          <div>
+            <label class="field-label block mb-1.5">권한 범위</label>
+            <select class="input">
+              <option>1:1 문의 조회·답변만</option>
+              <option>1:1 문의 + FAQ 수정</option>
+              <option>1:1 문의 + FAQ + 공지 조회</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-5">
+          <div>
+            <label class="field-label block mb-1.5">유효기간</label>
+            <div class="flex gap-2">
+              <input class="input" type="date" value="2026-06-01" />
+              <span class="flex items-center text-slate2 text-sm">~</span>
+              <input class="input" type="date" value="2026-08-31" />
+            </div>
+          </div>
+          <div>
+            <label class="field-label block mb-1.5">메모</label>
+            <input class="input" placeholder="위탁 사유 (감사 로그 기록)" />
+          </div>
+        </div>
+        <button class="btn btn-primary text-sm px-5 py-2 rounded-lg">권한 부여</button>
+      </div>
+
+      <div class="card overflow-hidden">
+        <div class="px-5 py-4 border-b border-mist">
+          <p class="font-medium text-sm text-ink">현재 위탁 중인 계정</p>
+        </div>
+        <table class="tbl w-full">
+          <thead>
+            <tr><th>업체 이메일</th><th>권한 범위</th><th>유효기간</th><th>처리 문의수</th><th>상태</th><th>조치</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-sm">cs@outsource.com</td>
+              <td class="text-xs text-slate2">1:1 문의 조회·답변만</td>
+              <td class="text-xs text-slate2">2026-06-01 ~ 2026-08-31</td>
+              <td class="text-xs font-semibold">142건</td>
+              <td><span class="badge-green">활성</span></td>
+              <td>
+                <button class="btn btn-destructive text-xs px-3 py-1 rounded-lg">권한 회수</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="../_shared/site.js"></script>
+<script>
+function showTab(t) {
+  ['inquiry','chatbot','faq','notice','delegation'].forEach(function(id) {
+    var el = document.getElementById('tab-'+id);
+    if (el) el.classList.toggle('hidden', id !== t);
+  });
+  document.querySelectorAll('.tab-btn').forEach(function(btn, i) {
+    btn.classList.toggle('active', ['inquiry','chatbot','faq','notice','delegation'][i] === t);
+  });
+}
+</script>
+<!-- PG-AD-012 | §10.12 | RQ-ADMIN-701~707 -->
+</body>
+</html>

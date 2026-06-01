@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>구성원 관리 — WiseCan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="_shared/tw-config.js"></script>
+  <link rel="stylesheet" href="_shared/style.css">
+</head>
+<body>
+<div data-site-header></div>
+<main class="pt-16">
+  <div class="flex">
+    <div data-member-sidebar data-active="27.company-members.html"></div>
+    <div class="flex-1 p-8 bg-cloud min-h-screen">
+
+      <div class="mb-8 flex items-start justify-between">
+        <div>
+          <p class="eyebrow">company</p>
+          <h1 class="text-2xl font-semibold text-ink mt-1">구성원 관리</h1>
+        </div>
+        <button class="btn btn-primary px-5 py-2.5 rounded-full text-sm flex items-center gap-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          하위 계정 추가
+        </button>
+      </div>
+
+      <!-- 검색 + 필터 바 -->
+      <div class="surface rounded-2xl p-4 mb-5 flex items-center gap-3">
+        <div class="relative flex-1 max-w-xs">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-stone" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input class="input pl-9 text-sm" placeholder="이름 또는 이메일 검색">
+        </div>
+        <select class="input text-sm max-w-[140px]">
+          <option>전체 권한</option>
+          <option>관리자</option>
+          <option>발송 담당자</option>
+          <option>조회 전용</option>
+        </select>
+        <select class="input text-sm max-w-[120px]">
+          <option>전체 상태</option>
+          <option>활성</option>
+          <option>초대 중</option>
+          <option>비활성</option>
+        </select>
+      </div>
+
+      <!-- 구성원 표 -->
+      <div class="surface rounded-2xl overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-cloud text-xs text-stone uppercase tracking-widest">
+            <tr>
+              <th class="text-left px-6 py-3 font-semibold border-b border-mist">이름</th>
+              <th class="text-left px-6 py-3 font-semibold border-b border-mist">이메일</th>
+              <th class="text-left px-6 py-3 font-semibold border-b border-mist">부서</th>
+              <th class="text-left px-6 py-3 font-semibold border-b border-mist">권한</th>
+              <th class="text-left px-6 py-3 font-semibold border-b border-mist">상태</th>
+              <th class="text-left px-6 py-3 font-semibold border-b border-mist">마지막 로그인</th>
+              <th class="px-6 py-3 border-b border-mist"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-mist">
+            <!-- 마스터 계정 (나) -->
+            <tr class="bg-psblue-wash">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-full bg-psblue-main text-white flex items-center justify-center text-sm font-semibold">홍</div>
+                  <div>
+                    <p class="font-medium text-graphite">홍길동</p>
+                    <p class="text-xs text-psblue-main font-medium">마스터</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-slate2">hong@company.com</td>
+              <td class="px-6 py-4 text-slate2">—</td>
+              <td class="px-6 py-4">
+                <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-psblue-soft text-psblue-deep">마스터</span>
+              </td>
+              <td class="px-6 py-4">
+                <span class="flex items-center gap-1.5 text-xs text-green-700 font-medium">
+                  <span class="status-dot bg-green-500"></span>활성
+                </span>
+              </td>
+              <td class="px-6 py-4 text-xs text-slate2">방금 전</td>
+              <td class="px-6 py-4 text-right text-xs text-stone">—</td>
+            </tr>
+
+            <!-- 하위 계정 1 -->
+            <tr>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-full bg-mist text-graphite flex items-center justify-center text-sm font-semibold">김</div>
+                  <p class="font-medium text-graphite">김민준</p>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-slate2">kim@company.com</td>
+              <td class="px-6 py-4 text-slate2">마케팅팀</td>
+              <td class="px-6 py-4">
+                <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-mist text-graphite">발송 담당자</span>
+              </td>
+              <td class="px-6 py-4">
+                <span class="flex items-center gap-1.5 text-xs text-green-700 font-medium">
+                  <span class="status-dot bg-green-500"></span>활성
+                </span>
+              </td>
+              <td class="px-6 py-4 text-xs text-slate2">2026-05-31 18:20</td>
+              <td class="px-6 py-4 text-right">
+                <button class="text-xs text-slate2 hover:text-graphite font-medium">더보기</button>
+              </td>
+            </tr>
+
+            <!-- 하위 계정 2 -->
+            <tr>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-full bg-mist text-graphite flex items-center justify-center text-sm font-semibold">이</div>
+                  <p class="font-medium text-graphite">이수진</p>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-slate2">lee@company.com</td>
+              <td class="px-6 py-4 text-slate2">개발팀</td>
+              <td class="px-6 py-4">
+                <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-mist text-graphite">관리자</span>
+              </td>
+              <td class="px-6 py-4">
+                <span class="flex items-center gap-1.5 text-xs text-green-700 font-medium">
+                  <span class="status-dot bg-green-500"></span>활성
+                </span>
+              </td>
+              <td class="px-6 py-4 text-xs text-slate2">2026-05-30 09:44</td>
+              <td class="px-6 py-4 text-right">
+                <button class="text-xs text-slate2 hover:text-graphite font-medium">더보기</button>
+              </td>
+            </tr>
+
+            <!-- 초대 중 -->
+            <tr>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-full bg-mist text-stone flex items-center justify-center text-sm">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  </div>
+                  <p class="font-medium text-slate2">—</p>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-slate2">park@company.com</td>
+              <td class="px-6 py-4 text-stone">—</td>
+              <td class="px-6 py-4">
+                <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-mist text-stone">조회 전용</span>
+              </td>
+              <td class="px-6 py-4">
+                <span class="flex items-center gap-1.5 text-xs text-amber-600 font-medium">
+                  <span class="status-dot bg-amber-400"></span>초대 중
+                </span>
+              </td>
+              <td class="px-6 py-4 text-xs text-stone">—</td>
+              <td class="px-6 py-4 text-right">
+                <button class="text-xs text-slate2 hover:text-graphite font-medium">더보기</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- 페이지네이션 -->
+        <div class="px-6 py-4 flex items-center justify-between border-t border-mist">
+          <p class="text-xs text-stone">전체 4명</p>
+          <div class="flex items-center gap-1">
+            <button class="px-3 py-1.5 rounded-lg text-xs text-stone border border-mist bg-white">이전</button>
+            <button class="px-3 py-1.5 rounded-lg text-xs font-medium bg-psblue-main text-white">1</button>
+            <button class="px-3 py-1.5 rounded-lg text-xs text-stone border border-mist bg-white">다음</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 더보기 드롭다운 예시 (모달 주석) -->
+      <!-- 더보기 클릭 시 팝업:
+           - 권한 변경
+           - 초대 재발송 (초대 중 상태만)
+           - 계정 비활성화
+           - 계정 삭제 (btn-destructive)
+      -->
+
+    </div>
+  </div>
+</main>
+<div data-site-footer data-page-id="PG-CO-001"></div>
+<script src="_shared/site.js"></script>
+</body>
+</html>

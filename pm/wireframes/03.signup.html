@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>회원가입 — WiseCan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="_shared/style.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="_shared/tw-config.js"></script>
+</head>
+<body>
+
+<div data-site-header></div>
+
+<main class="pt-16">
+
+  <!-- ── PAGE HEADER ────────────────────────────────── -->
+  <section class="border-b border-mist">
+    <div class="max-w-3xl mx-auto px-8 pt-16 pb-10 text-center">
+      <p class="eyebrow">create your account</p>
+      <h1 class="display text-3xl md:text-4xl mt-5">개인 회원가입</h1>
+      <p class="text-slate2 mt-4">휴대폰 본인 인증 후 정보를 입력하면 즉시 사용할 수 있습니다.</p>
+
+      <!-- Stepper -->
+      <div class="stepper mt-10">
+        <div class="step done">
+          <div class="dot">✓</div>
+          <div class="label">본인 인증</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step current">
+          <div class="dot">2</div>
+          <div class="label">정보 입력</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step">
+          <div class="dot">3</div>
+          <div class="label">약관 동의</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FORM CARD ─────────────────────────────────── -->
+  <section>
+    <div class="max-w-xl mx-auto px-8 py-14">
+
+      <div class="surface rounded-2xl p-8">
+
+        <!-- Step 1 — 본인 인증 (완료 요약) -->
+        <div class="pb-7 border-b border-mist">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="eyebrow">step 1</p>
+              <p class="font-semibold mt-1 text-graphite">본인 인증 완료</p>
+              <p class="text-sm text-slate2 mt-1">홍길동 · 010-****-5678 · 2026-06-01 인증</p>
+            </div>
+            <button class="cta-ghost text-xs px-3 py-1.5 rounded-full">다시 인증</button>
+          </div>
+        </div>
+
+        <!-- Step 2 — 정보 입력 (현재) -->
+        <div class="pt-7 space-y-5">
+          <p class="eyebrow">step 2</p>
+
+          <div>
+            <label class="field-label block mb-2">아이디 (이메일)</label>
+            <input type="email" class="input" placeholder="you@example.com" value="">
+            <p class="help">가입 후 발송된 환영 메일의 링크로 이메일 인증을 완료할 수 있습니다.</p>
+          </div>
+
+          <div>
+            <label class="field-label block mb-2">비밀번호</label>
+            <input type="password" class="input" placeholder="10자 이상">
+            <p class="help">10자 이상 · 영문 · 숫자 · 특수문자 중 2종 이상 포함</p>
+          </div>
+
+          <div>
+            <label class="field-label block mb-2">비밀번호 확인</label>
+            <input type="password" class="input" placeholder="다시 입력">
+          </div>
+
+          <div>
+            <label class="field-label block mb-2">이름</label>
+            <input type="text" class="input" value="홍길동" disabled style="background:#f6f8fa; color:#5b6470; cursor:not-allowed;">
+            <p class="help">본인 인증 정보로 자동 입력됩니다.</p>
+          </div>
+
+          <div>
+            <label class="field-label block mb-2">휴대폰</label>
+            <input type="tel" class="input" value="010-1234-5678" disabled style="background:#f6f8fa; color:#5b6470; cursor:not-allowed;">
+          </div>
+        </div>
+
+        <!-- Step 3 — 약관 -->
+        <div class="pt-8 mt-8 border-t border-mist">
+          <p class="eyebrow mb-4">step 3</p>
+          <div class="space-y-3">
+            <label class="flex items-start gap-3 cursor-pointer">
+              <span class="check checked"></span>
+              <div class="text-sm">
+                <span class="text-graphite font-medium">(필수)</span>
+                <span class="text-graphite ml-1">이용약관 동의</span>
+                <a class="link-blue ml-2 text-xs">전문 보기</a>
+              </div>
+            </label>
+            <label class="flex items-start gap-3 cursor-pointer">
+              <span class="check checked"></span>
+              <div class="text-sm">
+                <span class="text-graphite font-medium">(필수)</span>
+                <span class="text-graphite ml-1">개인정보 수집·이용 동의</span>
+                <a class="link-blue ml-2 text-xs">전문 보기</a>
+              </div>
+            </label>
+            <label class="flex items-start gap-3 cursor-pointer">
+              <span class="check"></span>
+              <div class="text-sm">
+                <span class="text-stone font-medium">(선택)</span>
+                <span class="text-slate2 ml-1">마케팅 정보 수신 동의 (이메일·문자)</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Action -->
+        <div class="mt-10 flex gap-3">
+          <button class="cta-ghost flex-1 px-5 py-3 rounded-full text-sm font-semibold">취소</button>
+          <button class="cta-primary flex-[2] px-5 py-3 rounded-full text-sm font-semibold">동의하고 가입하기</button>
+        </div>
+
+      </div>
+
+      <!-- Login link -->
+      <p class="text-center text-sm text-slate2 mt-8">
+        이미 계정이 있으신가요?
+        <a class="link-blue ml-1 font-medium" href="#">로그인</a>
+      </p>
+
+    </div>
+  </section>
+
+
+  <div data-site-footer data-page-id="PG-PUB-002"></div>
+
+</main>
+
+<script src="_shared/site.js"></script>
+</body>
+</html>

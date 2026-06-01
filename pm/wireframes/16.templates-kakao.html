@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>카카오 비즈메시지 템플릿 — WiseCan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="_shared/tw-config.js"></script>
+  <link rel="stylesheet" href="_shared/style.css">
+</head>
+<body class="bg-white">
+
+<!-- 상단 헤더 -->
+<header class="fixed top-0 inset-x-0 h-16 bg-white border-b border-line flex items-center px-6 z-30">
+  <a href="01.index.html" class="font-semibold text-lg tracking-tight text-ink mr-10">WiseCan</a>
+  <nav class="flex items-center gap-6 text-sm">
+    <a href="#" class="nav-link">대시보드</a>
+    <a href="#" class="nav-link">발송</a>
+    <a href="#" class="nav-link">이력</a>
+    <a href="#" class="nav-link font-semibold text-ink">템플릿</a>
+    <a href="#" class="nav-link">결제</a>
+  </nav>
+  <div class="ml-auto flex items-center gap-4">
+    <span class="text-sm text-stone">잔액 <strong class="text-ink">₩123,450</strong></span>
+    <button class="btn btn-primary text-sm px-4 py-1.5 rounded-lg">충전</button>
+    <div class="w-8 h-8 rounded-full bg-psblue-wash flex items-center justify-center text-psblue-main text-sm font-semibold">김</div>
+  </div>
+</header>
+
+<main class="pt-16">
+  <div class="flex">
+    <!-- 사이드바 -->
+    <div data-member-sidebar data-active="16.templates-kakao.html"></div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="flex-1 p-8 min-w-0">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-xl font-semibold text-ink">카카오 비즈메시지 템플릿</h1>
+          <p class="text-sm text-stone mt-0.5">알림톡·친구톡 메시지 양식의 등록·심사 상태를 관리하세요</p>
+        </div>
+        <button class="btn btn-primary text-sm px-4 py-2 rounded-lg flex items-center gap-2">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          새 템플릿
+        </button>
+      </div>
+
+      <!-- 발신 프로필(카카오 채널) 컨텍스트 -->
+      <div class="surface rounded-xl p-4 mb-5 flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-graphite" style="background:#FEE500">ch</div>
+          <div>
+            <p class="text-sm font-medium text-ink">@wisecan</p>
+            <p class="text-xs text-stone">발신 프로필 · 카카오톡 채널 연동 완료</p>
+          </div>
+        </div>
+        <select class="input text-sm w-44 ml-auto">
+          <option>@wisecan (공식)</option>
+          <option>@wisecan-shop</option>
+        </select>
+      </div>
+
+      <!-- 필터바 -->
+      <div class="flex gap-3 mb-5 flex-wrap">
+        <div class="relative flex-1 max-w-sm min-w-[200px]">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" class="input pl-9 text-sm" placeholder="템플릿 이름 또는 코드 검색">
+        </div>
+        <select class="input text-sm w-36">
+          <option>전체 종류</option>
+          <option>알림톡</option>
+          <option>친구톡</option>
+        </select>
+        <select class="input text-sm w-44">
+          <option>전체 유형</option>
+          <optgroup label="알림톡">
+            <option>기본형</option>
+            <option>강조표기형</option>
+            <option>이미지형</option>
+            <option>아이템리스트형</option>
+          </optgroup>
+          <optgroup label="친구톡">
+            <option>텍스트형</option>
+            <option>이미지형</option>
+            <option>와이드 이미지형</option>
+          </optgroup>
+        </select>
+        <select class="input text-sm w-32">
+          <option>전체 상태</option>
+          <option>신청</option>
+          <option>심사 중</option>
+          <option>승인</option>
+          <option>반려</option>
+        </select>
+      </div>
+
+      <!-- 템플릿 그리드 -->
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+
+        <!-- 1. 알림톡 기본형, 승인 -->
+        <div class="surface rounded-xl p-4 flex flex-col">
+          <div class="flex items-center justify-between mb-2 gap-1.5 flex-wrap">
+            <div class="flex items-center gap-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" style="background:#FEE500;color:#3C1E1E">알림톡</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cloud text-graphite border border-line">기본형</span>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">승인</span>
+          </div>
+          <p class="font-semibold text-ink">주문 접수 안내</p>
+          <p class="text-xs text-stone font-mono mt-0.5">TPL_001 · AT</p>
+
+          <!-- 미리보기 -->
+          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div class="px-3 py-1.5 text-[10px] font-semibold text-graphite text-center" style="background:#FEE500">알림톡 도착</div>
+              <div class="px-3 py-2 flex items-center gap-2 border-b border-line">
+                <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-graphite" style="background:#FEE500">ch</div>
+                <span class="text-xs font-medium text-graphite">@wisecan</span>
+              </div>
+              <div class="px-3 py-3 text-[11px] text-graphite leading-relaxed whitespace-pre-line">{name}님, 주문해 주셔서 감사합니다.
+
+주문번호: <span class="font-mono">{order_no}</span>
+주문일시: {ordered_at}
+결제금액: <span class="font-semibold">{amount}원</span>
+
+배송이 시작되면 다시 안내드릴게요.</div>
+              <div class="px-3 pb-3 space-y-1.5">
+                <button class="w-full text-[11px] py-1.5 rounded-md bg-cloud text-graphite border border-line">주문 상세 보기</button>
+                <button class="w-full text-[11px] py-1.5 rounded-md bg-cloud text-graphite border border-line">채널 추가</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-xs text-stone mt-4 pt-3 border-t border-line flex justify-between">
+            <span>등록 2026-05-10</span>
+            <span class="text-green-700 inline-flex items-center gap-1">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>발송 가능
+            </span>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button class="btn btn-secondary text-xs px-3 py-1.5 rounded-md flex-1">수정</button>
+            <button class="text-xs text-graphite border border-line px-3 py-1.5 rounded-md hover:bg-cloud">복제</button>
+            <button class="text-xs text-stone hover:text-psred-main px-3 py-1.5 rounded-md border border-line hover:bg-red-50 transition-colors">삭제</button>
+          </div>
+        </div>
+
+        <!-- 2. 알림톡 강조표기형, 승인 -->
+        <div class="surface rounded-xl p-4 flex flex-col">
+          <div class="flex items-center justify-between mb-2 gap-1.5 flex-wrap">
+            <div class="flex items-center gap-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" style="background:#FEE500;color:#3C1E1E">알림톡</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cloud text-graphite border border-line">강조표기형</span>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">승인</span>
+          </div>
+          <p class="font-semibold text-ink">인증번호 발송</p>
+          <p class="text-xs text-stone font-mono mt-0.5">TPL_002 · AT</p>
+
+          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div class="px-3 py-1.5 text-[10px] font-semibold text-graphite text-center" style="background:#FEE500">알림톡 도착</div>
+              <div class="px-3 py-2 flex items-center gap-2 border-b border-line">
+                <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-graphite" style="background:#FEE500">ch</div>
+                <span class="text-xs font-medium text-graphite">@wisecan</span>
+              </div>
+              <div class="px-3 pt-3 pb-2">
+                <p class="text-[10px] text-stone">인증번호</p>
+                <p class="text-xl font-bold text-ink tracking-widest mt-0.5">{code}</p>
+              </div>
+              <div class="px-3 py-2 text-[11px] text-graphite leading-relaxed border-t border-line">본인 확인을 위한 인증번호입니다. 3분 이내에 입력해 주세요. 타인에게 노출되지 않도록 주의해 주세요.</div>
+              <div class="px-3 py-2 pb-3">
+                <button class="w-full text-[11px] py-1.5 rounded-md bg-cloud text-graphite border border-line">인증하러 가기</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-xs text-stone mt-4 pt-3 border-t border-line flex justify-between">
+            <span>등록 2026-04-15</span>
+            <span class="text-green-700 inline-flex items-center gap-1">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>발송 가능
+            </span>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button class="btn btn-secondary text-xs px-3 py-1.5 rounded-md flex-1">수정</button>
+            <button class="text-xs text-graphite border border-line px-3 py-1.5 rounded-md hover:bg-cloud">복제</button>
+            <button class="text-xs text-stone hover:text-psred-main px-3 py-1.5 rounded-md border border-line hover:bg-red-50 transition-colors">삭제</button>
+          </div>
+        </div>
+
+        <!-- 3. 알림톡 아이템리스트형, 심사 중 -->
+        <div class="surface rounded-xl p-4 flex flex-col">
+          <div class="flex items-center justify-between mb-2 gap-1.5 flex-wrap">
+            <div class="flex items-center gap-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" style="background:#FEE500;color:#3C1E1E">알림톡</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cloud text-graphite border border-line">아이템리스트형</span>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700">심사 중</span>
+          </div>
+          <p class="font-semibold text-ink">배송 출발 안내</p>
+          <p class="text-xs text-stone font-mono mt-0.5">TPL_003 · AT</p>
+
+          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div class="px-3 py-1.5 text-[10px] font-semibold text-graphite text-center" style="background:#FEE500">알림톡 도착</div>
+              <div class="px-3 py-2 flex items-center gap-2 border-b border-line">
+                <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-graphite" style="background:#FEE500">ch</div>
+                <span class="text-xs font-medium text-graphite">@wisecan</span>
+              </div>
+              <div class="px-3 pt-3 pb-2 text-[11px] text-graphite">{name}님, 주문하신 상품이 출발했습니다.</div>
+              <div class="px-3 pb-2 space-y-1.5 text-[11px]">
+                <div class="flex justify-between border-b border-mist pb-1.5"><span class="text-stone">주문번호</span><span class="text-graphite font-mono">{order_no}</span></div>
+                <div class="flex justify-between border-b border-mist pb-1.5"><span class="text-stone">택배사</span><span class="text-graphite">{carrier}</span></div>
+                <div class="flex justify-between border-b border-mist pb-1.5"><span class="text-stone">송장번호</span><span class="text-graphite font-mono">{tracking_no}</span></div>
+                <div class="flex justify-between"><span class="text-stone">예상도착</span><span class="text-graphite">{eta}</span></div>
+              </div>
+              <div class="px-3 py-2 pb-3 space-y-1.5">
+                <button class="w-full text-[11px] py-1.5 rounded-md bg-cloud text-graphite border border-line">배송 조회</button>
+                <button class="w-full text-[11px] py-1.5 rounded-md bg-cloud text-graphite border border-line">고객센터 연결</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-xs text-stone mt-4 pt-3 border-t border-line flex justify-between">
+            <span>등록 2026-05-28</span>
+            <span class="text-stone">영업일 1~2일</span>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button class="btn btn-secondary text-xs px-3 py-1.5 rounded-md flex-1 opacity-50 cursor-not-allowed" disabled>수정</button>
+            <button class="text-xs text-graphite border border-line px-3 py-1.5 rounded-md hover:bg-cloud">복제</button>
+            <button class="text-xs link-blue px-3 py-1.5 rounded-md hover:bg-psblue-wash transition-colors border border-line">심사 보기</button>
+          </div>
+        </div>
+
+        <!-- 4. 알림톡 이미지형, 신청 -->
+        <div class="surface rounded-xl p-4 flex flex-col">
+          <div class="flex items-center justify-between mb-2 gap-1.5 flex-wrap">
+            <div class="flex items-center gap-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" style="background:#FEE500;color:#3C1E1E">알림톡</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cloud text-graphite border border-line">이미지형</span>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cloud text-stone border border-line">신청</span>
+          </div>
+          <p class="font-semibold text-ink">멤버십 등급 변경</p>
+          <p class="text-xs text-stone font-mono mt-0.5">TPL_004 · AI</p>
+
+          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div class="px-3 py-1.5 text-[10px] font-semibold text-graphite text-center" style="background:#FEE500">알림톡 도착</div>
+              <div class="px-3 py-2 flex items-center gap-2 border-b border-line">
+                <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-graphite" style="background:#FEE500">ch</div>
+                <span class="text-xs font-medium text-graphite">@wisecan</span>
+              </div>
+              <div class="aspect-[2/1] bg-gradient-to-br from-amber-200 via-amber-300 to-amber-500 flex items-center justify-center">
+                <p class="text-white font-bold text-lg tracking-tight drop-shadow">VIP MEMBER</p>
+              </div>
+              <div class="px-3 py-2.5 text-[11px] text-graphite leading-relaxed">{name}님, 축하드립니다! 이번 달부터 <span class="font-semibold">VIP 등급</span>으로 변경되었습니다. 더 풍성한 혜택을 만나보세요.</div>
+              <div class="px-3 pb-3">
+                <button class="w-full text-[11px] py-1.5 rounded-md bg-cloud text-graphite border border-line">혜택 확인하기</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-xs text-stone mt-4 pt-3 border-t border-line flex justify-between">
+            <span>등록 2026-06-01</span>
+            <span class="text-stone">심사 대기</span>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button class="btn btn-secondary text-xs px-3 py-1.5 rounded-md flex-1">수정</button>
+            <button class="text-xs text-graphite border border-line px-3 py-1.5 rounded-md hover:bg-cloud">복제</button>
+            <button class="text-xs text-stone hover:text-psred-main px-3 py-1.5 rounded-md border border-line hover:bg-red-50 transition-colors">삭제</button>
+          </div>
+        </div>
+
+        <!-- 5. 친구톡 와이드 이미지형, 승인 -->
+        <div class="surface rounded-xl p-4 flex flex-col">
+          <div class="flex items-center justify-between mb-2 gap-1.5 flex-wrap">
+            <div class="flex items-center gap-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">친구톡</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cloud text-graphite border border-line">와이드이미지형</span>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">승인</span>
+          </div>
+          <p class="font-semibold text-ink">여름 시즌 프로모션</p>
+          <p class="text-xs text-stone font-mono mt-0.5">TPL_005 · FW · <span class="text-psred-main">광고</span></p>
+
+          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div class="px-3 py-1.5 text-[10px] font-semibold text-graphite text-center" style="background:#FEE500">친구톡 도착</div>
+              <div class="px-3 py-2 flex items-center gap-2 border-b border-line">
+                <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-graphite" style="background:#FEE500">ch</div>
+                <span class="text-xs font-medium text-graphite">@wisecan</span>
+                <span class="ml-auto text-[10px] text-stone">(광고)</span>
+              </div>
+              <div class="aspect-[5/3] bg-gradient-to-br from-sky-300 via-cyan-400 to-emerald-400 flex items-center justify-center">
+                <div class="text-center text-white">
+                  <p class="text-[10px] uppercase tracking-widest opacity-80">Summer Sale</p>
+                  <p class="text-2xl font-extrabold tracking-tight mt-0.5">최대 50% OFF</p>
+                </div>
+              </div>
+              <div class="px-3 py-2.5 text-[11px] text-graphite leading-relaxed">{name}님만을 위한 시즌 특가가 도착했어요. 8월 31일까지, 베스트 아이템을 만나보세요.</div>
+              <div class="px-3 pb-3 space-y-1.5">
+                <button class="w-full text-[11px] py-1.5 rounded-md bg-cloud text-graphite border border-line">기획전 보러가기</button>
+                <button class="w-full text-[11px] py-1.5 rounded-md bg-cloud text-stone border border-line">수신거부</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-xs text-stone mt-4 pt-3 border-t border-line flex justify-between">
+            <span>등록 2026-05-22</span>
+            <span class="text-green-700 inline-flex items-center gap-1">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>발송 가능
+            </span>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button class="btn btn-secondary text-xs px-3 py-1.5 rounded-md flex-1">수정</button>
+            <button class="text-xs text-graphite border border-line px-3 py-1.5 rounded-md hover:bg-cloud">복제</button>
+            <button class="text-xs text-stone hover:text-psred-main px-3 py-1.5 rounded-md border border-line hover:bg-red-50 transition-colors">삭제</button>
+          </div>
+        </div>
+
+        <!-- 6. 알림톡 기본형, 반려 -->
+        <div class="surface rounded-xl p-4 flex flex-col">
+          <div class="flex items-center justify-between mb-2 gap-1.5 flex-wrap">
+            <div class="flex items-center gap-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" style="background:#FEE500;color:#3C1E1E">알림톡</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cloud text-graphite border border-line">기본형</span>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-psred-main">반려</span>
+          </div>
+          <p class="font-semibold text-ink">포인트 소멸 예고</p>
+          <p class="text-xs text-stone font-mono mt-0.5">TPL_006 · AT</p>
+
+          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div class="px-3 py-1.5 text-[10px] font-semibold text-graphite text-center" style="background:#FEE500">알림톡 도착</div>
+              <div class="px-3 py-2 flex items-center gap-2 border-b border-line">
+                <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-graphite" style="background:#FEE500">ch</div>
+                <span class="text-xs font-medium text-graphite">@wisecan</span>
+              </div>
+              <div class="px-3 py-3 text-[11px] text-graphite leading-relaxed">{name}님, 보유하신 포인트 <span class="font-semibold">{point}P</span>가 곧 소멸될 예정입니다. 지금 사용하시면 추가 5% 할인 혜택까지 받을 수 있어요!</div>
+              <div class="px-3 pb-3">
+                <button class="w-full text-[11px] py-1.5 rounded-md bg-cloud text-graphite border border-line">포인트 사용하기</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-[11px] text-psred-main leading-relaxed">
+            <span class="font-medium">반려 사유</span> · 본문에 "추가 5% 할인" 등 광고성 문구가 포함되어 정보성 메시지인 알림톡으로 발송할 수 없습니다. 광고 문구는 친구톡으로 전환해 주세요.
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button class="btn btn-secondary text-xs px-3 py-1.5 rounded-md flex-1">수정 후 재신청</button>
+            <button class="text-xs text-graphite border border-line px-3 py-1.5 rounded-md hover:bg-cloud">친구톡으로 전환</button>
+            <button class="text-xs text-stone hover:text-psred-main px-3 py-1.5 rounded-md border border-line hover:bg-red-50 transition-colors">삭제</button>
+          </div>
+        </div>
+
+        <!-- 7. 빈 카드 -->
+        <div class="border-2 border-dashed border-line rounded-xl p-5 flex flex-col items-center justify-center text-center min-h-[480px] hover:border-psblue-main/50 hover:bg-psblue-wash/20 transition-colors cursor-pointer group">
+          <div class="w-12 h-12 rounded-full bg-mist flex items-center justify-center mb-3 group-hover:bg-psblue-wash transition-colors">
+            <svg class="w-6 h-6 text-stone group-hover:text-psblue-main transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+          <p class="text-sm font-medium text-stone group-hover:text-psblue-main transition-colors">새 카카오 템플릿</p>
+          <p class="text-xs text-stone mt-1 max-w-[200px]">알림톡(기본·강조·이미지·아이템리스트) 또는<br>친구톡(텍스트·이미지·와이드) 중 선택</p>
+        </div>
+      </div>
+
+      <!-- 안내 박스 -->
+      <div class="mt-8 surface rounded-xl p-5 bg-cloud">
+        <div class="flex gap-3">
+          <svg class="w-5 h-5 text-psblue-main shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div class="text-sm text-graphite space-y-2 flex-1">
+            <p class="font-medium">카카오 비즈메시지 안내</p>
+            <div class="grid sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-stone leading-relaxed">
+              <div>
+                <p class="text-graphite font-medium mb-1">알림톡 (정보성)</p>
+                <ul class="list-disc list-inside space-y-0.5">
+                  <li>기본형 / 강조표기형 / 이미지형 / 아이템리스트형</li>
+                  <li>광고·홍보 문구 포함 시 반려됨</li>
+                  <li>수신자가 채널 친구가 아니어도 발송 가능</li>
+                  <li>본문 1,000자, 버튼 최대 5개</li>
+                </ul>
+              </div>
+              <div>
+                <p class="text-graphite font-medium mb-1">친구톡 (마케팅)</p>
+                <ul class="list-disc list-inside space-y-0.5">
+                  <li>텍스트형 / 이미지형 / 와이드 이미지형</li>
+                  <li>광고 메시지 가능, (광고) 표기 + 수신거부 필수</li>
+                  <li>채널을 추가한 친구에게만 발송</li>
+                  <li>이미지 800×400px / 와이드 800×600px, 최대 500KB</li>
+                </ul>
+              </div>
+            </div>
+            <p class="text-xs text-stone pt-2 border-t border-line/60">
+              버튼은 웹링크(WL) · 앱링크(AL) · 배송조회(DS) · 봇키워드(BK) · 상담톡(BC) · 채널추가(AC) 등을 사용할 수 있고, 본문에 <span class="font-mono text-graphite">{name}</span>, <span class="font-mono text-graphite">{order_no}</span> 같은 변수를 넣어 개인화할 수 있습니다.
+              템플릿은 카카오 비즈메시지 심사를 거치며, 영업일 기준 1~2일 소요됩니다.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="_shared/site.js"></script>
+</body>
+</html>

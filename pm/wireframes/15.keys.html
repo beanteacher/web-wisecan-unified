@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>API 키 관리 — WiseCan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="_shared/tw-config.js"></script>
+  <link rel="stylesheet" href="_shared/style.css">
+</head>
+<body>
+<div data-site-header></div>
+<main class="pt-16">
+  <div class="flex">
+    <div data-member-sidebar data-active="15.keys.html"></div>
+    <div class="flex-1 p-8 bg-cloud min-h-screen">
+
+      <div class="mb-8 flex items-start justify-between">
+        <div>
+          <p class="eyebrow">api</p>
+          <h1 class="text-2xl font-semibold text-ink mt-1">API 키 관리</h1>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn btn-secondary px-4 py-2.5 rounded-full text-sm flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            테스트 키 발급
+          </button>
+          <button class="btn btn-primary px-4 py-2.5 rounded-full text-sm flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            운영 키 발급
+          </button>
+        </div>
+      </div>
+
+      <!-- 안내 배너 -->
+      <div class="flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200 mb-6">
+        <svg class="text-amber-500 flex-shrink-0 mt-0.5" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        <p class="text-xs text-amber-800">API 키는 발급 시 한 번만 전체 표시됩니다. 즉시 안전한 곳에 보관하세요. 분실 시 재발급이 필요합니다.</p>
+      </div>
+
+      <div class="space-y-4">
+
+        <!-- 테스트 키 카드 -->
+        <div class="surface rounded-2xl p-6">
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">테스트</span>
+              <div>
+                <p class="font-semibold text-graphite">개발 테스트 키</p>
+                <p class="text-xs text-stone mt-0.5">생성일: 2026-03-10 · 마지막 사용: 2026-05-31 14:22</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="flex items-center gap-1.5 text-xs text-green-700 font-medium">
+                <span class="status-dot bg-green-500"></span>활성
+              </span>
+              <button class="text-xs text-psred-main hover:text-psred-deep font-medium ml-3">폐기</button>
+            </div>
+          </div>
+
+          <!-- 키 값 -->
+          <div class="bg-cloud rounded-xl p-3 flex items-center gap-3 mb-4 font-mono text-sm">
+            <span class="text-graphite flex-1 truncate">wc_test_••••••••••••••••••••••••••••••••</span>
+            <button class="flex items-center gap-1.5 text-xs text-psblue-main hover:text-psblue-deep font-medium flex-shrink-0">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+              복사
+            </button>
+          </div>
+
+          <!-- 스코프 칩 -->
+          <div>
+            <p class="text-xs text-stone mb-2 font-medium uppercase tracking-widest">허용 스코프</p>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">sms:send</span>
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">sms:read</span>
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">lms:send</span>
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">lms:read</span>
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">mms:send</span>
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">balance:read</span>
+            </div>
+          </div>
+
+          <!-- 사용 통계 -->
+          <div class="mt-4 pt-4 border-t border-mist grid grid-cols-3 gap-4">
+            <div>
+              <p class="text-xs text-stone">오늘 호출</p>
+              <p class="text-lg font-semibold text-graphite mt-0.5">247</p>
+            </div>
+            <div>
+              <p class="text-xs text-stone">이번 달 호출</p>
+              <p class="text-lg font-semibold text-graphite mt-0.5">5,821</p>
+            </div>
+            <div>
+              <p class="text-xs text-stone">일일 한도</p>
+              <p class="text-lg font-semibold text-graphite mt-0.5">1,000</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 운영 키 카드 -->
+        <div class="surface rounded-2xl p-6">
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-psblue-soft text-psblue-deep">운영</span>
+              <div>
+                <p class="font-semibold text-graphite">운영 API 키</p>
+                <p class="text-xs text-stone mt-0.5">생성일: 2026-01-20 · 마지막 사용: 2026-06-01 09:15</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="flex items-center gap-1.5 text-xs text-green-700 font-medium">
+                <span class="status-dot bg-green-500"></span>활성
+              </span>
+              <button class="text-xs text-psred-main hover:text-psred-deep font-medium ml-3">폐기</button>
+            </div>
+          </div>
+
+          <!-- 키 값 -->
+          <div class="bg-cloud rounded-xl p-3 flex items-center gap-3 mb-4 font-mono text-sm">
+            <span class="text-graphite flex-1 truncate">wc_live_••••••••••••••••••••••••••••••••</span>
+            <button class="flex items-center gap-1.5 text-xs text-psblue-main hover:text-psblue-deep font-medium flex-shrink-0">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+              복사
+            </button>
+          </div>
+
+          <!-- 스코프 칩 -->
+          <div>
+            <p class="text-xs text-stone mb-2 font-medium uppercase tracking-widest">허용 스코프</p>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">sms:send</span>
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">sms:read</span>
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">lms:send</span>
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">lms:read</span>
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">mms:send</span>
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">mms:read</span>
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">kakao:send</span>
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">kakao:read</span>
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">rcs:send</span>
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">rcs:read</span>
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">balance:read</span>
+              <span class="px-2.5 py-1 rounded-full text-xs bg-mist text-graphite">callback:read</span>
+            </div>
+          </div>
+
+          <!-- 사용 통계 -->
+          <div class="mt-4 pt-4 border-t border-mist grid grid-cols-3 gap-4">
+            <div>
+              <p class="text-xs text-stone">오늘 호출</p>
+              <p class="text-lg font-semibold text-graphite mt-0.5">12,450</p>
+            </div>
+            <div>
+              <p class="text-xs text-stone">이번 달 호출</p>
+              <p class="text-lg font-semibold text-graphite mt-0.5">284,312</p>
+            </div>
+            <div>
+              <p class="text-xs text-stone">일일 한도</p>
+              <p class="text-lg font-semibold text-graphite mt-0.5">무제한</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty 상태 (주석) -->
+        <!--
+        <div class="surface rounded-2xl p-12 text-center">
+          <svg class="mx-auto text-stone mb-3" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+          <p class="text-sm font-medium text-graphite">발급된 API 키가 없습니다</p>
+          <p class="text-xs text-stone mt-1">테스트 키 또는 운영 키를 발급하세요.</p>
+        </div>
+        -->
+
+      </div>
+    </div>
+  </div>
+</main>
+<div data-site-footer data-page-id="PG-KEY-001"></div>
+<script src="_shared/site.js"></script>
+</body>
+</html>

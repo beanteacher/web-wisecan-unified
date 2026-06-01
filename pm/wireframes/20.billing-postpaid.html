@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>후불 — WiseCan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="_shared/tw-config.js"></script>
+  <link rel="stylesheet" href="_shared/style.css">
+</head>
+<body class="bg-white">
+
+<!-- 상단 헤더 -->
+<header class="fixed top-0 inset-x-0 h-16 bg-white border-b border-line flex items-center px-6 z-30">
+  <a href="01.index.html" class="font-semibold text-lg tracking-tight text-ink mr-10">WiseCan</a>
+  <nav class="flex items-center gap-6 text-sm">
+    <a href="#" class="nav-link">대시보드</a>
+    <a href="#" class="nav-link">발송</a>
+    <a href="#" class="nav-link">이력</a>
+    <a href="#" class="nav-link">템플릿</a>
+    <a href="#" class="nav-link font-semibold text-ink">결제</a>
+  </nav>
+  <div class="ml-auto flex items-center gap-4">
+    <span class="text-sm text-stone">잔액 <strong class="text-ink">₩123,450</strong></span>
+    <button class="btn btn-primary text-sm px-4 py-1.5 rounded-lg">충전</button>
+    <div class="w-8 h-8 rounded-full bg-psblue-wash flex items-center justify-center text-psblue-main text-sm font-semibold">김</div>
+  </div>
+</header>
+
+<main class="pt-16">
+  <div class="flex">
+    <!-- 사이드바 -->
+    <div data-member-sidebar data-active="20.billing-postpaid.html"></div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="flex-1 p-8 min-w-0">
+      <div class="mb-6">
+        <h1 class="text-xl font-semibold text-ink">후불</h1>
+        <p class="text-sm text-stone mt-0.5">사업자 회원 전용 — 월 사용분을 다음 달 청구합니다</p>
+      </div>
+
+      <!-- ── 상태 A: 미신청 ── -->
+      <div class="max-w-2xl space-y-6" id="state-not-applied">
+
+        <div class="surface rounded-xl p-6">
+          <div class="flex items-start gap-4 mb-5">
+            <div class="w-10 h-10 rounded-xl bg-psblue-wash flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5 text-psblue-main" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+            </div>
+            <div>
+              <h2 class="font-semibold text-ink">후불 서비스 신청</h2>
+              <p class="text-sm text-stone mt-1">신용 검토 후 월 한도를 부여합니다. 심사 완료까지 영업일 2~3일이 소요됩니다.</p>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="field-label block mb-1">사업자등록번호</label>
+              <input type="text" class="input text-sm" placeholder="000-00-00000" value="123-45-67890" disabled>
+              <p class="help">가입 시 등록된 사업자번호로 신용을 검토합니다</p>
+            </div>
+
+            <div>
+              <label class="field-label block mb-1">신청 한도</label>
+              <select class="input text-sm">
+                <option>₩500,000 / 월</option>
+                <option>₩1,000,000 / 월</option>
+                <option>₩3,000,000 / 월</option>
+                <option>₩5,000,000 / 월</option>
+              </select>
+              <p class="help">신용 검토 결과에 따라 실제 부여 한도가 다를 수 있습니다</p>
+            </div>
+
+            <div class="p-4 bg-cloud rounded-lg space-y-2 text-sm text-stone">
+              <p class="font-medium text-ink flex items-center gap-2">
+                <svg class="w-4 h-4 text-psblue-main" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                신청 전 확인사항
+              </p>
+              <ul class="space-y-1 list-disc list-inside text-xs pl-1">
+                <li>보증보험 가입이 필요할 수 있습니다 (한도에 따라 결정).</li>
+                <li>청구서는 매월 1일 이메일로 발송되며, 10일 이내 결제해야 합니다.</li>
+                <li>결제가 연체되면 발송이 자동 차단됩니다.</li>
+                <li>후불 이용 중 선불 충전도 병행 가능합니다.</li>
+              </ul>
+            </div>
+
+            <div class="flex items-start gap-2">
+              <span class="check checked mt-0.5 shrink-0"></span>
+              <p class="text-sm text-stone">위 내용을 확인했으며, 후불 서비스 이용약관에 동의합니다</p>
+            </div>
+          </div>
+
+          <button class="btn btn-primary text-sm px-6 py-2.5 rounded-lg mt-5">신청하기</button>
+        </div>
+      </div>
+
+      <!-- ── 상태 B: 승인 완료 + 연체 배너 ── -->
+      <div class="max-w-3xl space-y-5 hidden" id="state-approved">
+
+        <!-- 연체 경고 배너 -->
+        <div class="border-l-4 border-psred-main bg-red-50 rounded-r-xl px-5 py-4 flex items-center gap-4">
+          <svg class="w-5 h-5 text-psred-main shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div class="flex-1">
+            <p class="font-semibold text-psred-main text-sm">결제 연체 — 발송이 차단됩니다</p>
+            <p class="text-xs text-stone mt-0.5">2026년 5월 청구서(₩234,500)가 미결제 상태입니다. 즉시 결제하지 않으면 모든 발송이 차단됩니다.</p>
+          </div>
+          <button class="btn btn-commerce text-sm px-4 py-2 rounded-lg shrink-0">지금 결제</button>
+        </div>
+
+        <!-- 한도 현황 -->
+        <div class="surface rounded-xl p-5 flex gap-6">
+          <div class="flex-1">
+            <p class="text-xs text-stone mb-1">월 한도</p>
+            <p class="text-lg font-semibold text-ink">₩1,000,000</p>
+          </div>
+          <div class="flex-1">
+            <p class="text-xs text-stone mb-1">이번 달 사용</p>
+            <p class="text-lg font-semibold text-ink">₩412,300</p>
+          </div>
+          <div class="flex-1">
+            <p class="text-xs text-stone mb-1">잔여 한도</p>
+            <p class="text-lg font-semibold text-psblue-main">₩587,700</p>
+          </div>
+          <div class="flex-1">
+            <p class="text-xs text-stone mb-1">결제일</p>
+            <p class="text-lg font-semibold text-ink">매월 10일</p>
+          </div>
+        </div>
+
+        <!-- 청구서 목록 -->
+        <div class="surface rounded-xl overflow-hidden">
+          <div class="px-5 py-4 border-b border-line">
+            <h2 class="text-sm font-semibold text-ink">청구서 목록</h2>
+          </div>
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-cloud border-b border-line">
+                <th class="text-left px-4 py-3 font-medium text-stone">청구 기간</th>
+                <th class="text-left px-4 py-3 font-medium text-stone">청구 금액</th>
+                <th class="text-left px-4 py-3 font-medium text-stone">결제 기한</th>
+                <th class="text-left px-4 py-3 font-medium text-stone">상태</th>
+                <th class="text-left px-4 py-3 font-medium text-stone">액션</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-line">
+              <tr class="hover:bg-cloud/50 bg-red-50/30">
+                <td class="px-4 py-3 text-graphite">2026년 5월</td>
+                <td class="px-4 py-3 font-semibold text-ink">₩234,500</td>
+                <td class="px-4 py-3 text-psred-main font-medium">2026-06-10 <span class="text-xs">(D-9)</span></td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-psred-main">연체</span>
+                </td>
+                <td class="px-4 py-3">
+                  <button class="btn btn-commerce text-xs px-3 py-1.5 rounded-md">결제하기</button>
+                </td>
+              </tr>
+              <tr class="hover:bg-cloud/50">
+                <td class="px-4 py-3 text-graphite">2026년 4월</td>
+                <td class="px-4 py-3 font-medium text-ink">₩189,200</td>
+                <td class="px-4 py-3 text-stone">2026-05-10</td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">완납</span>
+                </td>
+                <td class="px-4 py-3">
+                  <button class="btn btn-secondary text-xs px-3 py-1.5 rounded-md">영수증</button>
+                </td>
+              </tr>
+              <tr class="hover:bg-cloud/50">
+                <td class="px-4 py-3 text-graphite">2026년 3월</td>
+                <td class="px-4 py-3 font-medium text-ink">₩312,700</td>
+                <td class="px-4 py-3 text-stone">2026-04-10</td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">완납</span>
+                </td>
+                <td class="px-4 py-3">
+                  <button class="btn btn-secondary text-xs px-3 py-1.5 rounded-md">영수증</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="_shared/site.js"></script>
+</body>
+</html>

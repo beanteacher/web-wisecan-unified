@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>발송 이력 — WiseCan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="_shared/tw-config.js"></script>
+  <link rel="stylesheet" href="_shared/style.css">
+</head>
+<body class="bg-white">
+
+<!-- 상단 헤더 -->
+<header class="fixed top-0 inset-x-0 h-16 bg-white border-b border-line flex items-center px-6 z-30">
+  <a href="01.index.html" class="font-semibold text-lg tracking-tight text-ink mr-10">WiseCan</a>
+  <nav class="flex items-center gap-6 text-sm">
+    <a href="#" class="nav-link">대시보드</a>
+    <a href="#" class="nav-link">발송</a>
+    <a href="#" class="nav-link font-semibold text-ink">이력</a>
+    <a href="#" class="nav-link">템플릿</a>
+    <a href="#" class="nav-link">결제</a>
+  </nav>
+  <div class="ml-auto flex items-center gap-4">
+    <span class="text-sm text-stone">잔액 <strong class="text-ink">₩123,450</strong></span>
+    <button class="btn btn-primary text-sm px-4 py-1.5 rounded-lg">충전</button>
+    <div class="w-8 h-8 rounded-full bg-psblue-wash flex items-center justify-center text-psblue-main text-sm font-semibold">김</div>
+  </div>
+</header>
+
+<main class="pt-16">
+  <div class="flex">
+    <!-- 사이드바 -->
+    <div data-member-sidebar data-active="11.histories.html"></div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="flex-1 p-8 min-w-0">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-xl font-semibold text-ink">발송 이력</h1>
+          <p class="text-sm text-stone mt-0.5">기간·채널·번호로 발송 결과를 조회하세요</p>
+        </div>
+        <button class="btn btn-secondary text-sm px-4 py-2 rounded-lg flex items-center gap-2">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          CSV 다운로드
+        </button>
+      </div>
+
+      <!-- 필터바 -->
+      <div class="surface rounded-xl p-4 mb-5">
+        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div>
+            <label class="field-label block mb-1">기간</label>
+            <div class="flex gap-2">
+              <input type="date" class="input text-sm" value="2026-05-01">
+              <span class="self-center text-stone text-sm">~</span>
+              <input type="date" class="input text-sm" value="2026-06-01">
+            </div>
+          </div>
+          <div>
+            <label class="field-label block mb-1">채널</label>
+            <select class="input text-sm">
+              <option>전체</option>
+              <option>SMS</option>
+              <option>LMS</option>
+              <option>MMS</option>
+              <option>카카오 알림톡</option>
+              <option>RCS</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label block mb-1">발신번호</label>
+            <input type="text" class="input text-sm" placeholder="예: 02-1234-5678">
+          </div>
+          <div>
+            <label class="field-label block mb-1">수신번호</label>
+            <input type="text" class="input text-sm" placeholder="예: 010-****-1234">
+          </div>
+        </div>
+        <div class="flex items-center gap-3 mt-3">
+          <div class="flex-1">
+            <label class="field-label block mb-1">발송 ID</label>
+            <input type="text" class="input text-sm" placeholder="snd_...">
+          </div>
+          <div class="flex-1">
+            <label class="field-label block mb-1">상태</label>
+            <select class="input text-sm">
+              <option>전체</option>
+              <option>성공</option>
+              <option>실패</option>
+              <option>대기</option>
+              <option>예약</option>
+            </select>
+          </div>
+          <div class="flex gap-2 mt-5">
+            <button class="btn btn-primary text-sm px-5 py-2 rounded-lg">조회</button>
+            <button class="btn btn-secondary text-sm px-4 py-2 rounded-lg">초기화</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 결과 요약 -->
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-sm text-stone">총 <strong class="text-ink">1,482</strong>건</p>
+        <div class="flex items-center gap-3 text-sm text-stone">
+          <span>성공률 <strong class="text-green-600">99.1%</strong></span>
+          <span>·</span>
+          <span>실패 <strong class="text-psred-main">13</strong>건</span>
+        </div>
+      </div>
+
+      <!-- 이력 표 -->
+      <div class="surface rounded-xl overflow-hidden">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-cloud border-b border-line">
+              <th class="text-left px-4 py-3 font-medium text-stone">발송 ID</th>
+              <th class="text-left px-4 py-3 font-medium text-stone">일시</th>
+              <th class="text-left px-4 py-3 font-medium text-stone">채널</th>
+              <th class="text-left px-4 py-3 font-medium text-stone">발신번호</th>
+              <th class="text-left px-4 py-3 font-medium text-stone">수신번호</th>
+              <th class="text-left px-4 py-3 font-medium text-stone">상태</th>
+              <th class="text-left px-4 py-3 font-medium text-stone">사유</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-line">
+            <tr class="hover:bg-cloud/50 cursor-pointer" onclick="location.href='12.histories-detail.html'">
+              <td class="px-4 py-3 font-mono text-xs text-stone">snd_abc123</td>
+              <td class="px-4 py-3 text-graphite">2026-06-01 14:23</td>
+              <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-psblue-wash text-psblue-main">SMS</span></td>
+              <td class="px-4 py-3 text-graphite">02-1234-5678</td>
+              <td class="px-4 py-3 text-graphite">010-****-1234</td>
+              <td class="px-4 py-3"><span class="inline-flex items-center gap-1.5 text-green-700"><span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>성공</span></td>
+              <td class="px-4 py-3 text-stone">—</td>
+            </tr>
+            <tr class="hover:bg-cloud/50 cursor-pointer" onclick="location.href='12.histories-detail.html'">
+              <td class="px-4 py-3 font-mono text-xs text-stone">snd_abc124</td>
+              <td class="px-4 py-3 text-graphite">2026-06-01 14:20</td>
+              <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700">LMS</span></td>
+              <td class="px-4 py-3 text-graphite">02-1234-5678</td>
+              <td class="px-4 py-3 text-graphite">010-****-5678</td>
+              <td class="px-4 py-3"><span class="inline-flex items-center gap-1.5 text-psred-main"><span class="w-1.5 h-1.5 rounded-full bg-psred-main inline-block"></span>실패</span></td>
+              <td class="px-4 py-3 text-stone text-xs">수신 거부</td>
+            </tr>
+            <tr class="hover:bg-cloud/50 cursor-pointer" onclick="location.href='12.histories-detail.html'">
+              <td class="px-4 py-3 font-mono text-xs text-stone">snd_abc125</td>
+              <td class="px-4 py-3 text-graphite">2026-06-01 13:55</td>
+              <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-700">카카오</span></td>
+              <td class="px-4 py-3 text-graphite">02-1234-5678</td>
+              <td class="px-4 py-3 text-graphite">010-****-9012</td>
+              <td class="px-4 py-3"><span class="inline-flex items-center gap-1.5 text-green-700"><span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>성공</span></td>
+              <td class="px-4 py-3 text-stone">—</td>
+            </tr>
+            <tr class="hover:bg-cloud/50 cursor-pointer" onclick="location.href='12.histories-detail.html'">
+              <td class="px-4 py-3 font-mono text-xs text-stone">snd_abc126</td>
+              <td class="px-4 py-3 text-graphite">2026-06-01 13:40</td>
+              <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">RCS</span></td>
+              <td class="px-4 py-3 text-graphite">02-9999-0000</td>
+              <td class="px-4 py-3 text-graphite">010-****-3456</td>
+              <td class="px-4 py-3"><span class="inline-flex items-center gap-1.5 text-green-700"><span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>성공</span></td>
+              <td class="px-4 py-3 text-stone">—</td>
+            </tr>
+            <tr class="hover:bg-cloud/50 cursor-pointer" onclick="location.href='12.histories-detail.html'">
+              <td class="px-4 py-3 font-mono text-xs text-stone">snd_abc127</td>
+              <td class="px-4 py-3 text-graphite">2026-06-01 13:10</td>
+              <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-psblue-wash text-psblue-main">MMS</span></td>
+              <td class="px-4 py-3 text-graphite">02-1234-5678</td>
+              <td class="px-4 py-3 text-graphite">010-****-7890</td>
+              <td class="px-4 py-3"><span class="inline-flex items-center gap-1.5 text-stone"><span class="w-1.5 h-1.5 rounded-full bg-stone inline-block"></span>대기</span></td>
+              <td class="px-4 py-3 text-stone">—</td>
+            </tr>
+            <tr class="hover:bg-cloud/50 cursor-pointer" onclick="location.href='12.histories-detail.html'">
+              <td class="px-4 py-3 font-mono text-xs text-stone">snd_abc128</td>
+              <td class="px-4 py-3 text-graphite">2026-06-01 12:48</td>
+              <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-psblue-wash text-psblue-main">SMS</span></td>
+              <td class="px-4 py-3 text-graphite">02-1234-5678</td>
+              <td class="px-4 py-3 text-graphite">010-****-2233</td>
+              <td class="px-4 py-3"><span class="inline-flex items-center gap-1.5 text-psred-main"><span class="w-1.5 h-1.5 rounded-full bg-psred-main inline-block"></span>실패</span></td>
+              <td class="px-4 py-3 text-stone text-xs">번호 오류</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 페이지네이션 -->
+      <div class="flex items-center justify-between mt-5">
+        <p class="text-sm text-stone">1 – 20 / 1,482건</p>
+        <div class="flex items-center gap-1">
+          <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-line text-stone hover:bg-cloud disabled:opacity-40" disabled>
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-psblue-main text-white text-sm font-medium">1</button>
+          <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-line text-stone hover:bg-cloud text-sm">2</button>
+          <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-line text-stone hover:bg-cloud text-sm">3</button>
+          <span class="px-1 text-stone text-sm">…</span>
+          <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-line text-stone hover:bg-cloud text-sm">75</button>
+          <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-line text-stone hover:bg-cloud">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty state (조건부 — 필터 결과 없음) -->
+      <div class="hidden surface rounded-xl p-16 text-center mt-4">
+        <svg class="w-10 h-10 text-stone mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <p class="font-medium text-ink mb-1">조건에 맞는 이력이 없습니다</p>
+        <p class="text-sm text-stone mb-4">검색 기간이나 채널 조건을 변경해 보세요</p>
+        <button class="btn btn-secondary text-sm px-4 py-2 rounded-lg">필터 초기화</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="_shared/site.js"></script>
+</body>
+</html>

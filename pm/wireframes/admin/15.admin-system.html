@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>인코딩·약관·감사 로그 — WiseCan Admin</title>
+  <!-- PG-AD-014 | §10.14 | RQ-ADMIN-804~807, 009 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../_shared/tw-config.js"></script>
+  <link rel="stylesheet" href="../_shared/style.css">
+  <style>
+    body { background: #f0f2f5; }
+    .card  { background:#ffffff; border:1px solid #e4e8ec; border-radius:12px; }
+    .badge-blue   { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .badge-yellow { background:#fffbeb; color:#92400e; border:1px solid #fde68a; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .badge-green  { background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .badge-red    { background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .badge-gray   { background:#f3f4f6; color:#374151; border:1px solid #d1d5db; border-radius:9999px; font-size:0.7rem; font-weight:600; padding:1px 8px; }
+    .tbl th { font-size:0.78rem; font-weight:600; color:#5b6470; padding:10px 14px; background:#f6f8fa; border-bottom:1px solid #e4e8ec; text-align:left; }
+    .tbl td { font-size:0.85rem; color:#16191f; padding:10px 14px; border-bottom:1px solid #f0f2f5; }
+    .tbl tr:last-child td { border-bottom:none; }
+    .super-badge { display:inline-flex; align-items:center; gap:5px; background:#fef9c3; color:#854d0e; border:1px solid #fde047; border-radius:6px; font-size:0.72rem; font-weight:700; padding:2px 8px; }
+    .tab-btn { padding:6px 16px; border-radius:8px; font-size:0.85rem; font-weight:500; color:#5b6470; border:none; background:transparent; cursor:pointer; transition:background 150ms, color 150ms; }
+    .tab-btn.active { background:#0070D1; color:#fff; }
+    .tab-pane { display:none; }
+    .tab-pane.active { display:block; }
+    .btn-primary { background:#0070D1; color:#fff; border:none; border-radius:8px; padding:7px 18px; font-size:0.85rem; font-weight:600; cursor:pointer; }
+    .btn-ghost   { background:transparent; color:#5b6470; border:1px solid #e4e8ec; border-radius:8px; padding:7px 14px; font-size:0.85rem; cursor:pointer; }
+    .btn-danger  { background:#dc2626; color:#fff; border:none; border-radius:8px; padding:7px 14px; font-size:0.85rem; font-weight:600; cursor:pointer; }
+    .encoding-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #f0f2f5; }
+    .encoding-row:last-child { border-bottom:none; }
+    .encoding-label { font-size:0.83rem; font-weight:600; color:#374151; min-width:80px; }
+    .encoding-val { font-size:0.83rem; color:#5b6470; flex:1; }
+    .agent-row { display:grid; grid-template-columns:180px 100px 100px 80px 80px 1fr; align-items:center; gap:8px; padding:10px 14px; border-bottom:1px solid #f0f2f5; font-size:0.83rem; }
+    .agent-row:last-child { border-bottom:none; }
+    .agent-header { background:#f6f8fa; font-weight:600; color:#5b6470; font-size:0.78rem; border-bottom:1px solid #e4e8ec; }
+    .pulse-green  { display:inline-block; width:8px; height:8px; border-radius:9999px; background:#22c55e; box-shadow:0 0 0 0 rgba(34,197,94,.4); animation:pulse-g 1.8s infinite; }
+    .pulse-yellow { display:inline-block; width:8px; height:8px; border-radius:9999px; background:#f59e0b; }
+    .pulse-red    { display:inline-block; width:8px; height:8px; border-radius:9999px; background:#ef4444; }
+    @keyframes pulse-g { 0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)} 50%{box-shadow:0 0 0 5px rgba(34,197,94,0)} }
+    .version-tag { font-size:0.7rem; font-weight:700; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:4px; padding:1px 6px; }
+    .version-tag.current { background:#f0fdf4; color:#166534; border-color:#bbf7d0; }
+    .progress-bar { height:6px; border-radius:9999px; background:#e4e8ec; overflow:hidden; }
+    .progress-fill { height:100%; border-radius:9999px; background:#0070D1; }
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:100; display:flex; align-items:center; justify-content:center; }
+    .modal-box { background:#fff; border-radius:16px; width:520px; max-height:80vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.18); }
+  </style>
+</head>
+<body class="text-ink">
+
+<!-- 상단 바 -->
+<header class="admin-topbar fixed top-0 inset-x-0 z-40 h-16 flex items-center px-6 gap-4">
+  <span class="text-base font-semibold text-graphite">WiseCan<span style="color:#0070D1">.</span></span>
+  <span class="text-xs text-gray-500 ml-1">Admin Console</span>
+  <!-- 현재 메뉴 위치 -->
+  <nav class="flex items-center gap-1.5 text-xs ml-3" aria-label="현재 메뉴 위치">
+    <svg class="w-3 h-3 text-stone" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    <span class="text-slate2">시스템</span>
+    <svg class="w-3 h-3 text-stone" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    <span class="text-ink font-semibold">인코딩·약관·감사 로그</span>
+  </nav>
+  <div class="ml-auto flex items-center gap-3">
+    <span class="text-xs text-slate2">운영자: superadmin@wisecan.com</span>
+    <span class="super-badge">
+      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
+      SUPER_ADMIN
+    </span>
+    <button class="text-xs text-slate2 hover:text-graphite">로그아웃</button>
+  </div>
+</header>
+
+<main class="pt-16 flex">
+  <!-- 좌측 사이드바 -->
+  <div data-admin-sidebar data-active="15.admin-system.html"></div>
+
+  <!-- 본문 -->
+  <div class="flex-1 p-8 min-w-0">
+
+    <!-- 페이지 헤더 -->
+    <div class="mb-6 flex items-start justify-between">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-widest text-slate2 mb-1">시스템 · SUPER_ADMIN 전용</p>
+        <h1 class="text-2xl font-semibold text-ink">시스템 설정</h1>
+        <p class="text-sm text-slate2 mt-1">인코딩 정책·약관 버전·발송 에이전트·감사 로그를 관리합니다.</p>
+      </div>
+      <span class="super-badge mt-1">
+        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
+        SUPER_ADMIN
+      </span>
+    </div>
+
+    <!-- 탭 네비게이션 -->
+    <div class="flex items-center gap-1 mb-6 bg-white border border-e4e8ec rounded-xl p-1 w-fit" style="border-color:#e4e8ec">
+      <button class="tab-btn active" onclick="showTab('encoding')">인코딩 정책</button>
+      <button class="tab-btn" onclick="showTab('terms')">약관·개인정보 버전</button>
+      <button class="tab-btn" onclick="showTab('agents')">발송 에이전트 모니터링</button>
+      <button class="tab-btn" onclick="showTab('audit')">감사 로그 검색</button>
+    </div>
+
+    <!-- ── 탭1: 인코딩 정책 ─────────────────────────────────────────── -->
+    <div id="tab-encoding" class="tab-pane active">
+      <div class="grid grid-cols-2 gap-6">
+
+        <!-- 채널별 인코딩 설정 -->
+        <div class="card p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-semibold text-ink">채널별 인코딩 설정</h2>
+            <button class="btn-primary text-xs" onclick="document.getElementById('modal-encoding-save').classList.remove('hidden')">변경 저장</button>
+          </div>
+          <p class="text-xs text-slate2 mb-4">채널 전송 시 적용되는 기본 인코딩을 설정합니다. 변경 즉시 신규 발송 요청에 반영됩니다.</p>
+
+          <!-- SMS -->
+          <div class="mb-5">
+            <p class="text-sm font-semibold text-ink mb-2">SMS / LMS / MMS</p>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3">
+                <span class="text-xs text-slate2 w-36 flex-shrink-0">기본 인코딩</span>
+                <select class="select-field text-xs flex-1">
+                  <option selected>EUC-KR (기본값)</option>
+                  <option>UTF-8</option>
+                  <option>UTF-16</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-xs text-slate2 w-36 flex-shrink-0">한글 미포함 시</span>
+                <select class="select-field text-xs flex-1">
+                  <option selected>ASCII (자동 감지)</option>
+                  <option>EUC-KR 유지</option>
+                  <option>UTF-8 강제</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-xs text-slate2 w-36 flex-shrink-0">이모지 처리</span>
+                <select class="select-field text-xs flex-1">
+                  <option selected>제거 후 발송</option>
+                  <option>유니코드 유지 (주의)</option>
+                  <option>발송 거부</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 카카오 -->
+          <div class="mb-5">
+            <p class="text-sm font-semibold text-ink mb-2">카카오 (알림톡 / 친구톡)</p>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3">
+                <span class="text-xs text-slate2 w-36 flex-shrink-0">기본 인코딩</span>
+                <select class="select-field text-xs flex-1">
+                  <option selected>UTF-8 (고정)</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-xs text-slate2 w-36 flex-shrink-0">특수문자 이스케이프</span>
+                <select class="select-field text-xs flex-1">
+                  <option selected>자동 처리</option>
+                  <option>원문 유지</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- RCS -->
+          <div>
+            <p class="text-sm font-semibold text-ink mb-2">RCS</p>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3">
+                <span class="text-xs text-slate2 w-36 flex-shrink-0">기본 인코딩</span>
+                <select class="select-field text-xs flex-1">
+                  <option selected>UTF-8 (고정)</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-xs text-slate2 w-36 flex-shrink-0">최대 본문 바이트</span>
+                <div class="flex-1 flex items-center gap-2">
+                  <input type="number" class="input-field text-xs" value="2000" style="width:100px;">
+                  <span class="text-xs text-slate2">bytes</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 인코딩 변환 정책 -->
+        <div class="space-y-4">
+          <div class="card p-6">
+            <h2 class="text-base font-semibold text-ink mb-4">변환 실패 처리 정책</h2>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-slate2">인코딩 변환 불가 시</span>
+                <select class="select-field text-xs">
+                  <option selected>발송 실패 처리 + 에러 반환</option>
+                  <option>대체 문자(??) 치환 후 발송</option>
+                  <option>UTF-8 강제 전송</option>
+                </select>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-slate2">변환 경고 임계 바이트</span>
+                <div class="flex items-center gap-2">
+                  <input type="number" class="input-field text-xs" value="1500" style="width:80px;">
+                  <span class="text-xs text-slate2">bytes</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-slate2">로그 보존 기간</span>
+                <select class="select-field text-xs">
+                  <option>30일</option>
+                  <option selected>90일</option>
+                  <option>180일</option>
+                  <option>1년</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="card p-6">
+            <h2 class="text-base font-semibold text-ink mb-3">현행 적용 요약</h2>
+            <table class="w-full text-sm">
+              <tbody>
+                <tr class="border-b border-mist">
+                  <td class="py-2 pr-3 text-slate2 whitespace-nowrap">SMS/LMS/MMS</td>
+                  <td class="py-2 pr-3 whitespace-nowrap"><span class="badge-blue">EUC-KR</span></td>
+                  <td class="py-2 text-xs text-slate2">이모지 제거</td>
+                </tr>
+                <tr class="border-b border-mist">
+                  <td class="py-2 pr-3 text-slate2 whitespace-nowrap">카카오</td>
+                  <td class="py-2 pr-3 whitespace-nowrap"><span class="badge-green">UTF-8</span></td>
+                  <td class="py-2 text-xs text-slate2">특수문자 자동</td>
+                </tr>
+                <tr>
+                  <td class="py-2 pr-3 text-slate2 whitespace-nowrap">RCS</td>
+                  <td class="py-2 pr-3 whitespace-nowrap"><span class="badge-green">UTF-8</span></td>
+                  <td class="py-2 text-xs text-slate2">최대 2,000 bytes</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="text-xs text-slate2 mt-3">마지막 변경: 2026-05-15 14:22 · superadmin@wisecan.com</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 탭2: 약관·개인정보 버전 관리 ────────────────────────────── -->
+    <div id="tab-terms" class="tab-pane">
+      <div class="flex gap-6">
+
+        <!-- 약관 버전 목록 -->
+        <div class="card flex-1 overflow-hidden" style="max-width:460px;">
+          <div class="flex items-center justify-between px-6 py-4 border-b" style="border-color:#e4e8ec">
+            <h2 class="text-base font-semibold text-ink">약관 버전 목록</h2>
+            <button class="btn-primary text-xs" onclick="document.getElementById('modal-terms-new').classList.remove('hidden')">+ 새 버전</button>
+          </div>
+          <table class="tbl w-full">
+            <thead>
+              <tr>
+                <th>종류</th><th>버전</th><th>시행일</th><th>상태</th><th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-medium">이용약관</td>
+                <td><span class="version-tag current">v3.2</span></td>
+                <td class="text-slate2 text-xs">2026-04-01</td>
+                <td><span class="badge-green">시행 중</span></td>
+                <td><button class="text-xs text-psblue-main hover:underline" onclick="openTermsEdit('이용약관 v3.2')">편집</button></td>
+              </tr>
+              <tr>
+                <td class="font-medium">이용약관</td>
+                <td><span class="version-tag">v3.1</span></td>
+                <td class="text-slate2 text-xs">2025-10-01</td>
+                <td><span class="badge-gray">만료</span></td>
+                <td><button class="text-xs text-slate2 hover:underline">보기</button></td>
+              </tr>
+              <tr>
+                <td class="font-medium">개인정보 처리방침</td>
+                <td><span class="version-tag current">v2.5</span></td>
+                <td class="text-slate2 text-xs">2026-04-01</td>
+                <td><span class="badge-green">시행 중</span></td>
+                <td><button class="text-xs text-psblue-main hover:underline" onclick="openTermsEdit('개인정보 처리방침 v2.5')">편집</button></td>
+              </tr>
+              <tr>
+                <td class="font-medium">개인정보 처리방침</td>
+                <td><span class="version-tag">v2.4</span></td>
+                <td class="text-slate2 text-xs">2025-07-01</td>
+                <td><span class="badge-gray">만료</span></td>
+                <td><button class="text-xs text-slate2 hover:underline">보기</button></td>
+              </tr>
+              <tr>
+                <td class="font-medium">마케팅 수신 동의</td>
+                <td><span class="version-tag current">v1.3</span></td>
+                <td class="text-slate2 text-xs">2026-01-15</td>
+                <td><span class="badge-green">시행 중</span></td>
+                <td><button class="text-xs text-psblue-main hover:underline" onclick="openTermsEdit('마케팅 수신 동의 v1.3')">편집</button></td>
+              </tr>
+              <tr>
+                <td class="font-medium">제3자 제공 동의</td>
+                <td><span class="version-tag current">v1.0</span></td>
+                <td class="text-slate2 text-xs">2025-03-01</td>
+                <td><span class="badge-green">시행 중</span></td>
+                <td><button class="text-xs text-psblue-main hover:underline" onclick="openTermsEdit('제3자 제공 동의 v1.0')">편집</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 약관 편집 패널 -->
+        <div class="card flex-1 p-6" id="terms-editor-panel">
+          <div class="flex items-center justify-between mb-1">
+            <h2 class="text-base font-semibold text-ink" id="terms-editor-title">이용약관 v3.2 편집</h2>
+            <div class="flex items-center gap-2">
+              <span class="badge-green">시행 중</span>
+              <button class="btn-ghost text-xs">미리보기</button>
+            </div>
+          </div>
+          <p class="text-xs text-slate2 mb-3">시행일: 2026-04-01 · 마지막 수정: 2026-03-28 superadmin@wisecan.com</p>
+
+          <div class="flex gap-1 mb-3">
+            <button class="tab-btn active text-xs" style="padding:4px 10px;" onclick="toggleMd(this,'md')">마크다운</button>
+            <button class="tab-btn text-xs" style="padding:4px 10px;" onclick="toggleMd(this,'preview')">미리보기</button>
+          </div>
+
+          <textarea id="terms-md-area" class="md-editor" style="min-height:280px;">
+# 이용약관
+
+**시행일: 2026년 4월 1일**
+
+## 제1조 (목적)
+본 약관은 WiseCan(이하 "회사")이 제공하는 통합 메시징 서비스(이하 "서비스")의 이용에 관한 조건 및 절차를 규정합니다.
+
+## 제2조 (정의)
+1. "서비스"란 회사가 제공하는 SMS, LMS, MMS, 카카오알림톡, RCS 발송 API 및 관련 기능을 말합니다.
+2. "회원"이란 본 약관에 동의하고 회원가입을 완료한 자를 말합니다.
+3. "발신번호"란 메시지 수신자에게 표시되는 전화번호를 말합니다.
+
+## 제3조 (서비스 이용계약)
+이용계약은 회원이 약관 동의 후 가입 신청을 하고, 회사가 이를 승인함으로써 성립됩니다.
+
+## 제4조 (금지 행위)
+- 스팸·불법 광고 발송
+- 타인 발신번호 도용
+- 서비스 무단 재판매
+          </textarea>
+
+          <div class="mt-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate2">새 버전으로 저장 시 시행일:</span>
+              <input type="date" class="input-field text-xs" value="2026-07-01" style="width:140px;">
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="btn-ghost text-xs">임시 저장</button>
+              <button class="btn-primary text-xs" onclick="document.getElementById('modal-terms-publish').classList.remove('hidden')">새 버전 배포</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 약관 개정 이력 -->
+      <div class="card mt-6 p-6">
+        <h2 class="text-base font-semibold text-ink mb-4">개정 이력</h2>
+        <div class="space-y-3">
+          <div class="flex items-start gap-4 text-sm">
+            <span class="text-slate2 text-xs whitespace-nowrap mt-0.5">2026-04-01</span>
+            <span class="version-tag current">이용약관 v3.2</span>
+            <span class="version-tag current">개인정보 v2.5</span>
+            <span class="text-slate2 flex-1">카카오 채널 링크 수집 조항 추가, 후불 결제 약관 신설</span>
+            <span class="text-xs text-slate2">superadmin@wisecan.com</span>
+          </div>
+          <div class="flex items-start gap-4 text-sm">
+            <span class="text-slate2 text-xs whitespace-nowrap mt-0.5">2026-01-15</span>
+            <span class="version-tag">마케팅 v1.3</span>
+            <span class="text-slate2 flex-1">RCS 수신 동의 문구 추가 (방통위 가이드 반영)</span>
+            <span class="text-xs text-slate2">admin@wisecan.com</span>
+          </div>
+          <div class="flex items-start gap-4 text-sm">
+            <span class="text-slate2 text-xs whitespace-nowrap mt-0.5">2025-10-01</span>
+            <span class="version-tag">이용약관 v3.1</span>
+            <span class="version-tag">개인정보 v2.4</span>
+            <span class="text-slate2 flex-1">개인정보 보호법 개정 반영, 처리 목적 세분화</span>
+            <span class="text-xs text-slate2">admin@wisecan.com</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 탭3: 발송 에이전트 모니터링 ────────────────────────────────── -->
+    <div id="tab-agents" class="tab-pane">
+
+      <!-- 에이전트 상태 요약 카드 -->
+      <div class="grid grid-cols-4 gap-4 mb-6">
+        <div class="card p-4 text-center">
+          <p class="text-2xl font-semibold text-ink">12</p>
+          <p class="text-xs text-slate2 mt-1">전체 에이전트</p>
+        </div>
+        <div class="card p-4 text-center">
+          <p class="text-2xl font-semibold" style="color:#22c55e;">11</p>
+          <p class="text-xs text-slate2 mt-1">정상 가동</p>
+        </div>
+        <div class="card p-4 text-center">
+          <p class="text-2xl font-semibold" style="color:#f59e0b;">1</p>
+          <p class="text-xs text-slate2 mt-1">지연 (경고)</p>
+        </div>
+        <div class="card p-4 text-center">
+          <p class="text-2xl font-semibold" style="color:#ef4444;">0</p>
+          <p class="text-xs text-slate2 mt-1">오프라인</p>
+        </div>
+      </div>
+
+      <!-- 에이전트 목록 테이블 -->
+      <div class="card overflow-hidden mb-6">
+        <div class="flex items-center justify-between px-6 py-4 border-b" style="border-color:#e4e8ec">
+          <h2 class="text-base font-semibold text-ink">에이전트 목록</h2>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate2">최근 갱신: 09:47:32</span>
+            <button class="btn-ghost text-xs">새로고침</button>
+          </div>
+        </div>
+        <!-- 헤더 -->
+        <div class="agent-row agent-header">
+          <span>에이전트 ID</span>
+          <span>채널</span>
+          <span>상태</span>
+          <span>TPS</span>
+          <span>큐 잔량</span>
+          <span>최근 성공률 (1h)</span>
+        </div>
+        <!-- 행 -->
+        <div class="agent-row">
+          <span class="font-mono text-xs text-slate2">sms-agent-01</span>
+          <span><span class="badge-gray">SMS</span></span>
+          <span class="flex items-center gap-1.5"><span class="pulse-green"></span><span class="text-xs" style="color:#16a34a;">정상</span></span>
+          <span class="text-xs font-medium">342</span>
+          <span class="text-xs">18</span>
+          <span class="flex items-center gap-2 flex-1">
+            <div class="progress-bar flex-1"><div class="progress-fill" style="width:98%;background:#22c55e;"></div></div>
+            <span class="text-xs text-slate2">98.1%</span>
+          </span>
+        </div>
+        <div class="agent-row">
+          <span class="font-mono text-xs text-slate2">sms-agent-02</span>
+          <span><span class="badge-gray">SMS</span></span>
+          <span class="flex items-center gap-1.5"><span class="pulse-green"></span><span class="text-xs" style="color:#16a34a;">정상</span></span>
+          <span class="text-xs font-medium">318</span>
+          <span class="text-xs">22</span>
+          <span class="flex items-center gap-2 flex-1">
+            <div class="progress-bar flex-1"><div class="progress-fill" style="width:97%;background:#22c55e;"></div></div>
+            <span class="text-xs text-slate2">97.3%</span>
+          </span>
+        </div>
+        <div class="agent-row">
+          <span class="font-mono text-xs text-slate2">lms-agent-01</span>
+          <span><span class="badge-blue">LMS</span></span>
+          <span class="flex items-center gap-1.5"><span class="pulse-green"></span><span class="text-xs" style="color:#16a34a;">정상</span></span>
+          <span class="text-xs font-medium">156</span>
+          <span class="text-xs">7</span>
+          <span class="flex items-center gap-2 flex-1">
+            <div class="progress-bar flex-1"><div class="progress-fill" style="width:99%;background:#22c55e;"></div></div>
+            <span class="text-xs text-slate2">99.0%</span>
+          </span>
+        </div>
+        <div class="agent-row" style="background:#fffbeb;">
+          <span class="font-mono text-xs text-slate2">kakao-agent-01</span>
+          <span><span class="badge-yellow">카카오</span></span>
+          <span class="flex items-center gap-1.5"><span class="pulse-yellow"></span><span class="text-xs" style="color:#d97706;">지연</span></span>
+          <span class="text-xs font-medium">89</span>
+          <span class="text-xs font-semibold text-amber-600">412</span>
+          <span class="flex items-center gap-2 flex-1">
+            <div class="progress-bar flex-1"><div class="progress-fill" style="width:91%;background:#f59e0b;"></div></div>
+            <span class="text-xs text-amber-600 font-semibold">91.2%</span>
+          </span>
+        </div>
+        <div class="agent-row">
+          <span class="font-mono text-xs text-slate2">kakao-agent-02</span>
+          <span><span class="badge-yellow">카카오</span></span>
+          <span class="flex items-center gap-1.5"><span class="pulse-green"></span><span class="text-xs" style="color:#16a34a;">정상</span></span>
+          <span class="text-xs font-medium">201</span>
+          <span class="text-xs">45</span>
+          <span class="flex items-center gap-2 flex-1">
+            <div class="progress-bar flex-1"><div class="progress-fill" style="width:96%;background:#22c55e;"></div></div>
+            <span class="text-xs text-slate2">96.8%</span>
+          </span>
+        </div>
+        <div class="agent-row">
+          <span class="font-mono text-xs text-slate2">rcs-agent-01</span>
+          <span><span class="badge-blue">RCS</span></span>
+          <span class="flex items-center gap-1.5"><span class="pulse-green"></span><span class="text-xs" style="color:#16a34a;">정상</span></span>
+          <span class="text-xs font-medium">74</span>
+          <span class="text-xs">3</span>
+          <span class="flex items-center gap-2 flex-1">
+            <div class="progress-bar flex-1"><div class="progress-fill" style="width:97%;background:#22c55e;"></div></div>
+            <span class="text-xs text-slate2">97.5%</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- 경고 에이전트 상세 -->
+      <div class="card p-5" style="border:1px solid #fde68a; background:#fffbeb;">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="pulse-yellow"></span>
+          <h3 class="text-sm font-semibold" style="color:#92400e;">kakao-agent-01 — 처리 지연 경고</h3>
+          <span class="ml-auto badge-yellow">큐 412건 적체</span>
+        </div>
+        <div class="grid grid-cols-3 gap-4 text-sm mb-3">
+          <div>
+            <p class="text-xs text-slate2 mb-1">현재 TPS</p>
+            <p class="font-semibold" style="color:#d97706;">89 <span class="text-xs font-normal text-slate2">/ 목표 200</span></p>
+          </div>
+          <div>
+            <p class="text-xs text-slate2 mb-1">평균 지연 (1h)</p>
+            <p class="font-semibold" style="color:#d97706;">4.2s <span class="text-xs font-normal text-slate2">/ 기준 1.0s</span></p>
+          </div>
+          <div>
+            <p class="text-xs text-slate2 mb-1">카카오 API 오류율</p>
+            <p class="font-semibold" style="color:#d97706;">3.8%</p>
+          </div>
+        </div>
+        <p class="text-xs text-amber-700 mb-3">카카오 외부 API 응답 지연이 감지됩니다. 자동 재시도 중 (최대 3회). 10분 내 해소되지 않으면 알림 발송 예정.</p>
+        <div class="flex gap-2">
+          <button class="btn-ghost text-xs">에이전트 재시작</button>
+          <button class="btn-ghost text-xs">큐 드레인 일시정지</button>
+          <button class="btn-primary text-xs">수동 스케일아웃</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 탭4: 감사 로그 검색 ─────────────────────────────────────── -->
+    <div id="tab-audit" class="tab-pane">
+
+      <!-- 검색 필터 -->
+      <div class="card p-5 mb-5">
+        <div class="grid grid-cols-4 gap-4 mb-3">
+          <div>
+            <label class="text-xs font-medium text-slate2 mb-1.5 block">기간</label>
+            <div class="flex items-center gap-1">
+              <input type="date" class="input-field text-xs" value="2026-05-25">
+              <span class="text-slate2 text-xs">~</span>
+              <input type="date" class="input-field text-xs" value="2026-06-01">
+            </div>
+          </div>
+          <div>
+            <label class="text-xs font-medium text-slate2 mb-1.5 block">운영자 계정</label>
+            <input type="text" class="input-field text-xs" placeholder="이메일 검색">
+          </div>
+          <div>
+            <label class="text-xs font-medium text-slate2 mb-1.5 block">액션 유형</label>
+            <select class="select-field text-xs w-full">
+              <option value="">전체</option>
+              <option>약관 배포</option>
+              <option>인코딩 정책 변경</option>
+              <option>회원 차단</option>
+              <option>환불 처리</option>
+              <option>에이전트 조작</option>
+              <option>정책 한도 변경</option>
+              <option>템플릿 승인/반려</option>
+              <option>로그인</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-medium text-slate2 mb-1.5 block">대상 ID</label>
+            <input type="text" class="input-field text-xs" placeholder="회원 ID / 티켓 / 오브젝트">
+          </div>
+        </div>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <select class="select-field text-xs">
+              <option>결과 50건</option>
+              <option>100건</option>
+              <option>200건</option>
+            </select>
+            <span class="text-xs text-slate2">총 <strong class="text-ink">1,284</strong>건 (필터 적용 전)</span>
+          </div>
+          <div class="flex gap-2">
+            <button class="btn-ghost text-xs">초기화</button>
+            <button class="btn-primary text-xs">검색</button>
+            <button class="btn-ghost text-xs">CSV 내보내기</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 감사 로그 테이블 -->
+      <div class="card overflow-hidden">
+        <table class="tbl w-full">
+          <thead>
+            <tr>
+              <th style="width:160px;">일시</th>
+              <th style="width:200px;">운영자</th>
+              <th style="width:180px;">액션</th>
+              <th>대상 / 상세</th>
+              <th style="width:80px;">결과</th>
+              <th style="width:90px;">IP</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-xs text-slate2 font-mono">2026-06-01 09:42:11</td>
+              <td class="text-xs">superadmin@wisecan.com</td>
+              <td><span class="badge-blue">인코딩 정책 변경</span></td>
+              <td class="text-xs text-slate2">SMS 이모지 처리: <span class="text-ink">유지 → 제거</span></td>
+              <td><span class="badge-green">성공</span></td>
+              <td class="text-xs font-mono text-slate2">10.0.1.5</td>
+            </tr>
+            <tr>
+              <td class="text-xs text-slate2 font-mono">2026-06-01 09:15:44</td>
+              <td class="text-xs">admin@wisecan.com</td>
+              <td><span class="badge-yellow">환불 처리</span></td>
+              <td class="text-xs text-slate2">회원 <span class="text-ink">user_38291</span> · ₩48,000 캐시 환불 승인</td>
+              <td><span class="badge-green">성공</span></td>
+              <td class="text-xs font-mono text-slate2">10.0.1.8</td>
+            </tr>
+            <tr>
+              <td class="text-xs text-slate2 font-mono">2026-05-31 18:30:07</td>
+              <td class="text-xs">superadmin@wisecan.com</td>
+              <td><span class="badge-blue">약관 배포</span></td>
+              <td class="text-xs text-slate2">이용약관 <span class="text-ink">v3.2</span> 배포 (시행 2026-07-01)</td>
+              <td><span class="badge-green">성공</span></td>
+              <td class="text-xs font-mono text-slate2">10.0.1.5</td>
+            </tr>
+            <tr>
+              <td class="text-xs text-slate2 font-mono">2026-05-31 16:55:23</td>
+              <td class="text-xs">admin@wisecan.com</td>
+              <td><span class="badge-red">회원 차단</span></td>
+              <td class="text-xs text-slate2">회원 <span class="text-ink">user_19045</span> · 스팸 발송 72,000건 · 영구 차단</td>
+              <td><span class="badge-green">성공</span></td>
+              <td class="text-xs font-mono text-slate2">10.0.1.8</td>
+            </tr>
+            <tr>
+              <td class="text-xs text-slate2 font-mono">2026-05-31 14:12:59</td>
+              <td class="text-xs">admin@wisecan.com</td>
+              <td><span class="badge-yellow">템플릿 승인</span></td>
+              <td class="text-xs text-slate2">RCS 템플릿 <span class="text-ink">tmpl_rcs_00412</span> 승인</td>
+              <td><span class="badge-green">성공</span></td>
+              <td class="text-xs font-mono text-slate2">10.0.1.8</td>
+            </tr>
+            <tr>
+              <td class="text-xs text-slate2 font-mono">2026-05-30 11:03:18</td>
+              <td class="text-xs">superadmin@wisecan.com</td>
+              <td><span class="badge-blue">정책 한도 변경</span></td>
+              <td class="text-xs text-slate2">SMS 테스트 한도 <span class="text-ink">50 → 100건</span> (전체 적용)</td>
+              <td><span class="badge-green">성공</span></td>
+              <td class="text-xs font-mono text-slate2">10.0.1.5</td>
+            </tr>
+            <tr>
+              <td class="text-xs text-slate2 font-mono">2026-05-30 09:58:41</td>
+              <td class="text-xs">admin2@wisecan.com</td>
+              <td><span class="badge-gray">로그인</span></td>
+              <td class="text-xs text-slate2">관리자 콘솔 로그인</td>
+              <td><span class="badge-green">성공</span></td>
+              <td class="text-xs font-mono text-slate2">220.82.x.x</td>
+            </tr>
+            <tr>
+              <td class="text-xs text-slate2 font-mono">2026-05-29 22:17:03</td>
+              <td class="text-xs">unknown</td>
+              <td><span class="badge-red">로그인 실패</span></td>
+              <td class="text-xs text-slate2">admin@wisecan.com · 비밀번호 오류 3회 → 계정 잠금</td>
+              <td><span class="badge-red">실패</span></td>
+              <td class="text-xs font-mono text-slate2">121.134.x.x</td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- 페이지네이션 -->
+        <div class="flex items-center justify-between px-6 py-3 border-t" style="border-color:#e4e8ec">
+          <span class="text-xs text-slate2">1 – 8 / 1,284건</span>
+          <div class="flex items-center gap-1">
+            <button class="btn-ghost text-xs py-1 px-2" disabled>&lt;</button>
+            <button class="btn-primary text-xs py-1 px-2">1</button>
+            <button class="btn-ghost text-xs py-1 px-2">2</button>
+            <button class="btn-ghost text-xs py-1 px-2">3</button>
+            <span class="text-xs text-slate2 px-1">…</span>
+            <button class="btn-ghost text-xs py-1 px-2">129</button>
+            <button class="btn-ghost text-xs py-1 px-2">&gt;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 로그 상세 드릴다운 안내 -->
+      <div class="card p-4 mt-4 flex items-center gap-3">
+        <svg class="w-4 h-4 text-slate2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <p class="text-xs text-slate2">행을 클릭하면 전체 페이로드(before/after 값 포함)와 세션 정보를 확인할 수 있습니다. 감사 로그는 <strong class="text-ink">90일</strong> 보존 후 자동 아카이브됩니다.</p>
+      </div>
+    </div>
+
+  </div><!-- /본문 -->
+</main>
+
+<!-- ── 모달: 인코딩 저장 확인 ─────────────────────────── -->
+<div id="modal-encoding-save" class="modal-overlay hidden">
+  <div class="modal-box p-6">
+    <h3 class="text-base font-semibold text-ink mb-2">인코딩 정책 변경 확인</h3>
+    <p class="text-sm text-slate2 mb-4">아래 변경 사항을 저장하면 신규 발송 요청에 즉시 적용됩니다.</p>
+    <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-xs text-amber-800">
+      <strong>주의:</strong> 이미 큐에 대기 중인 발송 건은 기존 인코딩으로 처리됩니다.
+    </div>
+    <table class="tbl w-full mb-4 text-xs">
+      <thead><tr><th>채널</th><th>항목</th><th>변경 전</th><th>변경 후</th></tr></thead>
+      <tbody>
+        <tr><td>SMS</td><td>이모지 처리</td><td>유지</td><td class="font-semibold text-psblue-main">제거 후 발송</td></tr>
+        <tr><td>SMS</td><td>한글 미포함 시</td><td>EUC-KR 유지</td><td class="font-semibold text-psblue-main">ASCII 자동 감지</td></tr>
+      </tbody>
+    </table>
+    <div class="flex justify-end gap-2">
+      <button class="btn-ghost" onclick="document.getElementById('modal-encoding-save').classList.add('hidden')">취소</button>
+      <button class="btn-primary" onclick="document.getElementById('modal-encoding-save').classList.add('hidden')">저장 확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 모달: 약관 새 버전 ──────────────────────────────── -->
+<div id="modal-terms-new" class="modal-overlay hidden">
+  <div class="modal-box p-6">
+    <h3 class="text-base font-semibold text-ink mb-4">새 약관 버전 생성</h3>
+    <div class="space-y-3 mb-4">
+      <div>
+        <label class="text-xs font-medium text-slate2 mb-1.5 block">약관 종류</label>
+        <select class="select-field w-full text-sm">
+          <option>이용약관</option>
+          <option>개인정보 처리방침</option>
+          <option>마케팅 수신 동의</option>
+          <option>제3자 제공 동의</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs font-medium text-slate2 mb-1.5 block">버전 번호</label>
+        <input type="text" class="input-field text-sm" placeholder="예: v3.3" value="v3.3">
+      </div>
+      <div>
+        <label class="text-xs font-medium text-slate2 mb-1.5 block">시행일</label>
+        <input type="date" class="input-field text-sm" value="2026-07-01">
+      </div>
+      <div>
+        <label class="text-xs font-medium text-slate2 mb-1.5 block">기준 버전 (복사)</label>
+        <select class="select-field w-full text-sm">
+          <option>이용약관 v3.2 (현재 시행 중)</option>
+          <option>빈 문서로 시작</option>
+        </select>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2">
+      <button class="btn-ghost" onclick="document.getElementById('modal-terms-new').classList.add('hidden')">취소</button>
+      <button class="btn-primary" onclick="document.getElementById('modal-terms-new').classList.add('hidden')">초안 생성</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 모달: 약관 배포 확인 ───────────────────────────── -->
+<div id="modal-terms-publish" class="modal-overlay hidden">
+  <div class="modal-box p-6">
+    <h3 class="text-base font-semibold text-ink mb-2">약관 버전 배포 확인</h3>
+    <p class="text-sm text-slate2 mb-4">이용약관 <strong class="text-ink">v3.3</strong>을 2026-07-01 시행으로 배포합니다.</p>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 text-xs text-red-800">
+      <strong>주의:</strong> 배포 즉시 시행일 이후 신규 가입자에게 새 약관이 표시됩니다. 기존 회원에게는 재동의 안내 이메일이 발송됩니다.
+    </div>
+    <div class="flex justify-end gap-2">
+      <button class="btn-ghost" onclick="document.getElementById('modal-terms-publish').classList.add('hidden')">취소</button>
+      <button class="btn-danger" onclick="document.getElementById('modal-terms-publish').classList.add('hidden')">배포 확정</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showTab(name) {
+    document.querySelectorAll('.tab-pane').forEach(function(el) { el.classList.remove('active'); });
+    document.querySelectorAll('.tab-btn').forEach(function(el) { el.classList.remove('active'); });
+    document.getElementById('tab-' + name).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  function toggleMd(btn, mode) {
+    document.querySelectorAll('.tab-btn').forEach(function(b) {
+      if (b.parentNode === btn.parentNode) b.classList.remove('active');
+    });
+    btn.classList.add('active');
+  }
+
+  function openTermsEdit(title) {
+    document.getElementById('terms-editor-title').textContent = title + ' 편집';
+  }
+</script>
+<script src="../_shared/site.js"></script>
+</body>
+</html>

@@ -111,7 +111,7 @@
           <p class="text-xs text-stone font-mono mt-0.5">TPL_001 · AT</p>
 
           <!-- 미리보기 -->
-          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line">
+          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line flex-1 flex items-center justify-center">
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
               <div class="px-3 py-1.5 text-[10px] font-semibold text-graphite text-center" style="background:#FEE500">알림톡 도착</div>
               <div class="px-3 py-2 flex items-center gap-2 border-b border-line">
@@ -157,7 +157,7 @@
           <p class="font-semibold text-ink">인증번호 발송</p>
           <p class="text-xs text-stone font-mono mt-0.5">TPL_002 · AT</p>
 
-          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line">
+          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line flex-1 flex items-center justify-center">
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
               <div class="px-3 py-1.5 text-[10px] font-semibold text-graphite text-center" style="background:#FEE500">알림톡 도착</div>
               <div class="px-3 py-2 flex items-center gap-2 border-b border-line">
@@ -200,7 +200,7 @@
           <p class="font-semibold text-ink">배송 출발 안내</p>
           <p class="text-xs text-stone font-mono mt-0.5">TPL_003 · AT</p>
 
-          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line">
+          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line flex-1 flex items-center justify-center">
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
               <div class="px-3 py-1.5 text-[10px] font-semibold text-graphite text-center" style="background:#FEE500">알림톡 도착</div>
               <div class="px-3 py-2 flex items-center gap-2 border-b border-line">
@@ -244,7 +244,7 @@
           <p class="font-semibold text-ink">멤버십 등급 변경</p>
           <p class="text-xs text-stone font-mono mt-0.5">TPL_004 · AI</p>
 
-          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line">
+          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line flex-1 flex items-center justify-center">
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
               <div class="px-3 py-1.5 text-[10px] font-semibold text-graphite text-center" style="background:#FEE500">알림톡 도착</div>
               <div class="px-3 py-2 flex items-center gap-2 border-b border-line">
@@ -284,7 +284,7 @@
           <p class="font-semibold text-ink">여름 시즌 프로모션</p>
           <p class="text-xs text-stone font-mono mt-0.5">TPL_005 · FW · <span class="text-psred-main">광고</span></p>
 
-          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line">
+          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line flex-1 flex items-center justify-center">
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
               <div class="px-3 py-1.5 text-[10px] font-semibold text-graphite text-center" style="background:#FEE500">친구톡 도착</div>
               <div class="px-3 py-2 flex items-center gap-2 border-b border-line">
@@ -331,7 +331,7 @@
           <p class="font-semibold text-ink">포인트 소멸 예고</p>
           <p class="text-xs text-stone font-mono mt-0.5">TPL_006 · AT</p>
 
-          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line">
+          <div class="mt-4 bg-mist rounded-2xl p-3 border border-line flex-1 flex items-center justify-center">
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
               <div class="px-3 py-1.5 text-[10px] font-semibold text-graphite text-center" style="background:#FEE500">알림톡 도착</div>
               <div class="px-3 py-2 flex items-center gap-2 border-b border-line">
@@ -345,12 +345,15 @@
             </div>
           </div>
 
-          <div class="mt-3 bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-[11px] text-psred-main leading-relaxed">
-            <span class="font-medium">반려 사유</span> · 본문에 "추가 5% 할인" 등 광고성 문구가 포함되어 정보성 메시지인 알림톡으로 발송할 수 없습니다. 광고 문구는 친구톡으로 전환해 주세요.
+          <div class="text-xs text-stone mt-4 pt-3 border-t border-line flex justify-between">
+            <span>등록 2026-04-30</span>
+            <span class="text-psred-main inline-flex items-center gap-1">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>발송 불가
+            </span>
           </div>
           <div class="flex gap-2 mt-3">
+            <button class="text-xs link-blue px-3 py-1.5 rounded-md hover:bg-psblue-wash transition-colors border border-line">반려 사유</button>
             <button class="btn btn-secondary text-xs px-3 py-1.5 rounded-md flex-1">수정 후 재신청</button>
-            <button class="text-xs text-graphite border border-line px-3 py-1.5 rounded-md hover:bg-cloud">친구톡으로 전환</button>
             <button class="text-xs text-stone hover:text-psred-main px-3 py-1.5 rounded-md border border-line hover:bg-red-50 transition-colors">삭제</button>
           </div>
         </div>

@@ -14,6 +14,8 @@ pm/
 ├── 02_FEATURE_SPEC.md         ← 기능 정의서 (액션 단위)
 ├── 03_IA.md                   ← 정보구조도 (도메인·라우팅·내비)
 ├── 04_PROJECT_PLAN.md         ← 프로젝트 계획서 (마일스톤·WBS·리스크)
+├── 05_DATA_MODEL.md           ← 데이터 모델 (RDB·Redis·도메인 ERD)
+├── 06_OBSERVABILITY.md        ← 옵저버빌리티 (Prometheus·Alertmanager·Grafana 임베드)
 ├── wireframes/                ← HTML 와이어프레임 (33개 화면 + admin + _shared)
 │   ├── 01.index.html ~ 33.components.html
 │   ├── _shared/               ← 공통 헤더/사이드바/스타일
@@ -28,7 +30,7 @@ pm/
 
 ---
 
-## 2. 설계 문서 4종 — 작성 순서·역할·교차 참조
+## 2. 설계 문서 6종 — 작성 순서·역할·교차 참조
 
 | # | 문서 | 역할 | 주 독자 | 의존 |
 |---|------|------|---------|------|
@@ -36,6 +38,8 @@ pm/
 | **02** | `02_FEATURE_SPEC.md` | 사용자 액션 단위로 트리거/사전조건/정상흐름/예외/권한/데이터영향/공수 7필드 카드 | 개발(BE/FE), QA | 01 |
 | **03** | `03_IA.md` | 4개 도메인(공개/체험/회원/어드민) 사이트맵·라우팅·내비·권한 매트릭스 | FE, 디자이너 | 01, 02 |
 | **04** | `04_PROJECT_PLAN.md` | 22주 / 11 스프린트 마스터 플랜, M0~M5 마일스톤, 리스크·자원·운영 게이트 | PM, 전 팀 | 01, 02, 03 |
+| **05** | `05_DATA_MODEL.md` | 도메인별 RDB·Redis ERD, 키 카탈로그, 라이프사이클 | BE | 01, 02 |
+| **06** | `06_OBSERVABILITY.md` | Prometheus 메트릭 카탈로그·Alertmanager 룰·Grafana 임베드·운영자 권한 매핑 | BE, 운영자 | 01 K3, 02 §11·§12, 04 §8.3, 05 §결제·키 Redis 키 |
 
 ### 문서 헤더 규칙
 
@@ -89,6 +93,8 @@ node build.js
 - `pm/design/build/02_FEATURE_SPEC.pdf`
 - `pm/design/build/03_IA.pdf`
 - `pm/design/build/04_PROJECT_PLAN.pdf`
+- `pm/design/build/05_DATA_MODEL.pdf`
+- `pm/design/build/06_OBSERVABILITY.pdf`
 
 ### 빌드 파이프라인
 

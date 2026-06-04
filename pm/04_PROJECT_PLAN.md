@@ -36,7 +36,7 @@
 |---|---|---|---|---|---|---|
 | W-001 | M0 | 백엔드 스캐폴딩 · CI · 환경 3종 | BE | 8 | `staging` 배포 가능 + CI 그린 | — |
 | W-002 | M0 | 프론트 스캐폴딩 · 디자인 토큰 셋업 | FE/디자이너 | 6 | 디자인 시스템 1차 적용 | — |
-| W-003 | M0 | 자체 IDC 1차 셋업 + 모니터링 | BE | 6 | Prometheus + Grafana + 알림 | — |
+| W-003 | M0 | 자체 IDC 1차 셋업 + 모니터링 | BE | 6 | Prometheus + Grafana + Alertmanager 셋업 — 메트릭·알림·임베드 정의는 `06_OBSERVABILITY.md` 정본 따름 | — |
 | W-101 | M1 | 개인·사업자 회원가입 (`02 §1.1·1.2`) | BE+FE | 18 | 가입→로그인 E2E 통과 | W-001·002 |
 | W-102 | M1 | 로그인·2차 인증·신뢰 IP (`02 §1.3·1.4`) | BE+FE | 8 | 2차 인증 실측 성공 | W-101 |
 | W-103 | M1 | 회사 마스터 권한·하위 계정 (`02 §3`) | BE+FE | 10 | 권한 부여/회수/이관 + 이력 | W-101 |
@@ -158,14 +158,14 @@
 - 정적 분석 critical 0건
 
 ### 8.3. 운영 게이트 (NFR 인용)
-| 항목 | 목표 | 출처 |
-|---|---|---|
-| 발송 API 가용성 | ≥ 99.5% | NFR-AVAIL-001 |
-| 발송 API P95 응답 | ≤ 1,000ms | NFR-PERF-002 |
-| 발송 테이블 적재 성공률 | ≥ 99.9% | NFR-RELY-001 |
-| 자동충전 결제 실패율 | ≤ 1% | NFR-RELY-203 |
-| 1:1 문의 처리 시간 | ≤ 24h | PRD §K3 보조 |
-| 사업자 가입 심사 평균 | ≤ 24h | PRD §K1 보조 |
+| 항목 | 목표 | 출처 | 측정 메트릭 (정본 `06 §2·§3`) |
+|---|---|---|---|
+| 발송 API 가용성 | ≥ 99.5% | NFR-AVAIL-001 | `send_api_5xx_total` / `send_api_total` → 알림 `SendApiAvailabilityBelow995` |
+| 발송 API P95 응답 | ≤ 1,000ms | NFR-PERF-002 | `send_api_duration_seconds` P95 → 알림 `SendApiP95Over1s` |
+| 발송 테이블 적재 성공률 | ≥ 99.9% | NFR-RELY-001 | `send_table_insert_total{result}` → 알림 `SendTableInsertSuccessBelow999` (P0) |
+| 자동충전 결제 실패율 | ≤ 1% | NFR-RELY-203 | `autocharge_attempt_total{result}` → 알림 `AutochargeFailureRateOver1Percent` |
+| 1:1 문의 처리 시간 | ≤ 24h | PRD §K3 보조 | `cs_ticket_open_age_hours` → 알림 `CsTicket24hBreach` |
+| 사업자 가입 심사 평균 | ≤ 24h | PRD §K1 보조 | `admin_review_age_seconds{type="business"}` → 알림 `BusinessReviewSla24hBreach` |
 
 ### 8.4. 보안 게이트
 - TLS 1.2+ 강제, HSTS, mTLS 내부
@@ -263,5 +263,5 @@
 - [ ] 스프린트 캘린더(§4) 인력 휴가·외부 일정과 정합 확인
 - [ ] RACI(§5) 외부(PG·중계사·KISA) 담당 연락처 확보
 - [ ] 리스크 레지스터(§6) R-01·R-02·R-10 사전 대응 시작
-- [ ] 게이트(§8) 측정 도구(Prometheus·Grafana·테스트 커버리지) 구축 — S1 W-003 의존
+- [ ] 게이트(§8) 측정 도구(Prometheus·Grafana·테스트 커버리지) 구축 — S1 W-003 의존, 산출물 정의서 `06_OBSERVABILITY.md`
 - [ ] `MEMORY.md` 의 프로젝트 메모 영역에 본 v2 체계 등재 (PM 운영 메타)

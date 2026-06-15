@@ -1,0 +1,25 @@
+# 빌드 산출물·로컬 캐시 — 컨테이너 빌드 컨텍스트에서 제외
+.gradle/
+build/
+bin/
+
+# IDE / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# 로그·런타임 산출물
+logs/
+
+# 시크릿·환경 파일
+.env
+*.local
+
+# 컨테이너 정의 자신
+Dockerfile
+.dockerignore
+
+# 로컬 인프라
+docker-compose.yml

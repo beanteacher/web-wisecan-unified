@@ -67,8 +67,6 @@
 
 | 메트릭 | 타입 | 라벨 | 용도 |
 |---|---|---|---|
-| `kisa_register_request_total` | Counter | `result` | 자동연계 성공률 ≥ 99% (`04 §2` M1 게이트) |
-| `kisa_request_duration_seconds` | Histogram | — | KISA 응답 지연 |
 | `kakao_template_register_total` | Counter | `vendor`,`result` | LG CNS / KT / 인포뱅크 — **운영자 전용, 회원 비노출 (`02 §12.4`)** |
 | `rcs_brand_register_total` | Counter | `result` | RCS 브랜드 등록 |
 | `external_circuit_breaker_state` | Gauge | `system` | `open=2`/`half=1`/`closed=0` |
@@ -159,7 +157,7 @@
 |---|---|---|---|
 | `send-pipeline` | 발송 적재 파이프라인 | 가용성·P95·적재 성공률·검증 거부 사유 분포·잔액 분기 분포 | `ADMIN`+ |
 | `payment` | 결제·캐시 | 자동충전 실패율·PG 응답·환불 백로그·만료 임박 잔액 | `ADMIN`+ |
-| `external` | 외부 연동 | KISA 성공률·중계사별 오류·서킷 상태 | `ADMIN`+ |
+| `external` | 외부 연동 | 중계사별 오류·서킷 상태 | `ADMIN`+ |
 | `security` | 인증·보안 | 로그인 실패·키 무효화 지연·MCP 차단 시도·이상 패턴 | `SUPER_ADMIN` 전용 |
 | `kpi` | KPI (K2·K3) | 적재 성공률·가용성·전환율·CLI 위임 비율 | `ADMIN`+ |
 | `admin-queue` | 운영자 SLA | 심사 큐 길이·대기 시간·CS 24h 위반 | `ADMIN`+ |

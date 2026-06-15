@@ -1,0 +1,58 @@
+{
+  "uid": "kpi",
+  "title": "KPI (K2·K3)",
+  "tags": ["wisecan", "kpi"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": { "list": [] },
+  "annotations": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "발송 적재 성공률 (목표 ≥ 99.9%)",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(send_table_insert_total{result=\"success\"}[5m])) / sum(rate(send_table_insert_total[5m]))" }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "발송 API 가용성 (목표 ≥ 99.5%)",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "1 - (sum(rate(send_api_5xx_total[5m])) / sum(rate(send_api_total[5m])))" }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "체험 → 가입 전환율 (목표 ≥ 15%)",
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum(trial_session_converted_total) / sum(trial_session_started_total)" }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "AI Agent CLI 위임 비율 (목표 ≥ 50%)",
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(cli_invocation_total[1h])) / (sum(rate(cli_invocation_total[1h])) + sum(rate(mcp_invocation_total[1h])))" }
+      ]
+    }
+  ]
+}

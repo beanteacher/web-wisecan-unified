@@ -1,0 +1,69 @@
+{
+  "uid": "send-pipeline",
+  "title": "발송 적재 파이프라인",
+  "tags": ["wisecan", "send"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": { "list": [] },
+  "annotations": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "적재 성공률",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(send_table_insert_total{result=\"success\"}[5m])) / sum(rate(send_table_insert_total[5m]))" }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "발송 API 가용성",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "1 - (sum(rate(send_api_5xx_total[5m])) / sum(rate(send_api_total[5m])))" }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "발송 API P95 (목표 ≤ 1s)",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "histogram_quantile(0.95, sum(rate(send_api_duration_seconds_bucket[5m])) by (le))" }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "piechart",
+      "title": "검증 거부 사유 분포",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(send_validation_reject_total[1h])) by (reason)", "legendFormat": "{{reason}}" }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "piechart",
+      "title": "잔액 부족 분기 분포",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(insufficient_balance_branch_total[1h])) by (path)", "legendFormat": "{{path}}" }
+      ]
+    }
+  ]
+}

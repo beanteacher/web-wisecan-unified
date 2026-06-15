@@ -1,0 +1,146 @@
+# Alertmanager 룰 — 정본: pm/06_OBSERVABILITY.md §3.1 (표가 정본, 임계는 04 §8.3 / 01_PRD §K3)
+# 표현식이 추상적인 룰(폭증·3σ·임계)은 메트릭 기반으로 1차 구체화했으며, 도메인 구현 시 임계를 조정한다.
+# 다수 메트릭은 발송·결제·관리자 도메인(W-201+) 구현과 함께 노출되므로, 그 전까지는 no-data 로 발화하지 않는다.
+groups:
+  - name: wisecan-send-pipeline
+    rules:
+      - alert: SendApiAvailabilityBelow995
+        expr: 1 - (sum(rate(send_api_5xx_total[5m])) / sum(rate(send_api_total[5m]))) < 0.995
+        for: 10m
+        labels: { severity: P1 }
+        annotations:
+          summary: "발송 API 가용성 99.5% 미만"
+          ref: "01_PRD §K3 / 04_PROJECT_PLAN §8.3"
+
+      - alert: SendTableInsertSuccessBelow999
+        expr: sum(rate(send_table_insert_total{result="success"}[5m])) / sum(rate(send_table_insert_total[5m])) < 0.999
+        for: 5m
+        labels: { severity: P0 }
+        annotations:
+          summary: "발송 테이블 적재 성공률 99.9% 미만"
+          ref: "01_PRD §K3"
+
+      - alert: SendApiP95Over1s
+        expr: histogram_quantile(0.95, sum(rate(send_api_duration_seconds_bucket[5m])) by (le)) > 1
+        for: 10m
+        labels: { severity: P1 }
+        annotations:
+          summary: "발송 API P95 응답 1s 초과"
+          ref: "04_PROJECT_PLAN §8.3"
+
+      - alert: EncodingLossDetected
+        expr: increase(encoding_conversion_loss_total[5m]) > 0
+        for: 0m
+        labels: { severity: P0 }
+        annotations:
+          summary: "UTF-8 → EUC-KR 인코딩 손실 발생 (불변 조건 위반)"
+
+      - alert: InsufficientBalanceCancelSpike
+        expr: |
+          sum(rate(insufficient_balance_branch_total{path="cancel"}[15m]))
+            > 3 * sum(rate(insufficient_balance_branch_total{path="cancel"}[1h] offset 1h))
+        for: 15m
+        labels: { severity: P2 }
+        annotations:
+          summary: "잔액 부족 취소 분기 급증 (선행 지표, 임계 조정 필요)"
+          ref: "06_OBSERVABILITY §3.1"
+
+  - name: wisecan-payment
+    rules:
+      - alert: AutochargeFailureRateOver1Percent
+        expr: sum(rate(autocharge_attempt_total{result="fail"}[10m])) / sum(rate(autocharge_attempt_total[10m])) > 0.01
+        for: 10m
+        labels: { severity: P1 }
+        annotations:
+          summary: "자동충전 실패율 1% 초과"
+          ref: "04_PROJECT_PLAN §8.3"
+
+      - alert: PgRequestErrorSpike
+        expr: |
+          histogram_quantile(0.95, sum(rate(pg_request_duration_seconds_bucket[10m])) by (le)) > 5
+            or sum(rate(payment_attempt_total{result="fail"}[10m])) > 0.5
+        for: 10m
+        labels: { severity: P1 }
+        annotations:
+          summary: "PG 호출 오류/지연 급증 (임계 조정 필요)"
+
+      - alert: RefundQueueBacklog
+        expr: refund_request_total{status="pending"} > 50
+        for: 30m
+        labels: { severity: P2 }
+        annotations:
+          summary: "환불 대기 백로그 누적 (CS SLA)"
+
+  - name: wisecan-external
+    rules:
+      - alert: KisaRegisterSuccessBelow99Percent
+        expr: sum(rate(kakao_template_register_total{result="success"}[15m])) / sum(rate(kakao_template_register_total[15m])) < 0.99
+        for: 15m
+        labels: { severity: P1 }
+        annotations:
+          summary: "중계사 템플릿 등록 성공률 99% 미만"
+          ref: "04_PROJECT_PLAN §2 M1 게이트"
+
+      - alert: RelayVendorErrorSpike
+        expr: sum(rate(kakao_template_register_total{result="fail"}[10m])) by (vendor) > 0.2
+        for: 10m
+        labels: { severity: P1 }
+        annotations:
+          summary: "중계사({{ $labels.vendor }}) 오류 급증"
+
+      - alert: CircuitBreakerOpen
+        expr: external_circuit_breaker_state == 2
+        for: 0m
+        labels: { severity: P1 }
+        annotations:
+          summary: "외부 시스템({{ $labels.system }}) 서킷 OPEN"
+
+  - name: wisecan-security
+    rules:
+      - alert: LoginBruteForceSpike
+        expr: sum(rate(account_lockout_total[5m])) > 0.5
+        for: 5m
+        labels: { severity: P1 }
+        annotations:
+          summary: "로그인 무차별 대입 의심 (계정 잠금 폭증)"
+
+      - alert: ApiKeyCacheInvalidationOver1s
+        expr: histogram_quantile(0.95, sum(rate(api_key_cache_invalidation_latency_seconds_bucket[10m])) by (le)) > 1
+        for: 10m
+        labels: { severity: P0 }
+        annotations:
+          summary: "API Key 캐시 무효화 P95 1s 초과"
+          ref: "02_FEATURE_SPEC §5.4"
+
+      - alert: McpBlockedActionAttempted
+        expr: increase(mcp_blocked_action_total[1m]) > 0
+        for: 0m
+        labels: { severity: P0 }
+        annotations:
+          summary: "MCP 비노출 정책 차단 액션 시도"
+          ref: "04_PROJECT_PLAN §8.4"
+
+      - alert: AbnormalSendBurst
+        expr: sum(rate(abuse_auto_block_total[5m])) > 0.5
+        for: 5m
+        labels: { severity: P1 }
+        annotations:
+          summary: "이상 발송 폭증 (자동 차단 발화, 임계 조정 필요)"
+
+  - name: wisecan-admin-sla
+    rules:
+      - alert: BusinessReviewSla24hBreach
+        expr: max(admin_review_age_seconds{type="business"}) > 86400
+        for: 0m
+        labels: { severity: P2 }
+        annotations:
+          summary: "사업자 전환 심사 24h SLA 초과"
+          ref: "04_PROJECT_PLAN §8.3"
+
+      - alert: CsTicket24hBreach
+        expr: max(cs_ticket_open_age_hours) > 24
+        for: 0m
+        labels: { severity: P2 }
+        annotations:
+          summary: "1:1 문의 24h 처리 SLA 초과"
+          ref: "04_PROJECT_PLAN §8.3"

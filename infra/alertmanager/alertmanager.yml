@@ -1,0 +1,29 @@
+# Alertmanager 라우팅 — 알림 채널은 모두 Discord (사용자 결정 2026-06-15)
+# 라우팅 분기는 pm/06_OBSERVABILITY.md §3.2 기준(P0 즉시 / P1 / P2), 전송처만 Discord 로 통일.
+# Discord webhook URL 은 평문 커밋 금지 — webhook_url_file 로 시크릿 마운트한다.
+#   infra/alertmanager/secrets/discord_webhook_url  (gitignore, 운영/로컬에서 직접 생성)
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: discord
+  group_by: ['alertname', 'severity']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    # P0: 그룹 대기 없이 즉시, 더 짧은 반복 주기
+    - matchers: [severity="P0"]
+      receiver: discord
+      group_wait: 0s
+      repeat_interval: 1h
+
+receivers:
+  - name: discord
+    discord_configs:
+      - webhook_url_file: /etc/alertmanager/secrets/discord_webhook_url
+        title: '[{{ .CommonLabels.severity }}] {{ .CommonLabels.alertname }}'
+        message: |
+          {{ range .Alerts }}{{ .Annotations.summary }}
+          {{ if .Annotations.ref }}정본: {{ .Annotations.ref }}{{ end }}
+          {{ end }}

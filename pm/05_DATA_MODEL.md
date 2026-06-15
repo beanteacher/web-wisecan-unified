@@ -55,7 +55,7 @@ ERD 컬럼 type 표기는 `VARCHAR(N) column_name "코멘트"` 패턴 — mermai
 
 ERD 가독성과 와이어프레임 매핑을 위해 다음 원칙으로 도메인을 분할한다:
 
-1. **흐름 단위 매핑** — 화면 와이어프레임의 사용자 흐름과 ERD 가 1:1 대응. 예: `/signup` 일반 가입 → §1.1, `/signup/business` 사업자 가입 → §1.2, `/login` + 2FA → §1.3.
+1. **흐름 단위 매핑** — 화면 와이어프레임의 사용자 흐름과 ERD 가 1:1 대응. 예: `/signup` 일반 가입 → §1.1, `/signup/business` 사업자 전환 → §1.2, `/login` + 2FA → §1.3.
 2. **공통 vs 특수 분리** — 둘 이상의 흐름이 공유하는 엔티티는 별도 "공통" 절로 묶고, 특정 흐름만의 엔티티는 해당 절에 격리.
 3. **한 ERD ≤ 7 엔티티** — 초과 시 가독성·렌더링 크기 모두 떨어지므로 추가 분할.
 4. **회원·회사 참조는 stub** — 정본 정의는 단 한 곳, 다른 ERD 에서는 stub 으로 재표기 (아래 §0 stub 패턴).
@@ -88,18 +88,21 @@ erDiagram
 
 ## 1. 회원·인증
 
-회원 가입·약관 동의·본인인증·로그인 보안·세션을 다루는 도메인. 가입 흐름이 개인과 사업자로 갈리므로 다음 3개 ERD 로 분할한다:
+회원 가입·약관 동의·본인인증·로그인 보안·세션을 다루는 도메인. 개인 가입과 사업자 전환으로 흐름이 갈리므로 다음 3개 ERD 로 분할한다:
 
 - **§1.1 일반(개인) 회원 가입** — `/signup` 화면 흐름
-- **§1.2 사업자 회원 가입** — `/signup/business` + 운영자 심사 큐 (`COMPANY` 생성 포함)
-- **§1.3 공통 인증·세션·보안** — 로그인 + 2차 인증 + 신뢰 IP + 세션 (두 회원 유형 공통)
+- **§1.2 사업자 회원 전환** — `/signup/business` 전환 신청 + 운영자 심사 큐 (`COMPANY` 생성 포함)
+- **§1.3 공통 인증·세션·보안** — 로그인 + 2차 인증 + 신뢰 IP + 세션 (공통)
 
 | 테이블 | 한글명 | 저장소 | 정본 위치 | 역할 한 줄 |
 |--------|--------|--------|-----------|------------|
-| `MEMBER` | 회원 | RDB | §1.1 | 모든 페르소나 단일 본 테이블 (`role` × `member_type`) |
-| `TERM_AGREEMENT` | 약관 동의 | RDB | §1.1 | 회원의 약관 코드·버전·필수 여부·동의 시각 (현재 동의 상태의 진실 원천 — 단순 이력 아님) |
+| `MEMBER` | 회원 | RDB | §1.1 | 모든 페르소나 단일 본 테이블 (`role` + `company_id` NULL 여부로 식별) |
+| `TERM_CODE` | 약관 코드 마스터 | RDB | §1.1 | 약관별 시행일·고시일·약관 정보·필수 여부의 단일 소유. 원문은 파일 보관(경로만 DB) |
+| `TERM_CODE_LOG` | 약관 개정 이력 | RDB | §1.1 | 약관 버전 개정 1건당 1행 (버전별 시행·고시일·원문 파일 경로 보존) |
+| `TERM_AGREEMENT` | 약관 동의 | RDB | §1.1 | 회원의 약관 동의 현재 상태 — 필수 여부는 `TERM_CODE` 참조, 동의 여부는 enum |
+| `TERM_AGREEMENT_LOG` | 약관 동의 이력 | RDB | §1.1 | 가입·재동의·철회·버전 갱신 시 1행 append |
 | `IDENTITY_VERIFICATION` | 본인인증 봉인 | RDB | §1.1 | PASS 인증 CI/DI 단방향 해시 |
-| `BUSINESS_APPLICATION` | 사업자 가입 신청 | RDB | §1.2 | 운영자 심사 큐 헤더 |
+| `BUSINESS_APPLICATION` | 사업자 전환 신청 | RDB | §1.2 | 개인 회원의 사업자 전환 심사 큐 헤더 |
 | `BUSINESS_DOCUMENT` | 사업자 첨부 서류 | RDB | §1.2 | 사업자 등록증·신분증 OCR |
 | `BUSINESS_REVIEW_CALL` | 사업자 심사 통화 녹음 | RDB | §1.2 | 대표자 통화 5년 보존 |
 | `TWO_FACTOR_SETTING` | 2차 인증 설정 | RDB | §1.3 | SMS/OTP 방식 + 시드 |
@@ -111,7 +114,7 @@ erDiagram
 
 ### 1.1. 일반(개인) 회원 가입
 
-`/signup` 흐름 — 휴대폰 본인인증 → 이메일·비밀번호 입력 → 약관 동의 → 가입 완료. `MEMBER.member_type = PERSONAL` 케이스. `MEMBER` 정본 정의가 본 ERD 에 있고 다른 도메인은 stub 으로 참조.
+`/signup` 흐름 — 휴대폰 본인인증 → 이메일·비밀번호 입력 → 약관 동의 → 가입 완료. 개인 회원(`role = MEMBER`, `company_id IS NULL`) 케이스. `MEMBER` 정본 정의가 본 ERD 에 있고 다른 도메인은 stub 으로 참조.
 
 ```mermaid
 %%{init: {"themeVariables": {"fontSize": "16px"}}}%%
@@ -122,24 +125,58 @@ erDiagram
     VARCHAR(255) password_hash "bcrypt"
     VARCHAR(100) name "이름"
     VARCHAR(20) phone "본인인증 봉인본"
-    VARCHAR(20) role "enum MEMBER COMPANY_MASTER COMPANY_MEMBER"
+    VARCHAR(20) role "enum MEMBER COMPANY_MASTER"
     VARCHAR(20) status "enum ACTIVE SUSPENDED TERMINATED"
-    VARCHAR(20) member_type "enum PERSONAL BUSINESS"
-    bigint company_id FK "nullable COMPANY 참조"
+    bigint company_id FK "nullable NULL 개인 NOT NULL 회사 마스터"
     timestamp email_verified_at
     timestamp last_login_at
     timestamp withdrawn_at
     timestamp created_at
     timestamp updated_at
   }
+  TERM_CODE {
+    bigint id PK
+    VARCHAR(30) code UK "TOS PRIVACY MARKETING AGE14 등"
+    VARCHAR(200) title "약관 제목"
+    VARCHAR(20) current_version "현재 유효 버전"
+    VARCHAR(20) required "enum REQUIRED OPTIONAL 필수 여부 단일 소유"
+    date effective_date "시행일"
+    date notified_date "고시일"
+    VARCHAR(500) file_cloud_path "원문 파일 클라우드 경로"
+    VARCHAR(500) file_local_path "원문 파일 로컬 경로"
+    VARCHAR(20) status "enum ACTIVE SUPERSEDED"
+    timestamp created_at
+    timestamp updated_at
+  }
+  TERM_CODE_LOG {
+    bigint id PK
+    bigint term_code_id FK
+    VARCHAR(20) version "개정 버전"
+    VARCHAR(20) required "enum REQUIRED OPTIONAL 해당 버전 필수 여부"
+    date effective_date "시행일"
+    date notified_date "고시일"
+    VARCHAR(500) file_cloud_path "버전 원문 클라우드 경로"
+    VARCHAR(500) file_local_path "버전 원문 로컬 경로"
+    text change_note "개정 사유"
+    bigint author_operator_id FK "ADMIN_OPERATOR id"
+    timestamp created_at
+  }
   TERM_AGREEMENT {
     bigint id PK
     bigint member_id FK
-    VARCHAR(30) term_code "약관 코드 TOS PRIVACY MARKETING AGE14 등"
-    VARCHAR(20) version "약관 버전"
-    CHAR(1) required "Y N 필수동의 여부"
-    CHAR(1) agreed "Y N"
+    bigint term_code_id FK "TERM_CODE 참조 필수 여부 직접 보유 안 함"
+    VARCHAR(20) agreed_version "동의한 약관 버전"
+    VARCHAR(20) agreement "enum AGREED WITHDRAWN 동의 상태"
     timestamp agreed_at
+    timestamp updated_at
+  }
+  TERM_AGREEMENT_LOG {
+    bigint id PK
+    bigint member_id FK
+    bigint term_code_id FK
+    VARCHAR(20) version "대상 버전"
+    VARCHAR(20) action "enum AGREED REAGREED WITHDRAWN VERSION_UPDATED"
+    timestamp acted_at
   }
   IDENTITY_VERIFICATION {
     bigint id PK
@@ -154,16 +191,23 @@ erDiagram
     timestamp expires_at
   }
   MEMBER ||--o{ TERM_AGREEMENT : "동의"
+  MEMBER ||--o{ TERM_AGREEMENT_LOG : "동의 이력"
   MEMBER ||--o{ IDENTITY_VERIFICATION : "본인인증"
+  TERM_CODE ||--o{ TERM_CODE_LOG : "개정 이력"
+  TERM_CODE ||--o{ TERM_AGREEMENT : "동의 대상"
 ```
 
-- 본 절은 `member_type = PERSONAL` 만 다룬다. `BUSINESS` 는 §1.2 추가 흐름.
+- 본 절은 개인 회원(`company_id IS NULL`) 가입만 다룬다. 사업자 전환은 §1.2 추가 흐름.
+- **약관 필수 여부의 단일 소유** — 필수/선택 여부는 `TERM_CODE.required` (enum `REQUIRED`/`OPTIONAL`) 가 단일 소유. `TERM_AGREEMENT` 는 `term_code_id` 로 참조만 하고 필수 여부를 중복 보관하지 않는다.
+- **약관 원문은 파일 보관** — 약관 본문은 DB 에 적재하지 않고 파일로 보관하며, `TERM_CODE`/`TERM_CODE_LOG` 에는 `file_cloud_path` + `file_local_path` 경로만 저장(클라우드+로컬 이중 보관, `CALLBACK_DOCUMENT`·`BUSINESS_DOCUMENT` 와 동일 이중 보관 패턴). 버전별 원문은 `TERM_CODE_LOG` 경로로 추적, 약관 개정은 `TERM_CODE.current_version` 갱신 + `TERM_CODE_LOG` 1행 INSERT.
+- **동의 이력** — 가입 시 동의는 `TERM_AGREEMENT` 현재 상태 1행 + `TERM_AGREEMENT_LOG` append. 재동의·철회·약관 버전 갱신 시 `TERM_AGREEMENT` UPDATE + `TERM_AGREEMENT_LOG` 1행 추가.
 - `MEMBER` 정본 정의는 본 ERD 에만. 다른 도메인은 `MEMBER { bigint id PK; VARCHAR(255) email UK }` stub 으로 재표기 (§0 stub 가이드).
 - `IDENTITY_VERIFICATION.ci`/`di` 는 본인확인 봉인 — 발신번호 등록(§3) 에서 재사용.
+- **회사 직원의 개인 회원 가입** — 회사 하위 계정 사용자가 본인 명의 개인 회원이 되려 할 때도 별도 경로 없이 본 §1.1 일반 가입 흐름을 그대로 거쳐 정식 `MEMBER` 를 INSERT 한다. 발송 전용 하위 계정(§2)과 분리된 별개 계정이다.
 
-### 1.2. 사업자 회원 가입
+### 1.2. 사업자 회원 전환
 
-`/signup/business` 흐름 — 휴대폰 본인인증 → 사업자 정보 + 서류 업로드 → 운영자 심사 큐 (`SUBMITTED → UNDER_REVIEW → APPROVED/REJECTED`) → 승인 시 `COMPANY` 생성 + `MEMBER.role = COMPANY_MASTER` 자동 부여 (`§2.3 시나리오 ①` 참조).
+`/signup/business` 전환 신청 흐름 — **이미 가입한 개인 회원**이 사업자 정보 + 서류 업로드 → 운영자 심사 큐 (`SUBMITTED → UNDER_REVIEW → APPROVED/REJECTED`) → 승인 시 `COMPANY` 생성 + 기존 `MEMBER.role = COMPANY_MASTER` + `company_id` 부여 (`§2.3 시나리오 ①` 참조). 신규 회원을 새로 만들지 않고 기존 개인 `MEMBER` 를 전환한다.
 
 ```mermaid
 %%{init: {"themeVariables": {"fontSize": "16px"}}}%%
@@ -171,7 +215,7 @@ erDiagram
   MEMBER {
     bigint id PK
     VARCHAR(255) email UK
-    VARCHAR(20) member_type "enum PERSONAL BUSINESS"
+    VARCHAR(20) role "enum MEMBER COMPANY_MASTER"
     bigint company_id FK
   }
   COMPANY {
@@ -221,12 +265,12 @@ erDiagram
 ```
 
 - `MEMBER` 정본은 §1.1, `COMPANY` 정본은 §2. 본 ERD 에는 두 엔티티 모두 stub 으로 재표기.
-- 사업자 가입은 `MEMBER` INSERT 와 동시에 `BUSINESS_APPLICATION` INSERT. 승인 시 `COMPANY` 생성 + `MEMBER.company_id` UPDATE + `MEMBER.role = COMPANY_MASTER` 단일 트랜잭션.
+- 사업자 전환은 **개인 `MEMBER` 가 이미 존재하는 상태**에서 `BUSINESS_APPLICATION` INSERT (신규 `MEMBER` INSERT 없음). 승인 시 `COMPANY` 생성 + `MEMBER.company_id` UPDATE + `MEMBER.role = COMPANY_MASTER` 단일 트랜잭션.
 - `BUSINESS_REVIEW_CALL` 통화녹음 5년 보존 — `recording_cloud_path` + `recording_local_path` 이중 저장 (`02_FEATURE_SPEC §12.1`).
 
 ### 1.3. 공통 인증·세션·보안
 
-`/login` + `/security/two-factor` 흐름 — 모든 회원 유형이 공유하는 로그인 + 2차 인증 + 신뢰 IP + 세션. 회원 유형(`PERSONAL` / `BUSINESS`) 무관하게 동일 정책.
+`/login` + `/security/two-factor` 흐름 — 모든 회원 유형이 공유하는 로그인 + 2차 인증 + 신뢰 IP + 세션. 개인·회사 마스터 무관하게 동일 정책.
 
 ```mermaid
 %%{init: {"themeVariables": {"fontSize": "16px"}}}%%
@@ -285,10 +329,10 @@ erDiagram
 ### 1.4. 노트
 
 - `MEMBER.email` UNIQUE — 동일 이메일 재가입 차단.
-- `MEMBER.role` × `member_type` 조합으로 페르소나 식별:
-  - `PERSONAL` + `MEMBER` — 개인 회원 (§1.1 흐름)
-  - `BUSINESS` + `COMPANY_MASTER` — 사업자 가입 승인된 회사 마스터 (§1.2 + §2)
-  - `BUSINESS` + `COMPANY_MEMBER` — 마스터 초대로 합류한 하위 계정 (§2)
+- `MEMBER.role` + `company_id` NULL 여부로 페르소나 식별:
+  - `role = MEMBER` & `company_id IS NULL` — 개인 회원 (§1.1 흐름)
+  - `role = COMPANY_MASTER` & `company_id IS NOT NULL` — 사업자 전환 승인된 회사 마스터 (§1.2 + §2)
+  - 마스터 초대로 합류한 하위 계정은 `MEMBER` 가 아니라 별도 `COMPANY_SUB_ACCOUNT` 테이블(§2.1) — 본인인증·약관 동의 없이 로그인·발송·이력 조회만
 - `IDENTITY_VERIFICATION.ci`/`di` 는 본인확인 봉인 — 발신번호 등록(§3.1)·재가입 차단·KYC 재검증에 재사용.
 - `LOGIN_ATTEMPT` 인덱스: `(member_id, attempted_at DESC)`.
 - `MEMBER` stub 패턴 — 다른 도메인 ERD 에서는 `MEMBER { bigint id PK; VARCHAR(255) email UK }` 로 재표기 (§0 stub 가이드).
@@ -304,13 +348,14 @@ erDiagram
 
 | 테이블 | 한글명 | 저장소 | 정본 위치 | 역할 한 줄 |
 |--------|--------|--------|-----------|------------|
-| `COMPANY` | 회사 | RDB | §2.1 | 사업자 가입 승인 시 1행 생성. 마스터 식별은 `MEMBER.role` 단일 진실 |
-| `COMPANY_INVITATION` | 하위 계정 초대 | RDB | §2.1 | 마스터가 발행하는 일회용 가입 링크 (토큰 해시) |
+| `COMPANY` | 회사 | RDB | §2.1 | 사업자 전환 승인 시 1행 생성. 마스터 식별은 `MEMBER.role` 단일 진실 |
+| `COMPANY_SUB_ACCOUNT` | 하위 계정 | RDB | §2.1 | `MEMBER` 와 분리된 발송 전용 계정 — 본인인증·약관 동의 없이 로그인·발송·이력 조회만. 언제나 삭제 가능 |
+| `COMPANY_INVITATION` | 하위 계정 초대 | RDB | §2.1 | 마스터가 발행하는 일회용 가입 링크 — 수락 시 `COMPANY_SUB_ACCOUNT` 생성 |
 | `COMPANY_ROLE_LOG` | 마스터 권한 이관 이력 | RDB | §2.2 | GRANT TRANSFER AUTO_TRANSFER REVOKE 4종 감사 이력 |
 
 ### 2.1. 회사 본체 + 하위 계정 초대
 
-사업자 가입 승인 시 `COMPANY` 생성 (§1.2 흐름 끝). 회사 마스터는 `/company/members` 에서 직원 초대 링크 발급 → 수락 시 `MEMBER` INSERT (company_id 자동 부여, role=COMPANY_MEMBER).
+사업자 전환 승인 시 `COMPANY` 생성 (§1.2 흐름 끝). 회사 마스터는 `/company/members` 에서 직원 초대 링크 발급 → 수락 시 `COMPANY_SUB_ACCOUNT` INSERT (company_id 자동 부여). 하위 계정은 `MEMBER` 와 분리된 독립 테이블로, 본인인증·약관 동의 없이 로그인·발송·이력 조회만 가능하고 언제나 삭제할 수 있다.
 
 ```mermaid
 %%{init: {"themeVariables": {"fontSize": "16px"}}}%%
@@ -321,7 +366,7 @@ erDiagram
     VARCHAR(20) biz_number UK "사업자번호"
     VARCHAR(20) billing_mode "enum PREPAID POSTPAID"
     VARCHAR(20) status "enum ACTIVE SUSPENDED"
-    timestamp approved_at "사업자 가입 승인 시각"
+    timestamp approved_at "사업자 전환 승인 시각"
     timestamp created_at
     timestamp updated_at
   }
@@ -343,14 +388,29 @@ erDiagram
     timestamp expires_at
     timestamp accepted_at
   }
-  COMPANY ||--o{ MEMBER : "소속 (role 로 마스터 식별)"
+  COMPANY_SUB_ACCOUNT {
+    bigint id PK
+    bigint company_id FK
+    VARCHAR(255) login_id UK "로그인 아이디"
+    VARCHAR(255) password_hash "bcrypt"
+    VARCHAR(100) name
+    VARCHAR(20) phone "연락처 본인인증 아님"
+    VARCHAR(20) status "enum ACTIVE DISABLED DELETED"
+    timestamp deleted_at "soft delete 시각"
+    timestamp created_at
+    timestamp updated_at
+  }
+  COMPANY ||--o| MEMBER : "마스터 (회사당 1명)"
+  COMPANY ||--o{ COMPANY_SUB_ACCOUNT : "하위 계정"
   COMPANY ||--o{ COMPANY_INVITATION : "초대 발행"
   MEMBER ||--o{ COMPANY_INVITATION : "발행자(마스터)"
+  COMPANY_INVITATION ||--o| COMPANY_SUB_ACCOUNT : "수락 시 생성"
 ```
 
-- `MEMBER` 는 stub. 정본은 §1.1. `MEMBER.role = COMPANY_MASTER` 인 멤버가 회사 마스터.
+- `MEMBER` 는 stub. 정본은 §1.1. `MEMBER.role = COMPANY_MASTER` 인 멤버가 회사 마스터. 하위 계정 분리 후 회사에 소속된 `MEMBER` 는 마스터 1명뿐이다.
 - 회사당 마스터 1명 강제 — DB level 부분 UNIQUE 인덱스 (§2.3 참조).
-- `COMPANY_INVITATION.token_hash` — 일회용 가입 링크. 수락 시 새 `MEMBER` INSERT + `company_id` 자동 부여.
+- `COMPANY_INVITATION.token_hash` — 일회용 가입 링크. 수락 시 `COMPANY_SUB_ACCOUNT` INSERT + `company_id` 자동 부여 (`MEMBER` INSERT 아님).
+- **하위 계정 독립 구조** — `COMPANY_SUB_ACCOUNT` 는 `MEMBER` 와 다른 라이프사이클. 본인인증(`IDENTITY_VERIFICATION`)·약관 동의(`TERM_AGREEMENT`) 없이 로그인·발송·이력 조회만 가능하고, 회사 마스터 또는 본인이 언제나 삭제(soft/hard) 가능. 발신번호·API 키를 **독립 소유하지 않고 회사 자원을 공유**하며(O2), 개인 명의로 독립 소유하려면 개인 회원 전환(`02_FEATURE_SPEC §1.1`, C2) 후 가능. 기능 권한은 마스터가 초대·관리 시 부여한다.
 
 ### 2.2. 마스터 권한 이관 이력
 
@@ -396,7 +456,7 @@ erDiagram
 
 #### 마스터 라이프사이클 4가지 시나리오
 
-**① 초기 부여 (사업자 가입 승인)** — 0명 구간 없음
+**① 초기 부여 (사업자 전환 승인)** — 0명 구간 없음
 
 ```
 BUSINESS_APPLICATION.status='APPROVED' 트랜잭션:
@@ -410,7 +470,7 @@ COMMIT
 **② 명시적 이관 (TRANSFER)** — 마스터 본인이 후보 지정
 
 ```
-1. UPDATE member SET role='COMPANY_MEMBER' WHERE id = oldMaster
+1. UPDATE member SET role='MEMBER' WHERE id = oldMaster
 2. UPDATE member SET role='COMPANY_MASTER' WHERE id = newMaster
 3. INSERT company_role_log (action='TRANSFER', from=old, to=new, ...)
 ```
@@ -428,7 +488,7 @@ COMMIT
    ORDER BY created_at ASC, id ASC
    LIMIT 1 FOR UPDATE
 2. 후보 있음:
-   UPDATE member SET role='COMPANY_MEMBER' WHERE id = currentMasterId
+   UPDATE member SET role='MEMBER' WHERE id = currentMasterId
    UPDATE member SET role='COMPANY_MASTER' WHERE id = nextMasterId
    INSERT company_role_log (action='AUTO_TRANSFER', from=current, to=next,
                                 reason='MASTER_REVOKED_AUTO' or 'MASTER_WITHDRAWN_AUTO',
@@ -443,36 +503,38 @@ COMMIT
 마스터 단독 회사에서 마스터가 탈퇴하는 경우 (회사 멤버가 0명이 됨).
 
 ```
-1. UPDATE member SET role='COMPANY_MEMBER' WHERE id = currentMasterId  (또는 status=TERMINATED)
+1. UPDATE member SET role='MEMBER' WHERE id = currentMasterId  (또는 status=TERMINATED)
 2. UPDATE company SET status='SUSPENDED' WHERE id = companyId
 3. INSERT company_role_log (action='REVOKE', from=current, to=NULL, reason='LAST_MEMBER_LEFT')
 4. → 회사 발신번호·키·발송 자동 중단 (`02_FEATURE_SPEC §12.3` 연쇄 처리와 동일)
-   → 회사 부활은 운영자 개입 필요 (신규 마스터 임명 또는 사업자 가입 재신청)
+   → 회사 부활은 운영자 개입 필요 (신규 마스터 임명 또는 사업자 전환 재신청)
 ```
 
 #### 기타
 
 - `MEMBER.company_id` 가 NULL 이면 개인 회원, NOT NULL 이면 회사 소속. 회사 그룹 사이드바는 `MEMBER.role = COMPANY_MASTER` 인 사용자에게만 노출 (`03_IA §3`).
-- `COMPANY_INVITATION.token_hash` — 일회용 가입 링크 해시. 회사 마스터가 발급, 하위 계정 수락 시 `MEMBER` INSERT (company_id 자동 부여, role=COMPANY_MEMBER) + `accepted_at` 기록.
+- `COMPANY_INVITATION.token_hash` — 일회용 가입 링크 해시. 회사 마스터가 발급, 하위 계정 수락 시 `COMPANY_SUB_ACCOUNT` INSERT (company_id 자동 부여) + `accepted_at` 기록 (`MEMBER` INSERT 아님).
 - `COMPANY_ROLE_LOG.action` 카탈로그 — `GRANT` / `TRANSFER` / `AUTO_TRANSFER` / `REVOKE` 4종. `AUTO_TRANSFER` 와 `TRANSFER` 를 분리해 자동 정책 발동 vs 사용자 의도 명시 행위를 감사 시 구분.
+- **하위 계정 퇴사(삭제) 주체·연쇄** — 하위 계정 삭제는 회사 마스터뿐 아니라 본인도 직접 수행할 수 있다. 삭제 시 그 계정 명의로 등록된 `CALLBACK` 이 연쇄 삭제(§3.3)되며, 이는 동일 명의의 개인 신규가입 차단(`02_FEATURE_SPEC §1.1` 예외 b)을 해제하는 선행 조건이다. 신규가입 차단은 본인인증 명의가 활성 회사 소속으로 잔존하는 동안 적용된다.
+- **하위 계정 분리 후 마스터 후보 풀 영향 (O3 현행 유지)** — 마스터 라이프사이클 정책(1명 강제·자동 전이)은 변경하지 않는다. 다만 하위 계정이 `MEMBER` 에서 분리되면서 회사에 소속된 `MEMBER` 는 마스터 1명뿐이 되어, 시나리오 ②(TRANSFER)·③(AUTO_TRANSFER)의 후보 풀(다른 회사 소속 `MEMBER`)이 통상 비어 있다. 따라서 단독 마스터의 회수·탈퇴는 시나리오 ④(`COMPANY.status = SUSPENDED`)로 직행한다. 새 마스터를 두려면 하위 계정이 먼저 개인 회원 전환(C2) 후 정식 `MEMBER` 가 되어야 한다. 시나리오 ②③ SQL 의 강등 대상 role 은 현 enum(`MEMBER`,`COMPANY_MASTER`)에서 `MEMBER` 로 본다.
 
 ---
 
 ## 3. 발신번호 (Callback)
 
-KISA 사전 등록 자동 연계, 4 케이스(개인 휴대폰·개인 비휴대폰·임직원·법인 대표번호) 등록 흐름·서류·심사 이력. 흐름이 등록·증빙 vs 심사·외부 연계로 갈리므로 분할:
+4 케이스(개인 휴대폰·개인 비휴대폰·임직원·법인 대표번호) 등록 흐름·서류·심사·이력. 흐름이 등록·증빙 vs 심사·이력으로 갈리므로 분할:
 
 - **§3.1 발신번호 등록·증빙** — `/callbacks/registration` 화면
-- **§3.2 심사·KISA 연계** — `/admin/review/callback` + KISA 자동 연계
+- **§3.2 심사·이력** — `/admin/review/callback` + 등록 사건 이력
 
 | 테이블 | 한글명 | 저장소 | 정본 위치 | 역할 한 줄 |
 |--------|--------|--------|-----------|------------|
-| `CALLBACK` | 발신번호 | **RDB + Redis** | §3.1 | 4 등록 케이스 단일 수용. KISA 등록 여부는 Redis 캐시 |
+| `CALLBACK` | 발신번호 | RDB | §3.1 | 4 등록 케이스 단일 수용. 용도 설명·등록 상태 보유 |
 | `CALLBACK_DOCUMENT` | 발신번호 증빙 서류 | RDB | §3.1 | 재직증명서·통신서비스 이용 증명서 OCR |
 | `CALLBACK_REVIEW` | 발신번호 심사 액션 | RDB | §3.2 | 운영자 승인·반려·재제출·위조 의심 액션 1건당 1행 |
-| `KISA_REGISTRATION` | KISA 사전 등록 연계 | RDB | §3.2 | 외부 API raw 페이로드·응답 보존 |
+| `CALLBACK_LOG` | 발신번호 등록 이력 | RDB | §3.2 | 등록·심사·삭제 등 사건 1건당 1행 (소유권 이관 개념 없음) |
 
-> 이 도메인의 **Redis 전용 키**: `lock:kisa:{phone}` (KISA 호출 중복 방지 락 60초), `kisa:cache:{phone}` (발송 검증 hot path 캐시 10분), `caller:registered:{memberId}` (회원의 등록 발신번호 Set 캐시 10분).
+> 이 도메인의 **Redis 전용 키**: `caller:registered:{memberId}` (회원의 등록(`status=REGISTERED`) 발신번호 Set 캐시 10분).
 
 ### 3.1. 발신번호 등록·증빙
 
@@ -496,9 +558,8 @@ erDiagram
     bigint company_id FK "nullable"
     VARCHAR(20) phone_number "정규화된 번호"
     VARCHAR(20) register_type "enum SELF_MOBILE SELF_LANDLINE EMPLOYEE CORP_REP"
+    VARCHAR(100) description "용도 설명 라벨 무슨 발신번호인지"
     VARCHAR(20) status "enum SUBMITTED UNDER_REVIEW REGISTERED REJECTED DELETED"
-    VARCHAR(20) kisa_status "enum PENDING REGISTERED FAILED REMOVED"
-    VARCHAR(100) kisa_ref_id "KISA 사전등록 식별자"
     VARCHAR(500) reject_reason
     timestamp registered_at
     timestamp deleted_at
@@ -522,24 +583,24 @@ erDiagram
 
 - `MEMBER`·`COMPANY` 는 stub. 정본은 §1.1 / §2.1.
 - `CALLBACK.phone_number` **활성 등록 1개 강제** — 정규화된 번호 기준으로 `status ∈ {SUBMITTED, UNDER_REVIEW, REGISTERED}` 인 row 는 **전 시스템에 1개**만 허용 (부분 UNIQUE 인덱스, §11 INV-16). `REJECTED`·`DELETED` 는 종료 상태로 보고 동일 번호 재등록 가능. `register_type` 만 다른 동시 활성 등록(같은 번호가 `SELF_MOBILE` 과 `EMPLOYEE` 로 동시에 살아있는 케이스)은 더 이상 허용하지 않는다.
-- 소유권 이관(재등록·운영자 강제 회수 포함)은 §3.2 `CALLBACK_OWNERSHIP_LOG` 이력 + 기존 row 의 종료 상태 전이 후에만 신규 row INSERT 허용.
+- 재등록(삭제 후 동일 번호 재등록 포함)은 기존 row 의 종료 상태(`DELETED`/`REJECTED`) 전이 후에만 신규 row INSERT 허용. **소유권 이관 개념은 폐기** — 번호 소유권이 바뀔 일이 없으므로, 등록·삭제 사건은 §3.2 `CALLBACK_LOG` 에 기록한다.
+- `CALLBACK.description` — 회원이 등록 시 입력하는 용도 설명(예: '고객 문자 발송용', '예약 알림 발신'). 발신번호 목록·심사 화면에 표시 (`02_FEATURE_SPEC §4`).
 - 4 등록 케이스 흐름 (`02_FEATURE_SPEC §4.1~4.4`):
   - `SELF_MOBILE` — `IDENTITY_VERIFICATION` 의 본인 휴대폰과 일치 시 즉시 `REGISTERED`. 증빙 서류 없음.
   - `SELF_LANDLINE` — 통신사 명의 확인 추가 본인인증.
   - `EMPLOYEE`/`CORP_REP` — `CALLBACK_DOCUMENT` 업로드 + 운영자 심사 큐 (§3.2).
 
-### 3.2. 심사·KISA 연계
+### 3.2. 심사·이력
 
-운영자가 `/admin/review/callback` 에서 임직원·법인 케이스 심사. 승인 시 KISA 사전 등록 API 자동 호출.
+운영자가 `/admin/review/callback` 에서 임직원·법인 케이스 심사. 승인 시 `status = REGISTERED` 전이. 등록·심사·삭제 등 사건은 `CALLBACK_LOG` 에 1행씩 기록한다.
 
 ```mermaid
 %%{init: {"themeVariables": {"fontSize": "16px"}}}%%
 erDiagram
   CALLBACK {
     bigint id PK
+    VARCHAR(20) phone_number
     VARCHAR(20) status
-    VARCHAR(20) kisa_status
-    VARCHAR(100) kisa_ref_id
   }
   ADMIN_OPERATOR {
     bigint id PK
@@ -553,48 +614,32 @@ erDiagram
     text comment
     timestamp acted_at
   }
-  KISA_REGISTRATION {
+  CALLBACK_LOG {
     bigint id PK
     bigint callback_id FK
-    VARCHAR(64) request_payload "전송 페이로드 sha256"
-    VARCHAR(20) response_code
-    text response_body
-    VARCHAR(20) result "enum SUCCESS FAIL"
-    timestamp requested_at
-    timestamp completed_at
-  }
-  CALLBACK_OWNERSHIP_LOG {
-    bigint id PK
-    VARCHAR(20) phone_number "정규화된 번호"
-    bigint from_callback_id FK "직전 소유 row"
-    bigint to_callback_id FK "신규 소유 row nullable 회수만 한 경우 NULL"
-    VARCHAR(30) reason "enum DELETION_REUSE FRAUD_REVOKE OWNERSHIP_TRANSFER ADMIN_FORCED MEMBER_TERMINATED"
-    bigint actor_member_id FK "nullable 회원 의도 행위"
-    bigint actor_operator_id FK "nullable 운영자 강제"
+    VARCHAR(20) phone_number "정규화된 번호 역추적용"
+    VARCHAR(30) event "enum REGISTERED REVIEW_APPROVED REVIEW_REJECTED RESUBMIT_REQUESTED DELETED FRAUD_FLAGGED"
+    bigint actor_member_id FK "nullable 회원 행위"
+    bigint actor_operator_id FK "nullable 운영자 행위"
     text comment
-    timestamp transferred_at
+    timestamp occurred_at
   }
   CALLBACK ||--o{ CALLBACK_REVIEW : "심사 이력"
   ADMIN_OPERATOR ||--o{ CALLBACK_REVIEW : "심사자"
-  CALLBACK ||--o{ KISA_REGISTRATION : "KISA 자동 연계"
-  CALLBACK ||--o{ CALLBACK_OWNERSHIP_LOG : "직전 소유 from"
-  CALLBACK ||--o{ CALLBACK_OWNERSHIP_LOG : "신규 소유 to"
+  CALLBACK ||--o{ CALLBACK_LOG : "등록 사건 이력"
 ```
 
 - `CALLBACK`·`ADMIN_OPERATOR` 모두 stub. 정본은 §3.1 / §9.1.
-- `KISA_REGISTRATION` 은 어댑터 격리 — KISA API 변경(`04_PROJECT_PLAN §R-02`) 대비 raw payload 보존.
-- `CALLBACK_OWNERSHIP_LOG` 는 동일 정규화 `phone_number` 의 활성 소유권이 바뀌는 모든 사건의 단일 진실 원천. 동작 패턴:
-  1. 기존 row 종료 상태 전이 (`status` → `DELETED`/`REJECTED`) + KISA 연쇄 해제 (`kisa_status` → `REMOVED`).
-  2. `CALLBACK_OWNERSHIP_LOG` INSERT (`from_callback_id` 필수, `to_callback_id` 는 즉시 재등록되는 경우만).
-  3. 신규 소유자가 등록 신청하면 새 `CALLBACK` row INSERT (활성 1개 부분 UNIQUE 통과). 이후 `to_callback_id` 를 채워 이력 마감.
-- `reason` 카탈로그: `DELETION_REUSE` (회원이 본인 등록 삭제 후 재등록), `FRAUD_REVOKE` (위조 의심 운영자 회수), `OWNERSHIP_TRANSFER` (회사 간 또는 회원 간 의도적 이관), `ADMIN_FORCED` (분쟁 해결 운영자 강제), `MEMBER_TERMINATED` (회원 해지 연쇄).
+- `CALLBACK_LOG` 는 발신번호 등록과 관련된 모든 사건(등록·심사 승인/반려·재제출 요청·삭제·위조 의심)의 이력. **소유권 이관 개념은 없다** — 번호 소유권이 바뀔 일이 없으므로 `from/to` 이관 컬럼 대신 사건 단위 append 만 둔다.
+- `event` 카탈로그: `REGISTERED` (등록 확정) / `REVIEW_APPROVED` (심사 승인) / `REVIEW_REJECTED` (반려) / `RESUBMIT_REQUESTED` (보완 요청) / `DELETED` (삭제·연쇄 삭제 포함) / `FRAUD_FLAGGED` (위조 의심).
+- 동일 번호 재등록은 기존 row 종료 상태(`DELETED`/`REJECTED`) 전이 후 새 `CALLBACK` row INSERT (활성 1개 부분 UNIQUE 통과) + `CALLBACK_LOG` 에 `REGISTERED` 사건 INSERT.
 
 ### 3.3. 노트
 
-- 회원 정지·해지 시 `CALLBACK.status = DELETED` + KISA `REMOVED` 연쇄 처리(`02_FEATURE_SPEC §12.3`) + `CALLBACK_OWNERSHIP_LOG` 에 `reason='MEMBER_TERMINATED'` 이력 INSERT.
+- 회원 정지·해지 시 `CALLBACK.status = DELETED` 연쇄 처리(`02_FEATURE_SPEC §12.3`) + `CALLBACK_LOG` 에 `event='DELETED'` 사건 INSERT.
+- **하위 계정(직원) 퇴사·삭제 연쇄** — 직원이 회사 마스터 또는 본인에 의해 퇴사(삭제)되면, 그 직원 명의로 등록된 `CALLBACK` 은 `status = DELETED` 로 연쇄 처리(+ `CALLBACK_LOG` `event='DELETED'`)된다 (회원 해지 연쇄와 동일 메커니즘, `02_FEATURE_SPEC §3.1·§3.3·§4.4`). 동일 명의가 회사에 소속 잔존하는 동안은 개인 신규가입이 차단되고(§1.1 예외 b), 퇴사 처리 완료 후에만 신규 가입이 가능하다.
 - **활성 등록 1개 강제** — 동일 정규화 `phone_number` 에 대해 `status ∈ {SUBMITTED, UNDER_REVIEW, REGISTERED}` 행은 1개만. `register_type` 으로만 구분되던 이전 모델은 폐기 — 같은 실제 번호가 `SELF_MOBILE` 과 `EMPLOYEE` 로 동시에 존재하는 다중 소유 모호성을 제거한다. DB 강제는 부분 UNIQUE 인덱스(§11 인덱스 표).
-- KISA 연계 분산 락 — 동시 등록 신청 시 `lock:kisa:{phone}` (Redis SETNX 60초) 으로 중복 호출 방지.
-- 발송 검증 hot path — `kisa:cache:{phone}` 캐시 미스 시에만 `KISA_REGISTRATION.result=SUCCESS` 확인 (§5.3).
+- 발송 검증 hot path — 발신번호 등록 여부는 `caller:registered:{memberId}` Set 캐시로 확인, 미스 시 `CALLBACK.status = REGISTERED` 조회 (§5.3, §14.4).
 
 ---
 
@@ -793,7 +838,7 @@ erDiagram
 
 본 서비스가 책임지는 것은 다음 3 단계로 한정:
 
-1. **적재 전 검증** — KISA 등록 발신번호 / API Key 스코프 / 일일 한도 / 잔액 / 스팸 키워드 / 광고 의무 표기 / 채널 길이 / 카카오 템플릿 승인 등 (`02_FEATURE_SPEC §6.1·§11`)
+1. **적재 전 검증** — 발신번호 등록(`status=REGISTERED`) / API Key 스코프 / 일일 한도 / 잔액 / 스팸 키워드 / 광고 의무 표기 / 채널 길이 / 카카오 템플릿 승인 등 (`02_FEATURE_SPEC §6.1·§11`)
 2. **외부 테이블 INSERT** — 검증 통과 시 외부 시스템 스키마로 INSERT (`message_state = 0`). 외부 시스템이 `request_date` 도래 시점에 자동 송출
 3. **결과 조회** — 외부 진행·로그 테이블 SELECT (`message_state`, `result_code`, `result_deliver_date`, `result_net_id`). 회원 이력 화면(`/histories`) 에 표시
 
@@ -827,7 +872,6 @@ erDiagram
 | `msg_sub_type` | VARCHAR(5) | NOT NULL | 메시지 세부 유형 |
 | `group_id` | INT | NULL | 전송 그룹 ID (일괄 발송 묶음) |
 | `user_id` | VARCHAR(32) | NULL | 발송 사용자 ID |
-| `kisa_code` | VARCHAR(20) | NULL | KISA 식별 코드 |
 | `destaddr` | VARCHAR(32) | NOT NULL | 착신 번호 |
 | `callback` | VARCHAR(32) | NOT NULL | 회신 번호 (발신번호) |
 | `bill_code` | VARCHAR(30) | NULL | 과금 코드 |
@@ -893,7 +937,7 @@ erDiagram
 
 | 캐시 | Redis 키 | TTL | 용도 |
 |------|----------|-----|------|
-| KISA 등록 여부 | `kisa:cache:{phone}` | 10분 | 검증 1단계 |
+| 발신번호 등록 여부 | `caller:registered:{memberId}` | 10분 | 검증 1단계 |
 | 카카오 템플릿 승인 여부 | `tmpl:approved:{memberId}:{templateCode}` | 10분 | 검증 카카오 채널 |
 | 라우팅 매핑 | `routing:{memberId}` | 10분 | 외부 INSERT 시 routing_meta 산출 |
 | 잔액 합계 | `balance:{memberId}` | 30초 | 검증 잔액 조회 |
@@ -1426,7 +1470,7 @@ erDiagram
 | `TRIAL_SESSION` | 체험 세션 | **Redis only** | `trial:{token}` Hash — 시작시각·만료시각·핑거프린트·IP. 30분 sliding TTL |
 | `TRIAL_SEND_LOG` | 체험 가상 발송 로그 | **Redis only** | `trial:{token}:sends` List — 가상 결과만, 외부 송출 0 |
 | `TRIAL_CHARGE_LOG` | 체험 가상 결제 로그 | **Redis only** | `trial:{token}:charges` List — 실 결제 0, `SUCCESS` 가상 결과만 |
-| `TRIAL_CALLBACK` | 체험 더미 발신번호 | **Redis only** | `trial:{token}:callbacks` Hash — KISA 미연계, `REGISTERED` 고정 |
+| `TRIAL_CALLBACK` | 체험 더미 발신번호 | **Redis only** | `trial:{token}:callbacks` Hash — 외부 연계 없음, `REGISTERED` 고정 |
 | `TRIAL_API_KEY` | 체험 더미 키 | **Redis only** | `trial:{token}:keys` List — 실 발급 0, 표시용 마스킹 값만 |
 
 > **KPI 측정** (`01_PRD §K3 보조` 체험→가입 전환율 ≥ 15%) 은 RDB 가 아니라 **Prometheus 카운터**로 처리. 메트릭 정의·라벨·발화 시점은 `06_OBSERVABILITY §2.5` 정본을 따른다 — 본 절은 Redis 측 발화 트리거만 다룬다.
@@ -1520,7 +1564,7 @@ erDiagram
 #### 격리·만료·차단
 
 - **격리 원칙** — Redis 키 네임스페이스 `trial:*` 가 운영 테이블과 물리적으로 다른 저장소. RDB 에는 `TRIAL_*` 테이블이 존재하지 않음. FK 연결 자체 불가능 (`02_FEATURE_SPEC §2.3`).
-- **외부 차단** — 외부 송출·결제·KISA·카카오 등록은 진입 자체를 차단. Redis 키만 RW, 외부 API 호출 0.
+- **외부 차단** — 외부 송출·결제·카카오 등록은 진입 자체를 차단. Redis 키만 RW, 외부 API 호출 0.
 - **어뷰징 차단** — `trial:fp:{fingerprint}` + `trial:ip:{ipHash}` 카운터로 임계 검사 (`02_FEATURE_SPEC §2.1` 사전조건).
 - **가입 전환 시 폐기** — 더미는 회원 계정으로 이관 X. `DEL trial:{token}*` 일괄 삭제.
 
@@ -1784,7 +1828,7 @@ erDiagram
     bigint id PK
     VARCHAR(200) title
     text body
-    VARCHAR(20) audience "enum ALL PERSONAL BUSINESS COMPANY_MASTER"
+    VARCHAR(20) audience "enum ALL PERSONAL COMPANY_MASTER"
     CHAR(1) pinned "Y N 상단 고정"
     timestamp published_at
     timestamp expires_at
@@ -1802,7 +1846,7 @@ erDiagram
 ```
 
 - `MEMBER`·`ADMIN_OPERATOR` 모두 stub. 정본은 §1.1 / §9.1.
-- `NOTICE.audience` — `BUSINESS` 공지는 개인 회원에게 미노출. `COMPANY_MASTER` 공지는 회사 마스터만.
+- `NOTICE.audience` — `PERSONAL`(개인 `company_id IS NULL`) / `COMPANY_MASTER`(회사 마스터) 타겟. 하위 계정(`COMPANY_SUB_ACCOUNT`)은 `MEMBER` 가 아니므로 공지 타겟에서 제외.
 - 활성 공지 캐시 — Redis `notice:active:{audience}` (5분 TTL). 게시·만료·삭제 시 pub/sub `notice-published` 발행으로 즉시 무효화.
 
 ### 10.3. FAQ
@@ -1883,10 +1927,10 @@ erDiagram
 | 루트 엔티티 | 소속 도메인 | 한 줄 |
 |-------------|-------------|-------|
 | `MEMBER` | §1 회원·인증 | 모든 도메인의 허브 — 발신번호·키·발송·결제·문의 등 대부분이 회원에 매달림 |
-| `BUSINESS_APPLICATION` | §1 회원·인증 | 사업자 가입 신청 — 승인되면 `COMPANY` 생성 |
+| `BUSINESS_APPLICATION` | §1 회원·인증 | 사업자 전환 신청 — 승인되면 `COMPANY` 생성 |
 | `COMPANY` | §2 회사 | 사업자 회원의 단체 단위 — 후불 모델·하위 계정 묶음 |
 | `POSTPAID_CONFIG` | §7 결제 | 회사 단위 후불 설정 |
-| `CALLBACK` | §3 발신번호 | 발송의 발신자 — KISA 등록 후 사용 가능 |
+| `CALLBACK` | §3 발신번호 | 발송의 발신자 — 등록 승인 후 사용 가능 |
 | `API_KEY` | §4 API 키 | SDK·CLI·MCP 발송의 진입점 인증 |
 | `send_*_tran` / `send_*_log_YYYYMM` (외부) | §5 발송 | SMS·MMS·카카오·RCS 진행·로그 8 패밀리 — 외부 발송 시스템 소유 |
 | `kko_template` / `kko_brand_template` / `kko_template_category` / `kko_template_history` (외부) | §6 카카오/RCS | 카카오 알림톡 템플릿·브랜드·카테고리·이력 4종 — 외부 발송 시스템 소유 |
@@ -1941,12 +1985,12 @@ erDiagram
 | INV-08 | `API_KEY.environment = TEST` 키로 상용 발송 적재 시도는 거부 | `04_PROJECT_PLAN W-205` |
 | INV-09 | 카카오 채널 발송은 외부 시스템 카카오 템플릿이 `APPROVED` 상태일 때만 통과 — 본 서비스가 발송 직전 검증 게이트로 동작 | `02_FEATURE_SPEC §9.1`, §6 |
 | INV-10 | `BUSINESS_REVIEW_CALL` 통화녹음 5년 보존, `recording_cloud_path` + `recording_local_path` 이중 | `02_FEATURE_SPEC §12.1` |
-| INV-11 | 회원 `TERMINATED` 전이 시 보유 `CALLBACK`·`API_KEY` 일괄 무효 + KISA 연쇄 해제 | `02_FEATURE_SPEC §12.3` |
+| INV-11 | 회원 `TERMINATED` 전이 시 보유 `CALLBACK`·`API_KEY` 일괄 무효 + `CALLBACK.status=DELETED` 연쇄 + `CALLBACK_LOG` 사건 기록 | `02_FEATURE_SPEC §12.3` |
 | INV-12 | `POSTPAID_INVOICE.status = OVERDUE` 회사는 발송 차단 | `02_FEATURE_SPEC §10.3` |
 | INV-13 | 회사당 `MEMBER.role = COMPANY_MASTER` 는 최대 1명 — 부분 UNIQUE 인덱스로 DB level 강제 | `02_FEATURE_SPEC §3.2`, §2.3 |
-| INV-14 | `COMPANY.status = ACTIVE` 인 회사는 마스터 정확히 1명. 사업자 가입 승인 시 자동 부여, 회수·탈퇴 시 `(created_at ASC, id ASC)` 첫 ACTIVE 멤버로 자동 전이. 후보 0명 시 `COMPANY.status = SUSPENDED` 자동 전이 | §2.3 시나리오 ①·③·④ |
+| INV-14 | `COMPANY.status = ACTIVE` 인 회사는 마스터 정확히 1명. 사업자 전환 승인 시 자동 부여, 회수·탈퇴 시 `(created_at ASC, id ASC)` 첫 ACTIVE 멤버로 자동 전이. 후보 0명 시 `COMPANY.status = SUSPENDED` 자동 전이 | §2.3 시나리오 ①·③·④ |
 | INV-15 | API Key 인증 성공 조건 — `status = ACTIVE` AND `expires_at > NOW()`. 모든 키는 유한 수명 (무기한 옵션 없음 — `expires_at` NOT NULL). 만료 시 `401 KEY_EXPIRED` 응답 + status 를 `EXPIRED` 로 자동 전이. `API_KEY.status` enum 에 `PENDING` placeholder 없음 — 심사 중 상태는 `API_KEY_REQUEST.status = REQUESTED` 로 표현 | §4.1, §4.2 만료 정책 |
-| INV-16 | 동일 정규화 `phone_number` 의 활성 등록(`CALLBACK.status ∈ {SUBMITTED, UNDER_REVIEW, REGISTERED}`)은 **전 시스템 1개**. 부분 UNIQUE 인덱스로 DB level 강제. 이관·재등록은 `CALLBACK_OWNERSHIP_LOG` 이력 INSERT + 기존 row 종료 상태(`DELETED`/`REJECTED`) 전이 후에만 신규 row 허용 | §3.1, §3.2 |
+| INV-16 | 동일 정규화 `phone_number` 의 활성 등록(`CALLBACK.status ∈ {SUBMITTED, UNDER_REVIEW, REGISTERED}`)은 **전 시스템 1개**. 부분 UNIQUE 인덱스로 DB level 강제. 재등록은 기존 row 종료 상태(`DELETED`/`REJECTED`) 전이 후에만 신규 row 허용 + `CALLBACK_LOG` 사건 기록 (소유권 이관 개념 없음) | §3.1, §3.2 |
 | INV-17 | `API_KEY` row 는 운영자 승인 시점에만 생성 — placeholder 발급 금지. 신청 큐는 `API_KEY_REQUEST` 로 완전 분리, 승인 시 `API_KEY_REQUEST.issued_api_key_id` ↔ `API_KEY.issued_from_request_id` 양방향 링크 | §4.1 |
 | INV-18 | `COMPANY.billing_mode = POSTPAID` 인 회사 소속 멤버는 **선불 기능 일체 불가** — `CHARGE` INSERT 거부, `AUTO_CHARGE_CONFIG` 등록 거부, 신규 `CHARGE_BALANCE` 생성 안 됨. 개인 회원(`company_id IS NULL`)과 `billing_mode = PREPAID` 회사 멤버만 선불 흐름 사용. 회사 모드 전환 시 활성 자동충전 자동 비활성화 + PG 빌키 해지 | §7.1, §7.3, §2.1 |
 
@@ -1959,7 +2003,9 @@ erDiagram
 | `MEMBER` | `(email)` UK, `(company_id, status)`, **부분 UNIQUE** `(company_id) WHERE role='COMPANY_MASTER'` | 로그인·회사 멤버 조회·회사당 마스터 1명 강제 (INV-13) |
 | `AUTH_SESSION` | `(refresh_token_hash)` UK, `(member_id, expires_at)` | 토큰 검증·만료 정리 |
 | `CALLBACK` | `(member_id, status)`, **부분 UNIQUE** `(phone_number) WHERE status IN ('SUBMITTED','UNDER_REVIEW','REGISTERED')` | 목록 조회·동일 번호 활성 등록 1개 강제 (INV-16) |
-| `CALLBACK_OWNERSHIP_LOG` | `(phone_number, transferred_at DESC)`, `(from_callback_id)`, `(to_callback_id)` | 번호별 소유권 이력 추적·역참조 |
+| `CALLBACK_LOG` | `(callback_id, occurred_at DESC)`, `(phone_number, occurred_at DESC)` | 번호별 등록 사건 이력 추적 |
+| `COMPANY_SUB_ACCOUNT` | `(company_id, status)`, `(login_id)` UK | 회사별 하위 계정 조회·로그인 |
+| `TERM_AGREEMENT` | `(member_id, term_code_id)` UK, `(term_code_id)` | 회원·약관 동의 현재 상태 조회 |
 | `API_KEY` | `(key_hash)` UK, `(member_id, environment, status)`, `(issued_from_request_id)` | 인증·운영키 조회·발급 근거 역참조 |
 | `API_KEY_REQUEST` | `(status, requested_at DESC)`, `(member_id, requested_at DESC)`, `(source_api_key_id)` | 심사 큐·신청자 이력·운영전환 소스 추적 |
 | `API_USAGE` | `(api_key_id, called_at DESC)` | 사용량 통계 |
@@ -1985,7 +2031,7 @@ erDiagram
 |---|------|-----|-------|
 | C1 | 영속성·내구성 (서버 재시작 후 보존) 필수 | ⭕ | ❌ (AOF/RDB 백업 있어도 진실 원천 X) |
 | C2 | 회계·감사·법정 보존 기간 (5년 등) | ⭕ | ❌ |
-| C3 | 외부 시스템(KISA·PG·중계사) 합의된 식별자 | ⭕ | ❌ |
+| C3 | 외부 시스템(PG·중계사) 합의된 식별자 | ⭕ | ❌ |
 | C4 | 짧은 TTL (분/시간 단위) + 만료 후 폐기 OK | ❌ (불필요한 행 누적) | ⭕ |
 | C5 | hot path 의 ms 단위 응답 + 초당 수천 회 조회 | △ (캐시 필요) | ⭕ |
 | C6 | 슬라이딩 윈도우·카운터·Rate Limit·세션 만료 | △ | ⭕ |
@@ -1999,10 +2045,10 @@ erDiagram
 
 | 도메인 | 테이블 | 사유 |
 |--------|--------|------|
-| §1 회원 | `MEMBER`, `BUSINESS_APPLICATION`, `BUSINESS_DOCUMENT`, `BUSINESS_REVIEW_CALL`, `IDENTITY_VERIFICATION`, `TERM_AGREEMENT` | 영구·법정 보존(통화 녹음 5년·동의 이력) |
+| §1 회원 | `MEMBER`, `BUSINESS_APPLICATION`, `BUSINESS_DOCUMENT`, `BUSINESS_REVIEW_CALL`, `IDENTITY_VERIFICATION`, `TERM_CODE`, `TERM_CODE_LOG`, `TERM_AGREEMENT`, `TERM_AGREEMENT_LOG` | 영구·법정 보존(통화 녹음 5년·약관 동의 이력) |
 | §1 회원 | `LOGIN_ATTEMPT` | 감사·이상 패턴 분석 원본 (잠금 카운터만 Redis 별도) |
-| §2 회사 | `COMPANY`, `COMPANY_ROLE_LOG`, `COMPANY_INVITATION` | 권한 이력 감사 |
-| §3 발신번호 | `CALLBACK`, `CALLBACK_DOCUMENT`, `CALLBACK_REVIEW`, `KISA_REGISTRATION` | 외부 시스템(KISA) 합의 + 감사 |
+| §2 회사 | `COMPANY`, `COMPANY_SUB_ACCOUNT`, `COMPANY_ROLE_LOG`, `COMPANY_INVITATION` | 권한 이력 감사 + 하위 계정 |
+| §3 발신번호 | `CALLBACK`, `CALLBACK_DOCUMENT`, `CALLBACK_REVIEW`, `CALLBACK_LOG` | 등록 이력 + 감사 |
 | §4 API 키 | `API_KEY`, `API_KEY_REQUEST`, `API_KEY_SCOPE`, `API_KEY_CALLBACK_WHITELIST`, `API_KEY_LIMIT` | 정합성 + 운영자 승인 시점에만 키 발급 (인증 hot path 캐시는 §14.4) |
 | §4 API 키 | `API_USAGE` | 사용량 통계·감사 — 인덱스 + 파티셔닝 |
 | §5 발송 | (외부 시스템) | 외부 발송 시스템 소유 — 본 서비스는 검증·적재·결과 조회만 |
@@ -2035,7 +2081,6 @@ erDiagram
 | 체험 발급 횟수 (어뷰징 차단) | String INCR | 1시간 | `trial:fp:{fingerprint}` | 임계 초과 시 차단 |
 | 체험 IP 발급 횟수 | String INCR | 1시간 | `trial:ip:{ipHash}` | IP 단위 추가 차단 |
 | 자동충전 중복 실행 분산 락 | String SETNX | 30초 | `lock:auto-charge:{memberId}` | 임계 도달 시 1노드만 실행 |
-| KISA 사전 등록 여부 빠른 확인 | String | 10분 | `kisa:cache:{phone}` | 발송 검증 hot path |
 | 카카오 템플릿 승인 여부 빠른 확인 | Hash | 10분 | `tmpl:approved:{memberId}:{templateCode}` | 발송 검증 hot path |
 | 이상 패턴 슬라이딩 윈도우 | Sorted Set | 1시간 | `abuse:burst:{memberId}` | 분당 발송량 트래킹 |
 | 잔액 임계 알림 발화 방지 | String | 1시간 | `alert:fired:{memberId}` | 알림 재발사 디바운스 |
@@ -2049,7 +2094,7 @@ erDiagram
 | 회원 잔액 합계 | `CHARGE_BALANCE.amount_remaining` 합산 | `balance:{memberId}` → int (TTL=30초) | 발송 차감/충전/환불 트랜잭션 커밋 후 DEL (write-around) |
 | 중계사 라우팅 매핑 | (외부 시스템 조회) | `routing:{memberId}` → kakaoProvider·rcsProvider (Hash, TTL=10분) | 외부 시스템에서 변경 시 webhook 으로 DEL |
 | 활성 공지 | `NOTICE` (audience·published_at·expires_at) | `notice:active:{audience}` → JSON 배열 (TTL=5분) | 공지 게시·만료·삭제 시 즉시 DEL |
-| 회원 KISA 등록 발신번호 목록 | `CALLBACK.kisa_status=REGISTERED` | `caller:registered:{memberId}` → Set(phone) (TTL=10분) | 등록 승인·삭제 시 DEL |
+| 회원 등록 발신번호 목록 | `CALLBACK.status=REGISTERED` | `caller:registered:{memberId}` → Set(phone) (TTL=10분) | 등록 승인·삭제 시 DEL |
 | FAQ 카테고리·항목 | `FAQ_CATEGORY`+`FAQ` | `faq:tree` → JSON (TTL=10분) | 운영자 수정 시 DEL |
 
 > **캐시 정책**
@@ -2084,7 +2129,6 @@ erDiagram
 | 락 | 키 | TTL | 용도 |
 |----|----|-----|------|
 | 자동충전 중복 방지 | `lock:auto-charge:{memberId}` | 30초 | 잔액 임계 도달 시 단일 노드만 PG 결제 |
-| 발신번호 등록 동시 KISA 호출 방지 | `lock:kisa:{phone}` | 60초 | 중복 등록 신청 차단 |
 | 후불 청구서 발행 중복 방지 | `lock:invoice:{companyId}:{period}` | 5분 | 정산 주기 batch 단일 실행 |
 | 잔액 차감 직렬화 (옵션) | `lock:balance:{memberId}` | 10초 | 동시 발송 시 차감 race condition 회피 — DB row-level lock 우선이고 Redis 락은 보강 |
 
@@ -2100,7 +2144,7 @@ erDiagram
    - HIT → memberId/scopes 즉시 확보
    - MISS → RDB SELECT api_key + api_key_scope → Redis SET (TTL=10m)
 3) Redis ZADD ratelimit:send:{apiKeyId} now → ZCARD 검사
-4) Redis GET kisa:cache:{phone} → 발신번호 등록 여부 확인 (MISS 시 RDB)
+4) Redis SISMEMBER caller:registered:{memberId} → 발신번호 등록 여부 확인 (MISS 시 RDB CALLBACK.status)
 5) Redis GET balance:{memberId} → 잔액 사전 평가 (MISS 시 RDB)
 6) (검증 통과) RDB BEGIN
    → 외부 발송 시스템 적재 테이블 INSERT (외부 시스템 스키마)
@@ -2151,7 +2195,7 @@ erDiagram
 2) 활동 (가상 발송/결제/발신번호 등록)
    → 매 요청마다 EXPIRE trial:{token} 1800 (sliding window)
    → LPUSH trial:{token}:sends ... + LTRIM 0 99 (최대 100건)
-   → 외부 API 호출 0 (송출·결제·KISA 진입 차단)
+   → 외부 API 호출 0 (송출·결제 진입 차단)
 3) 어뷰징 차단
    → INCR 결과가 임계 초과 시 차단 응답 + Prometheus trial_abuse_blocked_total++
 4) 자동 만료

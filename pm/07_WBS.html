@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WBS 진행도 — WiseCan 통합 메시징 서비스</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --border: #e2e5ea;
+    --border-strong: #cbd1da;
+    --text: #1a1d23;
+    --text-sub: #6b7280;
+    --text-mute: #9aa1ad;
+    --accent: #2f6df6;
+    --todo: #9aa1ad;
+    --todo-bg: #eef0f3;
+    --doing: #d98a00;
+    --doing-bg: #fdf4e3;
+    --done: #1f9d57;
+    --done-bg: #e7f6ee;
+    --m0: #6366f1;
+    --m1: #2f6df6;
+    --m2: #0ea5a3;
+    --m3: #d97706;
+    --m4: #db2777;
+    --m5: #7c3aed;
+    --shadow: 0 1px 3px rgba(16,24,40,.06), 0 1px 2px rgba(16,24,40,.04);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  header.page { margin-bottom: 24px; }
+  header.page h1 { font-size: 22px; font-weight: 700; margin: 0 0 4px; letter-spacing: -.01em; }
+  header.page .meta { font-size: 13px; color: var(--text-sub); }
+  header.page .meta a { color: var(--accent); text-decoration: none; }
+  header.page .meta a:hover { text-decoration: underline; }
+
+  /* summary */
+  .summary {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0 8px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+  }
+  .card .label { font-size: 12px; color: var(--text-sub); font-weight: 600; letter-spacing: .02em; text-transform: uppercase; }
+  .card .big { font-size: 26px; font-weight: 700; margin-top: 6px; letter-spacing: -.02em; }
+  .card .sub { font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+
+  .bar { height: 8px; border-radius: 99px; background: var(--todo-bg); overflow: hidden; margin-top: 12px; display: flex; }
+  .bar > span { height: 100%; display: block; transition: width .35s ease; }
+  .bar .seg-done { background: var(--done); }
+  .bar .seg-doing { background: var(--doing); }
+
+  .statline { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+  .statline .s { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-sub); }
+  .dot { width: 9px; height: 9px; border-radius: 99px; display: inline-block; }
+  .dot.todo { background: var(--todo); }
+  .dot.doing { background: var(--doing); }
+  .dot.done { background: var(--done); }
+
+  /* toolbar */
+  .toolbar {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin: 20px 0 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: var(--shadow);
+  }
+  .toolbar .group { display: flex; gap: 6px; align-items: center; }
+  .toolbar .glabel { font-size: 12px; color: var(--text-mute); font-weight: 600; margin-right: 2px; }
+  .chip {
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text-sub);
+    font-size: 12.5px; font-weight: 600;
+    padding: 5px 11px; border-radius: 99px; cursor: pointer;
+    transition: all .15s ease; font-family: inherit;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .spacer { flex: 1; }
+  .btn {
+    border: 1px solid var(--border-strong);
+    background: var(--surface); color: var(--text-sub);
+    font-size: 12.5px; font-weight: 600; font-family: inherit;
+    padding: 6px 12px; border-radius: 8px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn svg { width: 14px; height: 14px; }
+
+  /* milestone */
+  .milestone { margin-bottom: 14px; }
+  .ms-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 4px; cursor: pointer; user-select: none;
+  }
+  .ms-badge {
+    font-size: 12px; font-weight: 700; color: #fff;
+    padding: 3px 9px; border-radius: 6px; letter-spacing: .02em;
+  }
+  .ms-title { font-size: 15px; font-weight: 700; }
+  .ms-range { font-size: 12px; color: var(--text-mute); }
+  .ms-progress { flex: 1; max-width: 320px; }
+  .ms-pct { font-size: 13px; font-weight: 700; color: var(--text-sub); min-width: 42px; text-align: right; }
+  .ms-caret { width: 16px; height: 16px; color: var(--text-mute); transition: transform .2s ease; }
+  .milestone.collapsed .ms-caret { transform: rotate(-90deg); }
+  .milestone.collapsed .ms-body { display: none; }
+
+  /* table */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    text-align: left; font-size: 11.5px; font-weight: 600; color: var(--text-mute);
+    text-transform: uppercase; letter-spacing: .03em;
+    padding: 10px 12px; background: #fafbfc; border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody td { padding: 11px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.done-row { background: #fcfdfc; }
+  tbody tr.done-row .action-main { color: var(--text-sub); }
+
+  .col-status { width: 96px; }
+  .col-id { width: 70px; }
+  .col-owner { width: 96px; }
+  .col-md { width: 56px; text-align: right; }
+  .col-sprint { width: 56px; }
+
+  .wid { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); }
+  .action-main { font-weight: 600; }
+  .action-dod { font-size: 12px; color: var(--text-sub); margin-top: 3px; }
+  .deps { font-size: 11.5px; color: var(--text-mute); margin-top: 4px; }
+  .deps b { color: var(--text-sub); font-weight: 600; }
+
+  .owner-tag {
+    display: inline-block; font-size: 11.5px; font-weight: 600;
+    color: var(--text-sub); background: var(--todo-bg);
+    padding: 2px 7px; border-radius: 5px; white-space: nowrap;
+  }
+  .md-val { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .sprint-tag { font-size: 11.5px; color: var(--text-mute); font-weight: 600; }
+
+  .status-btn {
+    border: 1px solid var(--border-strong); border-radius: 99px;
+    font-size: 12px; font-weight: 700; font-family: inherit;
+    padding: 4px 10px 4px 8px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    width: 90px; transition: all .15s ease;
+  }
+  .status-btn .sd { width: 8px; height: 8px; border-radius: 99px; flex-shrink: 0; }
+  .status-btn[data-s="todo"]  { color: var(--todo);  background: var(--todo-bg);  border-color: transparent; }
+  .status-btn[data-s="todo"] .sd  { background: var(--todo); }
+  .status-btn[data-s="doing"] { color: var(--doing); background: var(--doing-bg); border-color: transparent; }
+  .status-btn[data-s="doing"] .sd { background: var(--doing); }
+  .status-btn[data-s="done"]  { color: var(--done);  background: var(--done-bg);  border-color: transparent; }
+  .status-btn[data-s="done"] .sd  { background: var(--done); }
+  .status-btn:hover { filter: brightness(.97); }
+
+  tr.hidden-row { display: none; }
+  .milestone.hidden-ms { display: none; }
+
+  footer.note { margin-top: 28px; font-size: 12px; color: var(--text-mute); text-align: center; }
+
+  @media (max-width: 900px) {
+    .summary { grid-template-columns: 1fr 1fr; }
+    .col-sprint, .col-owner { display: none; }
+    .ms-progress { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <h1>WBS 진행도 추적</h1>
+    <div class="meta">
+      WiseCan 통합 메시징 서비스 · 정본 <a href="04_PROJECT_PLAN.md">04_PROJECT_PLAN.md §3</a> ·
+      상태는 이 브라우저에 자동 저장됩니다
+    </div>
+  </header>
+
+  <!-- summary -->
+  <section class="summary">
+    <div class="card">
+      <div class="label">전체 진행률 (가중)</div>
+      <div class="big" id="sum-pct">0%</div>
+      <div class="sub" id="sum-pct-sub">진행중은 50%로 환산</div>
+      <div class="bar">
+        <span class="seg-done" id="sum-bar-done" style="width:0"></span>
+        <span class="seg-doing" id="sum-bar-doing" style="width:0"></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label">완료 항목</div>
+      <div class="big"><span id="sum-done-n">0</span> <span style="font-size:15px;color:var(--text-mute)">/ <span id="sum-total-n">32</span></span></div>
+      <div class="statline">
+        <span class="s"><span class="dot todo"></span> 미시작 <b id="sum-todo-n" style="margin-left:2px">0</b></span>
+        <span class="s"><span class="dot doing"></span> 진행중 <b id="sum-doing-n" style="margin-left:2px">0</b></span>
+        <span class="s"><span class="dot done"></span> 완료 <b id="sum-done-n2" style="margin-left:2px">0</b></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label">완료 공수 (man-day)</div>
+      <div class="big"><span id="sum-md-done">0</span> <span style="font-size:15px;color:var(--text-mute)">/ <span id="sum-md-total">0</span></span></div>
+      <div class="sub" id="sum-md-sub">가중 완료 0 mD</div>
+    </div>
+    <div class="card">
+      <div class="label">마일스톤</div>
+      <div class="big">6 <span style="font-size:15px;color:var(--text-mute)">M0~M5</span></div>
+      <div class="sub">11 스프린트 · 22주</div>
+    </div>
+  </section>
+
+  <!-- toolbar -->
+  <div class="toolbar">
+    <div class="group">
+      <span class="glabel">마일스톤</span>
+      <button class="chip active" data-filter="ms" data-val="all">전체</button>
+      <button class="chip" data-filter="ms" data-val="M0">M0</button>
+      <button class="chip" data-filter="ms" data-val="M1">M1</button>
+      <button class="chip" data-filter="ms" data-val="M2">M2</button>
+      <button class="chip" data-filter="ms" data-val="M3">M3</button>
+      <button class="chip" data-filter="ms" data-val="M4">M4</button>
+      <button class="chip" data-filter="ms" data-val="M5">M5</button>
+    </div>
+    <div class="group">
+      <span class="glabel">상태</span>
+      <button class="chip active" data-filter="st" data-val="all">전체</button>
+      <button class="chip" data-filter="st" data-val="todo">미시작</button>
+      <button class="chip" data-filter="st" data-val="doing">진행중</button>
+      <button class="chip" data-filter="st" data-val="done">완료</button>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn" id="btn-collapse" title="전체 접기/펼치기">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      접기/펼치기
+    </button>
+    <button class="btn" id="btn-export" title="JSON으로 내보내기">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      내보내기
+    </button>
+    <button class="btn" id="btn-reset" title="모든 상태 초기화">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+      초기화
+    </button>
+  </div>
+
+  <div id="board"></div>
+
+  <footer class="note">
+    추정 공수: S=2 / M=6 / L=14 평균 환산 · 진행률은 항목 상태를 man-day 가중으로 계산 ·
+    데이터 출처 <a href="04_PROJECT_PLAN.md" style="color:var(--text-sub)">04_PROJECT_PLAN.md §3·§4</a>
+  </footer>
+
+</div>
+
+<script>
+// ── WBS 데이터 (04_PROJECT_PLAN §3 + §4 스프린트 매핑) ──────────────────
+const MILESTONES = [
+  { id:"M0", title:"킥오프 / 인프라 / CI", range:"1주차", color:"var(--m0)" },
+  { id:"M1", title:"회원·발신번호·키 기반", range:"2~5주차", color:"var(--m1)" },
+  { id:"M2", title:"발송 파이프라인", range:"6~9주차", color:"var(--m2)" },
+  { id:"M3", title:"SDK · CLI · MCP", range:"10~13주차", color:"var(--m3)" },
+  { id:"M4", title:"결제 · 캐시 · 체험 모드", range:"14~17주차", color:"var(--m4)" },
+  { id:"M5", title:"운영자 콘솔·보안·릴리즈", range:"18~22주차", color:"var(--m5)" },
+];
+
+const WBS = [
+  // M0
+  { id:"W-001", ms:"M0", action:"백엔드 스캐폴딩 · CI · 환경 3종", owner:"BE", md:8, dod:"staging 배포 가능 + CI 그린", deps:"—", sprint:"S1" },
+  { id:"W-002", ms:"M0", action:"프론트 스캐폴딩 · 디자인 토큰 셋업", owner:"FE/디자이너", md:6, dod:"디자인 시스템 1차 적용", deps:"—", sprint:"S1" },
+  { id:"W-003", ms:"M0", action:"자체 IDC 1차 셋업 + 모니터링", owner:"BE", md:6, dod:"Prometheus + Grafana + Alertmanager 셋업 (정본 06_OBSERVABILITY)", deps:"—", sprint:"S1" },
+  // M1
+  { id:"W-101", ms:"M1", action:"개인·사업자 회원가입 (02 §1.1·1.2)", owner:"BE+FE", md:18, dod:"가입→로그인 E2E 통과", deps:"W-001·002", sprint:"S2" },
+  { id:"W-102", ms:"M1", action:"로그인·2차 인증·신뢰 IP (02 §1.3·1.4)", owner:"BE+FE", md:8, dod:"2차 인증 실측 성공", deps:"W-101", sprint:"S2" },
+  { id:"W-103", ms:"M1", action:"회사 마스터 권한·하위 계정 (02 §3)", owner:"BE+FE", md:10, dod:"권한 부여/회수/이관 + 이력", deps:"W-101", sprint:"S3" },
+  { id:"W-104", ms:"M1", action:"발신번호 등록 4 케이스 (02 §4.1~4.4)", owner:"BE+FE", md:20, dod:"4 케이스 등록 성공 + 상태 REGISTERED 확인", deps:"W-101", sprint:"S3" },
+  { id:"W-105", ms:"M1", action:"API Key 발급·스코프·폐기·재발급 (02 §5)", owner:"BE+FE", md:14, dod:"12 스코프 카탈로그 + 권장 프리셋 적용", deps:"W-101", sprint:"S3" },
+  { id:"W-106", ms:"M1", action:"운영자 콘솔 — 사업자 전환·발신번호·키 검토 큐 (02 §12.1·12.2·12.6)", owner:"BE+FE", md:14, dod:"큐 처리 → 회원 알림 E2E", deps:"W-103·104·105", sprint:"S3" },
+  // M2
+  { id:"W-201", ms:"M2", action:"발송 정합성 검증 (발신번호·스코프·한도·스팸·광고·잔액)", owner:"BE", md:14, dod:"검증 9종 모두 단위 테스트 통과", deps:"W-104·105", sprint:"S4" },
+  { id:"W-202", ms:"M2", action:"UTF-8 → EUC-KR 인코딩 변환", owner:"BE", md:6, dod:"변환 무손실률 100%", deps:"W-201", sprint:"S4" },
+  { id:"W-203", ms:"M2", action:"발송 테이블 적재 + 메타·라우팅", owner:"BE", md:8, dod:"적재 P95 ≤ 1s, ULID 단일", deps:"W-201·202", sprint:"S4" },
+  { id:"W-204", ms:"M2", action:"외부 발송 시스템 인터페이스 합의·테스트", owner:"BE", md:6, dod:"테이블 컬럼·polling 스펙 합의 문서", deps:"W-203", sprint:"S4" },
+  { id:"W-205", ms:"M2", action:"테스트망/상용망 분리 + API Key 테스트/상용 식별자", owner:"BE", md:14, dod:"테스트 키로 상용 적재 시 거부 응답 확인", deps:"W-203", sprint:"S5" },
+  { id:"W-206", ms:"M2", action:"웹 콘솔 발송 — 5채널 + 일괄 + 예약 (02 §6)", owner:"BE+FE", md:20, dod:"5채널 발송 E2E + 일괄 100k행 적재", deps:"W-201~205", sprint:"S5" },
+  // M3
+  { id:"W-301", ms:"M3", action:"SDK (Python) (02 §7.1)", owner:"BE", md:8, dod:"pypi 배포 + 5 채널 동작", deps:"W-206", sprint:"S6" },
+  { id:"W-302", ms:"M3", action:"CLI (wsc) 멀티 플랫폼 (02 §7.2)", owner:"BE", md:18, dod:"3 OS 패키지 + 명령 14종 + 자동 업데이트", deps:"W-206", sprint:"S6~S7" },
+  { id:"W-303", ms:"M3", action:"MCP 서버 (도구 13종 + 비노출 정책) (02 §7.3)", owner:"BE", md:14, dod:"동등성 매트릭스 단언 통과", deps:"W-206", sprint:"S7" },
+  { id:"W-304", ms:"M3", action:"발송 이력 조회 (02 §8)", owner:"BE+FE", md:8, dod:"키별 조회 범위 정책 적용 확인", deps:"W-206", sprint:"S7" },
+  { id:"W-305", ms:"M3", action:"카카오·RCS 템플릿/브랜드 (02 §9)", owner:"BE+FE", md:14, dod:"중계사 인터페이스 정상 + 이관 처리 큐", deps:"W-206", sprint:"S7" },
+  // M4
+  { id:"W-401", ms:"M4", action:"충전 + PG 통합 (결제수단 7종) (02 §10.1)", owner:"BE", md:14, dod:"7 수단 모두 결제 성공 + 결제수단별 분리 보관", deps:"W-201", sprint:"S8" },
+  { id:"W-402", ms:"M4", action:"자동충전 (PG 정기결제, 30일 제한) (02 §10.2)", owner:"BE", md:14, dod:"임계 도달 → 자동결제 성공 + 실패 알림", deps:"W-401", sprint:"S8" },
+  { id:"W-403", ms:"M4", action:"후불 모델 (신용·보증보험·청구·연체 차단) (02 §10.3)", owner:"BE", md:14, dod:"청구서 발행·결제·연체 → 발송 차단 E2E", deps:"W-401", sprint:"S9" },
+  { id:"W-404", ms:"M4", action:"환불·5년 소멸·현금영수증 마이너스 정정 (02 §10.4·10.5)", owner:"BE+FE", md:14, dod:"결제수단별 라우팅·마이너스 발행 자동", deps:"W-401", sprint:"S9" },
+  { id:"W-405", ms:"M4", action:"잔액 부족 분기 (자동결제→후불→부분/취소) (02 §11)", owner:"BE+FE", md:14, dod:"4분기 모두 시나리오 통과 + HTTP 207 응답", deps:"W-401·402·403", sprint:"S9" },
+  { id:"W-406", ms:"M4", action:"체험 모드 — 더미 데이터 적재·격리·차단 (02 §2)", owner:"BE+FE", md:14, dod:"외부 송출·결제 차단 단언 + 데이터 무영향", deps:"W-104·206", sprint:"S10" },
+  // M5
+  { id:"W-501", ms:"M5", action:"운영자 — 회원 통제·라우팅·재무 (02 §12.3·12.4·12.5)", owner:"BE+FE", md:14, dod:"정지·해지 → 발신번호 일괄 해지 E2E", deps:"W-104·404", sprint:"S10" },
+  { id:"W-502", ms:"M5", action:"운영자 — 통합관리·OCR·내부 감사 (02 §12.2·12.9)", owner:"BE+FE", md:14, dod:"OCR 텍스트 검색 + 매년 감사 실행 + 출력 이중 보관", deps:"W-104", sprint:"S11" },
+  { id:"W-503", ms:"M5", action:"운영자 — 대시보드·통계·시스템 설정", owner:"BE+FE", md:8, dod:"일/주/월 통계 + 데이터 갱신 5분 이하", deps:"W-203", sprint:"S11" },
+  { id:"W-504", ms:"M5", action:"보안·스팸·이상 패턴 자동 차단 (02 §13)", owner:"BE", md:14, dod:"false-negative ≤ 5% (시뮬레이션)", deps:"W-201", sprint:"S10" },
+  { id:"W-505", ms:"M5", action:"CS — 1:1 문의·챗봇·FAQ·공지 (02 §12.8)", owner:"BE+FE", md:8, dod:"문의 답변 24h 처리 SLA 측정 가능", deps:"W-103", sprint:"S11" },
+  { id:"W-506", ms:"M5", action:"베타 → GA 안정화 + 부하 테스트", owner:"전원", md:14, dod:"처리량 NFR-PERF-301·302 통과", deps:"전체", sprint:"S11" },
+];
+
+const STORAGE_KEY = "wisecan_wbs_status_v1";
+const ORDER = ["todo","doing","done"];
+const LABEL = { todo:"미시작", doing:"진행중", done:"완료" };
+const WEIGHT = { todo:0, doing:0.5, done:1 };
+
+let state = loadState();
+let filterMs = "all", filterSt = "all";
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  const init = {};
+  WBS.forEach(w => init[w.id] = "todo");
+  return init;
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function statusBtn(w) {
+  const s = state[w.id] || "todo";
+  return `<button class="status-btn" data-s="${s}" data-id="${w.id}">
+    <span class="sd"></span>${LABEL[s]}</button>`;
+}
+
+function rowHtml(w) {
+  const s = state[w.id] || "todo";
+  return `<tr data-id="${w.id}" data-ms="${w.ms}" data-st="${s}" class="${s==='done'?'done-row':''}">
+    <td class="col-status">${statusBtn(w)}</td>
+    <td class="col-id"><span class="wid">${w.id}</span></td>
+    <td>
+      <div class="action-main">${w.action}</div>
+      <div class="action-dod">DoD · ${w.dod}</div>
+      <div class="deps"><b>의존</b> ${w.deps}</div>
+    </td>
+    <td class="col-owner"><span class="owner-tag">${w.owner}</span></td>
+    <td class="col-md"><span class="md-val">${w.md}</span></td>
+    <td class="col-sprint"><span class="sprint-tag">${w.sprint}</span></td>
+  </tr>`;
+}
+
+function render() {
+  const board = document.getElementById("board");
+  let html = "";
+  MILESTONES.forEach(m => {
+    const items = WBS.filter(w => w.ms === m.id);
+    html += `<div class="milestone" data-ms="${m.id}">
+      <div class="ms-head">
+        <svg class="ms-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        <span class="ms-badge" style="background:${m.color}">${m.id}</span>
+        <span class="ms-title">${m.title}</span>
+        <span class="ms-range">${m.range}</span>
+        <div class="ms-progress">
+          <div class="bar">
+            <span class="seg-done" data-ms-done="${m.id}" style="width:0"></span>
+            <span class="seg-doing" data-ms-doing="${m.id}" style="width:0"></span>
+          </div>
+        </div>
+        <span class="ms-pct" data-ms-pct="${m.id}">0%</span>
+      </div>
+      <div class="ms-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th class="col-status">상태</th>
+              <th class="col-id">ID</th>
+              <th>액션 · DoD · 의존</th>
+              <th class="col-owner">담당</th>
+              <th class="col-md">mD</th>
+              <th class="col-sprint">스프린트</th>
+            </tr></thead>
+            <tbody>${items.map(rowHtml).join("")}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+  });
+  board.innerHTML = html;
+  bindRows();
+  bindMilestones();
+  recompute();
+  applyFilters();
+}
+
+function bindRows() {
+  document.querySelectorAll(".status-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      const cur = state[id] || "todo";
+      const next = ORDER[(ORDER.indexOf(cur) + 1) % ORDER.length];
+      state[id] = next;
+      saveState();
+      btn.dataset.s = next;
+      btn.querySelector("span").nextSibling; // noop
+      btn.lastChild.textContent = LABEL[next];
+      const tr = btn.closest("tr");
+      tr.dataset.st = next;
+      tr.classList.toggle("done-row", next === "done");
+      recompute();
+      applyFilters();
+    });
+  });
+}
+
+function bindMilestones() {
+  document.querySelectorAll(".ms-head").forEach(head => {
+    head.addEventListener("click", e => {
+      if (e.target.closest(".status-btn")) return;
+      head.closest(".milestone").classList.toggle("collapsed");
+    });
+  });
+}
+
+function recompute() {
+  let totalMd = 0, doneMd = 0, weightedMd = 0;
+  let nDone = 0, nDoing = 0, nTodo = 0;
+  const perMs = {};
+  MILESTONES.forEach(m => perMs[m.id] = { total:0, weighted:0, done:0 });
+
+  WBS.forEach(w => {
+    const s = state[w.id] || "todo";
+    totalMd += w.md;
+    weightedMd += w.md * WEIGHT[s];
+    if (s === "done") { doneMd += w.md; nDone++; }
+    else if (s === "doing") nDoing++;
+    else nTodo++;
+    perMs[w.ms].total += w.md;
+    perMs[w.ms].weighted += w.md * WEIGHT[s];
+    perMs[w.ms].done += (s === "done" ? w.md : 0);
+  });
+
+  const pct = totalMd ? Math.round(weightedMd / totalMd * 100) : 0;
+  const donePct = totalMd ? (doneMd / totalMd * 100) : 0;
+  const doingPct = totalMd ? ((weightedMd - doneMd) / totalMd * 100) : 0;
+
+  document.getElementById("sum-pct").textContent = pct + "%";
+  document.getElementById("sum-bar-done").style.width = donePct + "%";
+  document.getElementById("sum-bar-doing").style.width = doingPct + "%";
+  document.getElementById("sum-done-n").textContent = nDone;
+  document.getElementById("sum-done-n2").textContent = nDone;
+  document.getElementById("sum-doing-n").textContent = nDoing;
+  document.getElementById("sum-todo-n").textContent = nTodo;
+  document.getElementById("sum-total-n").textContent = WBS.length;
+  document.getElementById("sum-md-done").textContent = doneMd;
+  document.getElementById("sum-md-total").textContent = totalMd;
+  document.getElementById("sum-md-sub").textContent = "가중 완료 " + (Math.round(weightedMd*10)/10) + " mD";
+
+  MILESTONES.forEach(m => {
+    const d = perMs[m.id];
+    const p = d.total ? Math.round(d.weighted / d.total * 100) : 0;
+    const dp = d.total ? (d.done / d.total * 100) : 0;
+    const gp = d.total ? ((d.weighted - d.done) / d.total * 100) : 0;
+    const pctEl = document.querySelector(`[data-ms-pct="${m.id}"]`);
+    const doneEl = document.querySelector(`[data-ms-done="${m.id}"]`);
+    const doingEl = document.querySelector(`[data-ms-doing="${m.id}"]`);
+    if (pctEl) pctEl.textContent = p + "%";
+    if (doneEl) doneEl.style.width = dp + "%";
+    if (doingEl) doingEl.style.width = gp + "%";
+  });
+}
+
+function applyFilters() {
+  document.querySelectorAll(".milestone").forEach(msEl => {
+    const msId = msEl.dataset.ms;
+    const msShow = (filterMs === "all" || filterMs === msId);
+    let visibleRows = 0;
+    msEl.querySelectorAll("tbody tr").forEach(tr => {
+      const stOk = (filterSt === "all" || tr.dataset.st === filterSt);
+      const show = msShow && stOk;
+      tr.classList.toggle("hidden-row", !show);
+      if (show) visibleRows++;
+    });
+    msEl.classList.toggle("hidden-ms", !msShow || visibleRows === 0);
+  });
+}
+
+// toolbar
+document.querySelectorAll(".chip").forEach(chip => {
+  chip.addEventListener("click", () => {
+    const f = chip.dataset.filter, v = chip.dataset.val;
+    document.querySelectorAll(`.chip[data-filter="${f}"]`).forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+    if (f === "ms") filterMs = v; else filterSt = v;
+    applyFilters();
+  });
+});
+
+document.getElementById("btn-collapse").addEventListener("click", () => {
+  const anyOpen = [...document.querySelectorAll(".milestone")].some(m => !m.classList.contains("collapsed"));
+  document.querySelectorAll(".milestone").forEach(m => m.classList.toggle("collapsed", anyOpen));
+});
+
+document.getElementById("btn-reset").addEventListener("click", () => {
+  if (!confirm("모든 WBS 상태를 '미시작'으로 초기화할까요?")) return;
+  WBS.forEach(w => state[w.id] = "todo");
+  saveState();
+  render();
+});
+
+document.getElementById("btn-export").addEventListener("click", () => {
+  const rows = WBS.map(w => ({ id:w.id, milestone:w.ms, status:state[w.id]||"todo", md:w.md, sprint:w.sprint, action:w.action }));
+  const blob = new Blob([JSON.stringify({ exportedAt:new Date().toISOString(), items:rows }, null, 2)], { type:"application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "wbs-progress.json"; a.click();
+  URL.revokeObjectURL(url);
+});
+
+render();
+</script>
+</body>
+</html>

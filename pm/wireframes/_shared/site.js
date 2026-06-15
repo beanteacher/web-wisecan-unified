@@ -139,7 +139,7 @@ var ADMIN_SIDEBAR_HTML = '<aside class="admin-aside w-56 flex-shrink-0 p-3">' +
     '<details class="aside-group">' +
       '<summary>심사</summary>' +
       '<div class="aside-group-items">' +
-        '<a class="aside-link" data-key="03.admin-review-business.html" href="03.admin-review-business.html">사업자 가입</a>' +
+        '<a class="aside-link" data-key="03.admin-review-business.html" href="03.admin-review-business.html">사업자 전환</a>' +
         '<a class="aside-link" data-key="04.admin-review-callback.html" href="04.admin-review-callback.html">발신번호</a>' +
         '<a class="aside-link" data-key="05.admin-keys-review.html" href="05.admin-keys-review.html">키 발급·전환</a>' +
       '</div>' +

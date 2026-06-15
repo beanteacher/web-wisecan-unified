@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>설계 변경 체크리스트 — 회원·약관·발신번호 구조 재설계</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --surface-2: #f0f2f5;
+    --border: #e2e5ea;
+    --text: #1a1d23;
+    --text-dim: #5c6470;
+    --accent: #2563eb;
+    --done: #1e9e4a;
+    --open: #c77700;
+    --chip-bg: #eef1f6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    line-height: 1.65;
+    font-size: 15px;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 24px 96px; }
+  header.doc { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 32px; }
+  h1 { font-size: 25px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .meta { color: var(--text-dim); font-size: 13px; }
+  .lead {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 20px 0 0;
+    color: var(--text-dim);
+    font-size: 13.5px;
+  }
+  .lead strong { color: var(--text); }
+  h2 {
+    font-size: 19px; font-weight: 700; margin: 44px 0 16px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  h3 { font-size: 16px; font-weight: 600; margin: 28px 0 6px; }
+  h3 .code { color: var(--accent); font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13.5px; }
+  th, td { border: 1px solid var(--border); padding: 8px 11px; text-align: left; vertical-align: top; }
+  th { background: var(--surface-2); font-weight: 600; color: var(--text); }
+  td { background: var(--surface); color: var(--text-dim); }
+  td code, p code, li code, th code { background: var(--chip-bg); color: #334155; padding: 1px 6px; border-radius: 4px; font-size: 12.5px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .field { margin: 4px 0; }
+  .field b { color: var(--text); }
+  ul.files { list-style: none; padding: 0; margin: 10px 0 4px; }
+  ul.files li {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 7px 12px; margin: 5px 0;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 7px;
+  }
+  ul.files li label { cursor: pointer; flex: 1; }
+  ul.files li input { margin-top: 5px; }
+  input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--done); cursor: pointer; flex-shrink: 0; }
+  li.checked label { color: var(--text-dim); text-decoration: line-through; }
+  .open-box ul.files li { border-left: 3px solid var(--open); }
+  .open-box ul.files li input { accent-color: var(--open); }
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin-left: 8px; vertical-align: middle; }
+  .badge.open { background: rgba(199,119,0,.12); color: var(--open); }
+  .badge.new { background: rgba(30,158,74,.12); color: var(--done); }
+  .badge.del { background: rgba(220,38,38,.1); color: #dc2626; }
+  .badge.review { background: rgba(37,99,235,.1); color: var(--accent); }
+  .progress-bar { background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; height: 10px; overflow: hidden; margin: 8px 0 0; }
+  .progress-bar > span { display: block; height: 100%; background: var(--done); width: 0%; transition: width .25s ease; }
+  .progress-wrap { position: sticky; top: 0; background: var(--bg); padding: 14px 0; z-index: 10; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+  .progress-label { font-size: 13px; color: var(--text-dim); display: flex; justify-content: space-between; }
+  .note { color: var(--text-dim); font-size: 13px; border-top: 1px dashed var(--border); margin-top: 28px; padding-top: 14px; }
+  .reset-btn { background: var(--surface-2); border: 1px solid var(--border); color: var(--text-dim); font-size: 12px; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-family: inherit; }
+  .reset-btn:hover { color: var(--text); border-color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="doc">
+    <h1>설계 변경 체크리스트 — 회원·약관·발신번호 구조 재설계</h1>
+    <div class="meta">작성일 2026-06-15</div>
+    <div class="lead">
+      본 파일은 2026-06-15 회의 내용을 기존 <code>pm/01~06</code> 정본 문서에 반영하기 위한 <strong>작업 추적용 체크리스트</strong>다.
+      정본 문서가 아니며, 모든 항목 반영이 끝나면 본 파일은 아카이브한다.
+      진행 규칙 — 한 항목씩 순차 반영하고, 완료 시 체크박스를 클릭한다(상태는 브라우저에 자동 저장).
+    </div>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="progressText">진행률 0 / 0</span>
+      <button class="reset-btn" onclick="resetAll()">전체 초기화</button>
+    </div>
+    <div class="progress-bar"><span id="progressFill"></span></div>
+  </div>
+
+  <h2>0. 회의 내용 원문 → 분류</h2>
+  <table>
+    <thead><tr><th>#</th><th>회의 내용 (원문 요지)</th><th>처리 항목</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>사업자 회원 <b>가입</b>이 아닌 사업자 회원 <b>전환</b>으로 변경</td><td>C1</td></tr>
+      <tr><td>2</td><td>회사 내 직원이 개인 회원이 되고 싶을 때, 별도 서류 심사가 아니라 일반 회원가입과 동일하게 본인인증·개인 서류·약관 동의 등을 제출하도록</td><td>C2</td></tr>
+      <tr><td>3</td><td>회사 직원이 퇴사 후 신규가입 시, 서류 받고 회사에 전화해 (회사 측) 삭제 처리. 해당 회사에서 직원이 삭제되면 그 발신번호도 삭제</td><td>C3</td></tr>
+      <tr><td>4</td><td>발신번호 등록 history 는 <code>CALLBACK_OWNERSHIP_LOG</code> 대신 <code>callback_log</code> 히스토리로 사용. 해당 테이블 불필요. 소유권 변경될 일 없음</td><td>C4</td></tr>
+      <tr><td>5</td><td>해당 발신번호가 무슨 발신번호인지에 대한 설명 필요</td><td>C5</td></tr>
+      <tr><td>6</td><td>KISA 관련 테이블 및 행은 존재하지 않아도 된다</td><td>C6</td></tr>
+      <tr><td>7</td><td>회원 테이블 <code>member_type</code> 없애고 <code>role</code> 만으로 처리</td><td>C7</td></tr>
+      <tr><td>8</td><td><code>term_agreement</code> 이력 테이블 필요. 필수 동의여부를 enum 으로 표현</td><td>C8</td></tr>
+      <tr><td>9</td><td><code>term_code</code> 테이블 필요 — 시행일 / 고시일 / 약관 정보 / 필수 여부 포함. 이력도 필요. 약관은 파일로 보관</td><td>C9</td></tr>
+      <tr><td>10</td><td>business 연관 member 는 <code>member_type</code> 제외 → <code>company_id</code> null 여부만 판단</td><td>C7</td></tr>
+      <tr><td>11</td><td>사업자 하위 회원은 <code>MEMBER</code> 와 분리된 독립 구조. 인증·개인정보 동의 없이 로그인·발송·이력 조회만. 언제나 삭제 가능</td><td>C10</td></tr>
+    </tbody>
+  </table>
+
+  <h2>1. 결정 사항 <span class="badge new">결정됨 2026-06-15</span></h2>
+  <p class="field">착수 전 확정이 필요했던 항목과 그 결정.</p>
+  <div>
+    <ul class="files">
+      <li><input type="checkbox" data-id="O1" checked><label><b>O1. 퇴사자 신규가입 처리</b> — <b>결정:</b> 퇴사자가 신규가입을 시도하면 "현재 ○○ 회사에 소속되어 있어 가입 불가, 해당 회사에서 퇴사(삭제) 처리가 완료되어야 신규 가입 가능" 으로 안내·차단한다. 퇴사(삭제) 처리는 <b>회사(마스터)뿐 아니라 본인(개인)도 직접</b> 할 수 있다. 처리되면 그 직원의 발신번호도 연쇄 삭제한다. (C3)</label></li>
+      <li><input type="checkbox" data-id="O2" checked><label><b>O2. 하위 계정의 발신번호·키 소유</b> — <b>결정:</b> 하위 계정은 발신번호·키를 <b>독립 소유할 수 없다</b>(회사 자원만 공유 사용). 개인 명의의 발신번호/키를 독립 소유하려면 그 직원이 <b>개인 회원으로 전환(C2)</b> 해야 한다. (C10)</label></li>
+      <li><input type="checkbox" data-id="O3" checked><label><b>O3. 마스터 모델</b> — <b>결정:</b> 마스터는 <b>현행 유지</b>(§2.3 마스터 1명 강제·라이프사이클 정책 그대로). 하위 계정 분리와 무관하게 마스터 모델은 변경하지 않는다. (C10, §2.3)</label></li>
+    </ul>
+  </div>
+
+  <h2>2. 변경 항목 체크리스트</h2>
+
+  <h3><span class="code">C1.</span> 사업자 회원 가입 → 전환</h3>
+  <p class="field"><b>현재</b> — <code>/signup/business</code> 에서 처음부터 사업자로 가입. <code>BUSINESS_APPLICATION</code> 은 가입 신청 큐. <code>MEMBER</code> INSERT 와 동시에 신청 INSERT.</p>
+  <p class="field"><b>변경 방향</b></p>
+  <ul>
+    <li>개인 회원으로 먼저 가입 후 <b>사업자 전환 신청</b> → 승인 시 <code>COMPANY</code> 생성 + 기존 <code>MEMBER.role = COMPANY_MASTER</code> + <code>company_id</code> 부여.</li>
+    <li><code>BUSINESS_APPLICATION</code> 의 의미를 "가입 신청" → "전환 신청" 으로 재서술(신규 MEMBER 생성 트랜잭션 제거).</li>
+  </ul>
+  <ul class="files">
+    <li><input type="checkbox" data-id="C1-1" checked><label><code>pm/02_FEATURE_SPEC.md</code> §1.2 (사업자 가입 → 전환), §12.1 심사</label></li>
+    <li><input type="checkbox" data-id="C1-2" checked><label><code>pm/03_IA.md</code> §1·§3 사이트맵 + §5 인벤토리 — 사업자 전환을 <b>공개→회원 콘솔로 이동</b>(PG-BIZUP-001), 총계 갱신. <code>pm/04_PROJECT_PLAN.md</code> "사업자 가입"→"전환" 정합</label></li>
+    <li><input type="checkbox" data-id="C1-3" checked><label><code>pm/05_DATA_MODEL.md</code> §1 도입부, §1.2 (전환 흐름·트랜잭션), §2.3 시나리오 ①</label></li>
+  </ul>
+
+  <h3><span class="code">C2.</span> 회사 직원의 개인 회원 전환 (일반 회원가입과 동일 절차)</h3>
+  <p class="field"><b>현재</b> — 하위 계정 → 개인 회원 전환 경로 정의 없음.</p>
+  <p class="field"><b>변경 방향</b></p>
+  <ul>
+    <li>회사 직원이 개인 회원이 되려 할 때 <b>별도 예외 서류 심사를 두지 않는다.</b></li>
+    <li>대신 <b>일반 회원가입과 동일한 절차</b>(휴대폰 본인인증 + 개인 서류 + 약관 동의 등)를 그대로 거쳐 정식 개인 <code>MEMBER</code> 로 생성한다.</li>
+    <li>즉 하위 계정(<code>COMPANY_SUB_ACCOUNT</code>, 인증·약관 동의 없는 계정)은 개인 회원이 되려면 <code>§1.1</code> 일반 가입 흐름을 정상 완료해야 한다.</li>
+  </ul>
+  <ul class="files">
+    <li><input type="checkbox" data-id="C2-1" checked><label><code>pm/02_FEATURE_SPEC.md</code> §1.1 (직원의 개인 가입 = 일반 가입 절차 재사용 명시)</label></li>
+    <li><input type="checkbox" data-id="C2-2" checked><label><code>pm/03_IA.md</code> §5.1 <code>/signup</code> 개인 가입에 "회사 직원도 동일 절차" 주석</label></li>
+    <li><input type="checkbox" data-id="C2-3" checked><label><code>pm/05_DATA_MODEL.md</code> §1.1 노트 (하위 계정과 정식 <code>MEMBER</code> 생성 경로 분리 명시)</label></li>
+  </ul>
+
+  <h3><span class="code">C3.</span> 퇴사자 신규가입 처리 (서류 + 회사 유선 → 회사 측 삭제 → 발신번호 삭제)</h3>
+  <p class="field"><b>현재</b> — 퇴사 후 개인 신규가입 시 기존 회사 소속 잔존 처리·발신번호 연쇄 삭제 흐름 미정의.</p>
+  <p class="field"><b>변경 방향</b> (O1 결정 반영)</p>
+  <ul>
+    <li>퇴사자가 개인으로 신규가입을 시도하면 <b>"○○ 회사에 소속되어 있어 가입 불가"</b> 안내·차단 — 해당 회사에서 퇴사(삭제) 처리가 완료되어야 신규 가입 가능.</li>
+    <li>퇴사(삭제) 처리는 <b>회사(마스터)와 본인(개인) 둘 다 직접 가능</b>하며, 처리되면 그 직원의 <b>발신번호도 연쇄 삭제</b>.</li>
+  </ul>
+  <ul class="files">
+    <li><input type="checkbox" data-id="C3-1" checked><label><code>pm/02_FEATURE_SPEC.md</code> §1.1 가입 예외 / §3 회사 계정 / §4 발신번호 삭제 연쇄</label></li>
+    <li><input type="checkbox" data-id="C3-2" checked><label><code>pm/05_DATA_MODEL.md</code> §2 하위계정 삭제 → §3 발신번호 삭제 연쇄</label></li>
+  </ul>
+
+  <h3><span class="code">C4.</span> 발신번호 이력 — <code>CALLBACK_OWNERSHIP_LOG</code> 제거, <code>CALLBACK_LOG</code> 로 대체 <span class="badge del">테이블 삭제</span></h3>
+  <p class="field"><b>현재</b> — <code>CALLBACK_OWNERSHIP_LOG</code> 가 번호별 소유권 이관의 단일 진실 원천(<code>from/to_callback_id</code>, <code>reason</code> 5종). 소유권 이관 모델 전제.</p>
+  <p class="field"><b>변경 방향</b></p>
+  <ul>
+    <li><code>CALLBACK_OWNERSHIP_LOG</code> <b>테이블 제거</b> — 소유권이 변경될 일은 없으므로 이관 개념 폐기.</li>
+    <li>발신번호 등록 관련 이력은 <b><code>CALLBACK_LOG</code> 히스토리 테이블</b>로 대체(등록·심사·삭제 등 사건 기록).</li>
+  </ul>
+  <ul class="files">
+    <li><input type="checkbox" data-id="C4-1" checked><label><code>pm/05_DATA_MODEL.md</code> §3.2 (OWNERSHIP_LOG 제거 + <code>CALLBACK_LOG</code> 신설), §3.1·§3.3 관련 서술</label></li>
+    <li><input type="checkbox" data-id="C4-2" checked><label><code>pm/05_DATA_MODEL.md</code> §12 INV-16, §13 인덱스 표 (OWNERSHIP 참조 정리)</label></li>
+  </ul>
+
+  <h3><span class="code">C5.</span> 발신번호 설명 필드 추가</h3>
+  <p class="field"><b>현재</b> — <code>CALLBACK</code> 에 용도 설명 컬럼 없음.</p>
+  <p class="field"><b>변경 방향</b> — "무슨 발신번호인지" 설명(용도/라벨) 컬럼을 <code>CALLBACK</code> 에 추가.</p>
+  <ul class="files">
+    <li><input type="checkbox" data-id="C5-1" checked><label><code>pm/05_DATA_MODEL.md</code> §3.1 <code>CALLBACK</code> (description 컬럼)</label></li>
+    <li><input type="checkbox" data-id="C5-2" checked><label><code>pm/02_FEATURE_SPEC.md</code> §4 (등록 시 설명 입력) / <code>pm/03_IA.md</code> 발신번호 화면</label></li>
+  </ul>
+
+  <h3><span class="code">C6.</span> KISA 테이블·컬럼 제거 <span class="badge del">테이블 삭제</span></h3>
+  <p class="field"><b>현재</b> — <code>KISA_REGISTRATION</code> 테이블 + <code>CALLBACK.kisa_status</code>/<code>kisa_ref_id</code> 컬럼. 도입부·Redis 키(<code>lock:kisa</code>, <code>kisa:cache</code>, <code>caller:registered</code>)·검증 게이트·INV·인덱스·§14 캐시 전략 전반에 KISA 언급.</p>
+  <p class="field"><b>변경 방향</b> — KISA 관련 테이블·컬럼·행을 모두 제거. (발신번호 "등록됨" 상태 개념 자체는 유지하되 외부 KISA 연계 표현만 제거.)</p>
+  <ul class="files">
+    <li><input type="checkbox" data-id="C6-1" checked><label><code>pm/05_DATA_MODEL.md</code> §3 도입부·§3.1·§3.2 (<code>KISA_REGISTRATION</code> 제거, <code>kisa_*</code> 컬럼 제거)</label></li>
+    <li><input type="checkbox" data-id="C6-2" checked><label><code>pm/05_DATA_MODEL.md</code> §3 Redis 키, §5.2 <code>kisa_code</code>, §5.3 검증, §8.x 체험</label></li>
+    <li><input type="checkbox" data-id="C6-3" checked><label><code>pm/05_DATA_MODEL.md</code> §11 관계도, §12 INV-09·11·16, §13 인덱스, §14 캐시 전략·데이터 흐름</label></li>
+    <li><input type="checkbox" data-id="C6-4" checked><label><code>pm/02_FEATURE_SPEC.md</code> §4·§12.2 (KISA 자동 연계 표현) / <code>pm/04_PROJECT_PLAN.md</code> R-02·게이트</label></li>
+  </ul>
+
+  <h3><span class="code">C7.</span> <code>member_type</code> 제거 — role + company_id 로만 식별</h3>
+  <p class="field"><b>현재</b> — <code>MEMBER.member_type = enum(PERSONAL, BUSINESS)</code>. 페르소나는 <code>role × member_type</code> 조합으로 식별.</p>
+  <p class="field"><b>변경 방향</b></p>
+  <ul>
+    <li><code>member_type</code> 컬럼 제거. 식별은 <b><code>role</code> + <code>company_id</code> NULL 여부</b>만 사용.</li>
+    <li>개인 = <code>company_id IS NULL</code>, 회사 마스터 = <code>role=COMPANY_MASTER</code> & <code>company_id NOT NULL</code>.</li>
+  </ul>
+  <ul class="files">
+    <li><input type="checkbox" data-id="C7-1" checked><label><code>pm/05_DATA_MODEL.md</code> §1.1·§1.2 ERD, §1.4 페르소나 식별, §1 도입부</label></li>
+    <li><input type="checkbox" data-id="C7-2" checked><label><code>pm/05_DATA_MODEL.md</code> §10.2 <code>NOTICE.audience</code>, §11 관계도 stub 등 잔여 참조</label></li>
+    <li><input type="checkbox" data-id="C7-3" checked><label><code>pm/02_FEATURE_SPEC.md</code> / <code>pm/03_IA.md</code> 의 PERSONAL/BUSINESS 표현 정리</label></li>
+  </ul>
+
+  <h3><span class="code">C8.</span> <code>TERM_AGREEMENT</code> 이력 테이블 + 필수동의 enum <span class="badge new">테이블 신설</span></h3>
+  <p class="field"><b>현재</b> — <code>TERM_AGREEMENT</code> 단일 테이블(<code>required</code>/<code>agreed</code> CHAR(1) Y/N). 동의 변경 이력 없음.</p>
+  <p class="field"><b>변경 방향</b></p>
+  <ul>
+    <li><code>TERM_AGREEMENT_LOG</code> 이력 테이블 신설(가입·재동의·철회·버전 갱신 시 1행).</li>
+    <li>필수 동의여부를 <b>enum</b> 으로 표현(필수 여부 자체는 C9 의 <code>TERM_CODE</code> 로 이동).</li>
+  </ul>
+  <ul class="files">
+    <li><input type="checkbox" data-id="C8-1" checked><label><code>pm/05_DATA_MODEL.md</code> §1.1 (<code>TERM_AGREEMENT</code> enum화 + <code>TERM_AGREEMENT_LOG</code> 신설), §1 도입부 표</label></li>
+    <li><input type="checkbox" data-id="C8-2" checked><label><code>pm/05_DATA_MODEL.md</code> §14.2 RDB 전용 표 반영</label></li>
+  </ul>
+
+  <h3><span class="code">C9.</span> <code>TERM_CODE</code> 테이블 + 이력 + 파일 보관 <span class="badge new">테이블 신설</span></h3>
+  <p class="field"><b>현재</b> — 약관 메타(코드·버전·필수 여부)가 <code>TERM_AGREEMENT</code> 행마다 중복 보관. 약관 마스터·원문 보관 없음.</p>
+  <p class="field"><b>변경 방향</b></p>
+  <ul>
+    <li><code>TERM_CODE</code> 신설 — <b>시행 날짜 / 고시 날짜 / 약관 정보 / 필수 여부</b> 보유. 필수 여부의 단일 소유.</li>
+    <li><code>TERM_CODE_LOG</code> 개정 이력 + 약관 원문은 <b>파일로 보관</b>(경로만 DB).</li>
+    <li><code>TERM_AGREEMENT</code> 는 <code>TERM_CODE</code> 를 참조하고 필수 여부를 직접 보유하지 않음.</li>
+  </ul>
+  <ul class="files">
+    <li><input type="checkbox" data-id="C9-1" checked><label><code>pm/05_DATA_MODEL.md</code> §1.1 (<code>TERM_CODE</code>·<code>TERM_CODE_LOG</code> 신설 + 관계), §1 도입부 표</label></li>
+    <li><input type="checkbox" data-id="C9-2" checked><label><code>pm/05_DATA_MODEL.md</code> §14.2 RDB 전용 표, §13 인덱스(필요 시)</label></li>
+    <li><input type="checkbox" data-id="C9-3" checked><label>약관 원문 파일 보관 경로 정책(이중 보관 여부 등) 명시</label></li>
+  </ul>
+
+  <h3><span class="code">C10.</span> 사업자 하위 회원 독립 구조 — <code>MEMBER</code> 에서 분리 <span class="badge new">테이블 신설</span></h3>
+  <p class="field"><b>현재</b> — 하위 계정이 <code>MEMBER</code> 테이블에 <code>role=COMPANY_MEMBER</code> 로 들어감. 초대(<code>COMPANY_INVITATION</code>) 수락 시 <code>MEMBER</code> INSERT. 마스터 자동 전이 후보로 하위 멤버 사용.</p>
+  <p class="field"><b>변경 방향</b></p>
+  <ul>
+    <li>하위 회원을 <code>MEMBER</code> 에서 분리해 <b>독립 테이블</b>(<code>COMPANY_SUB_ACCOUNT</code> 등)로 신설 — 본인인증·약관 동의 없이 <b>로그인 · 발송 · 이력 조회</b>만 가능.</li>
+    <li>하위 계정은 <b>언제나 삭제 가능</b>(soft/hard) — <code>MEMBER</code> 와 다른 라이프사이클.</li>
+    <li><b>(O2 결정)</b> 하위 계정은 발신번호·키를 <b>독립 소유하지 않고 회사 자원을 공유</b>. 개인 명의로 독립 소유하려면 개인 회원 전환(C2) 필요.</li>
+    <li><b>(O3 결정)</b> 마스터 모델은 <b>현행 유지</b> — §2.3 마스터 1명 강제·라이프사이클 정책 변경 없음.</li>
+    <li><code>MEMBER.role</code> enum 에서 <code>COMPANY_MEMBER</code> 제거.</li>
+  </ul>
+  <ul class="files">
+    <li><input type="checkbox" data-id="C10-1" checked><label><code>pm/05_DATA_MODEL.md</code> §2.1 (<code>COMPANY_SUB_ACCOUNT</code> 신설, <code>COMPANY_INVITATION</code> 연결 변경)</label></li>
+    <li><input type="checkbox" data-id="C10-2" checked><label><code>pm/05_DATA_MODEL.md</code> §2.2·§2.3 마스터 라이프사이클 — 현행 유지(O3), 하위계정 분리에 따른 후보 선출 영향만 확인</label></li>
+    <li><input type="checkbox" data-id="C10-3" checked><label><code>pm/05_DATA_MODEL.md</code> §1.1 <code>MEMBER.role</code> enum, §1.4 페르소나, §4 <code>API_KEY</code>·§3 <code>CALLBACK</code> 연결 검토</label></li>
+    <li><input type="checkbox" data-id="C10-4" checked><label><code>pm/05_DATA_MODEL.md</code> §11 관계도, §12 INV-13·14 (마스터 1명·자동 전이)</label></li>
+    <li><input type="checkbox" data-id="C10-5" checked><label><code>pm/02_FEATURE_SPEC.md</code> §3 하위계정 / <code>pm/03_IA.md</code> §3 회사 그룹·권한</label></li>
+  </ul>
+
+  <h2>3. 영향 파일 매트릭스 (한눈에)</h2>
+  <table>
+    <thead><tr><th>파일</th><th>관련 항목</th></tr></thead>
+    <tbody>
+      <tr><td><code>pm/02_FEATURE_SPEC.md</code></td><td>C1, C2, C3, C5, C6, C7, C10</td></tr>
+      <tr><td><code>pm/03_IA.md</code></td><td>C1, C2, C5, C7, C10</td></tr>
+      <tr><td><code>pm/04_PROJECT_PLAN.md</code></td><td>C6 (R-02·게이트)</td></tr>
+      <tr><td><code>pm/05_DATA_MODEL.md</code></td><td>C1, C2, C3, C4, C5, C6, C7, C8, C9, C10 (핵심)</td></tr>
+      <tr><td><code>pm/design/build/*.pdf</code></td><td>위 md 수정 시 동반 재생성 (pm/CLAUDE.md §6.3)</td></tr>
+    </tbody>
+  </table>
+
+  <p class="note">
+    진행 순서 제안 — 결정 O1~O3 완료 → C7(member_type) → C9(TERM_CODE) → C8(TERM 이력) → C1(사업자 전환) → C10(하위계정 분리) → C2 → C3 → C6(KISA 제거) → C4(이력 테이블 교체) → C5(설명 필드) → PDF 재생성.
+  </p>
+
+</div>
+
+<script>
+  const STORE_KEY = "revision-2026-06-15-member";
+  const boxes = Array.from(document.querySelectorAll('input[type=checkbox][data-id]'));
+
+  function load() {
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(STORE_KEY) || "{}"); } catch (e) { saved = {}; }
+    boxes.forEach(function (b) {
+      if (b.dataset.id in saved) { b.checked = !!saved[b.dataset.id]; }
+      b.closest('li').classList.toggle('checked', b.checked);
+    });
+    updateProgress();
+  }
+  function save() {
+    const state = {};
+    boxes.forEach(function (b) { state[b.dataset.id] = b.checked; });
+    localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  }
+  function updateProgress() {
+    const done = boxes.filter(function (b) { return b.checked; }).length;
+    const total = boxes.length;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    document.getElementById('progressText').textContent = '진행률 ' + done + ' / ' + total + ' (' + pct + '%)';
+    document.getElementById('progressFill').style.width = pct + '%';
+  }
+  boxes.forEach(function (b) {
+    b.addEventListener('change', function () {
+      b.closest('li').classList.toggle('checked', b.checked);
+      save();
+      updateProgress();
+    });
+  });
+  function resetAll() {
+    boxes.forEach(function (b) { b.checked = false; b.closest('li').classList.remove('checked'); });
+    save();
+    updateProgress();
+  }
+  load();
+</script>
+</body>
+</html>

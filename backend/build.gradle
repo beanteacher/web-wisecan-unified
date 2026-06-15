@@ -66,3 +66,8 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+// 실행 가능한 bootJar 하나만 산출 — plain jar 비활성 (Docker COPY / CI artifact 단순화)
+tasks.named('jar') {
+    enabled = false
+}

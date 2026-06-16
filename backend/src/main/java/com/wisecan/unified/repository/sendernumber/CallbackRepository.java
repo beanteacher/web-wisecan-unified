@@ -29,4 +29,10 @@ public interface CallbackRepository extends JpaRepository<Callback, Long> {
 
     /** 회사의 REGISTERED 발신번호 목록 */
     List<Callback> findByCompanyIdAndStatus(Long companyId, CallbackStatus status);
+
+    /**
+     * 발송 검증용 — 회원의 특정 번호가 지정 상태인지 확인 (hot-path).
+     * CallerRegistrationGate에서 사용. Redis 캐시 미스 시 이 메서드로 DB 조회.
+     */
+    boolean existsByMemberIdAndPhoneNumberAndStatus(Long memberId, String phoneNumber, CallbackStatus status);
 }

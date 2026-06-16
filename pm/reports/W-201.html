@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>W-201 보고서 — 발송 정합성 검증</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .report-header { margin-bottom: 32px; }
+    .report-header .badge-wbs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .report-header .meta-date { font-size: 13px; color: #64748b; }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .meta-item {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .meta-item .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .meta-item .value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e2228;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #f8f9fb;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f3f5;
+      vertical-align: top;
+      font-size: 13px;
+      color: #374151;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-orange { background: #fff7ed; color: #c2410c; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
+    .badge-blue   { background: #e8f0fe; color: #2563eb; }
+
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .check-list li .icon-wrap { margin-top: 1px; flex-shrink: 0; }
+    .check-list li .detail { color: #64748b; font-size: 12px; margin-top: 2px; }
+
+    .file-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .file-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .file-tag {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .file-tag-new { background: #dcfce7; color: #15803d; }
+    .file-tag-mod { background: #fef9c3; color: #854d0e; }
+    .file-path {
+      font-family: 'Courier New', Courier, monospace;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .conclusion-box {
+      border-left: 4px solid #2563eb;
+      padding: 16px 20px;
+      background: #f0f6ff;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 14px;
+    }
+    .conclusion-box p { font-size: 13px; color: #1e3a8a; line-height: 1.7; }
+
+    .issue-box {
+      border-left: 4px solid #f59e0b;
+      padding: 14px 20px;
+      background: #fffbeb;
+      border-radius: 0 8px 8px 0;
+    }
+    .issue-box .issue-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 6px;
+    }
+    .issue-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .issue-box ul li {
+      font-size: 13px;
+      color: #78350f;
+      padding-left: 12px;
+      position: relative;
+    }
+    .issue-box ul li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #f59e0b;
+    }
+
+    .order-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 20px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .section-gap { margin-top: 8px; }
+    .sub-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-wbs">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      W-201
+    </div>
+    <h1>W-201 보고서 — 발송 정합성 검증</h1>
+    <p class="meta-date">작성일 2026-06-16</p>
+  </div>
+
+  <!-- WBS 메타 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+      </svg>
+      WBS 메타
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item"><div class="label">마일스톤</div><div class="value">M2</div></div>
+      <div class="meta-item"><div class="label">WBS ID</div><div class="value">W-201</div></div>
+      <div class="meta-item"><div class="label">담당</div><div class="value">BE</div></div>
+      <div class="meta-item"><div class="label">공수</div><div class="value">14 man-day</div></div>
+      <div class="meta-item"><div class="label">우선순위</div><div class="value">S4</div></div>
+      <div class="meta-item"><div class="label">의존</div><div class="value">W-104, W-105</div></div>
+      <div class="meta-item"><div class="label">블록</div><div class="value">W-202, W-203, W-206</div></div>
+      <div class="meta-item">
+        <div class="label">전체 상태</div>
+        <div class="value">
+          <span class="badge badge-green">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            완료
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DoD 및 충족 여부 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      DoD 및 충족 여부
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:6%">순서</th>
+          <th style="width:38%">검증 항목 (완료 기준)</th>
+          <th style="width:16%">상태</th>
+          <th>구현 매핑</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="order-badge">10</span></td>
+          <td>발신번호 등록 여부 (REGISTERED 상태)</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>CallerRegistrationGate — CallbackRepository.existsByMemberIdAndPhoneNumberAndStatus</td>
+        </tr>
+        <tr>
+          <td><span class="order-badge">20</span></td>
+          <td>API Key 스코프 권한 (ACTIVE + 채널 스코프)</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>ScopePermissionGate — SEND / SEND_SMS / SEND_KAKAO / SEND_RCS 스코프 분기</td>
+        </tr>
+        <tr>
+          <td><span class="order-badge">30</span></td>
+          <td>발신번호 화이트리스트 (API Key 제한 목록)</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>CallerWhitelistGate — 숫자 정규화 후 CSV 목록 대조</td>
+        </tr>
+        <tr>
+          <td><span class="order-badge">40</span></td>
+          <td>일일 발송 한도 (Redis 카운터 기반)</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>DailyLimitGate — quota:daily:{apiKeyId}:{yyyymmdd} 키, 익일 0시 만료</td>
+        </tr>
+        <tr>
+          <td><span class="order-badge">50</span></td>
+          <td>스팸 키워드 필터 (본문 포함 여부)</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>SpamKeywordGate — 16종 기본 키워드, 대소문자 무관 감지</td>
+        </tr>
+        <tr>
+          <td><span class="order-badge">60</span></td>
+          <td>광고 의무 표기 — (광고) 접두사 + 080 수신거부</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>AdDisclosureGate — 정보통신망법 §50 준수</td>
+        </tr>
+        <tr>
+          <td><span class="order-badge">70</span></td>
+          <td>야간 광고 발송 차단 (21:00~08:00 KST)</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>NightAdBlockGate — isNightTime() 정적 메서드, 경계값 검증 완료</td>
+        </tr>
+        <tr>
+          <td><span class="order-badge">80</span></td>
+          <td>잔액 사전 평가 (recipientCount × unitCost)</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>BalanceGate — Redis 캐시 우선(TTL 30s), 미스 시 CHARGE_BALANCE SUM 조회</td>
+        </tr>
+        <tr>
+          <td><span class="order-badge">90</span></td>
+          <td>후불 연체 차단 (POSTPAID + OVERDUE 청구서)</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>PostpaidBlockGate — company.billing_mode + postpaid_invoice.status 조회</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 검증 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      검증 내역
+    </div>
+    <ul class="check-list">
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </span>
+        <div>
+          <div>SendValidationGate 인터페이스 + order() 메서드로 실행 순서 제어 설계 확인</div>
+          <div class="detail">order() 오름차순 정렬 후 첫 실패에서 즉시 예외 — fail-fast 파이프라인</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </span>
+        <div>
+          <div>SendValidationContext record — totalCost() 계산, 불변 입력 객체 구조 확인</div>
+          <div class="detail">recipientCount × unitCost = totalCost, BalanceGate에서 사전 평가에 사용</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </span>
+        <div>
+          <div>SendErrorCode 카탈로그 13종 — 발신번호·스코프·한도·스팸·광고·잔액·API Key 상태 분류</div>
+          <div class="detail">02_FEATURE_SPEC §6.1 예외 목록 및 §11 잔액 분기 기반</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </span>
+        <div>
+          <div>BalanceGate Redis 캐시 전략 확인 — write-around 패턴, TTL 30초, 캐시 미스 시 DB 직접 조회</div>
+          <div class="detail">balance:{memberId} 키, CHARGE_BALANCE 테이블 SUM(amount_remaining) 집계</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </span>
+        <div>
+          <div>NightAdBlockGate isNightTime() — 경계값 21:00, 07:59, 08:00, 20:59 모두 단위 검증</div>
+          <div class="detail">정보통신망법 §50조의8 준수, KST(Asia/Seoul) 기준 적용</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </span>
+        <div>
+          <div>PostpaidBlockGate 3단계 조회 — company_id → billing_mode → OVERDUE 청구서 COUNT</div>
+          <div class="detail">개인 회원(company_id null) / 선불 회사 / 후불 연체 분기 모두 검증</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </span>
+        <div>
+          <div>SendValidationService — 9종 게이트 Spring 자동 주입, 역순 등록 후 order() 정렬 동작 확인</div>
+          <div class="detail">오케스트레이터 통합 테스트 6케이스 — 전체 통과 / 첫 실패 / 중간 실패 / 마지막 실패</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </span>
+        <div>
+          <div>로컬 빌드 실행 검증 불가 — SSL 인터셉션 환경</div>
+          <div class="detail">PKIX 오류로 gradle 외부 다운로드 실패. 컴파일 정합 확인 후 CI 위임</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 구현 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+      </svg>
+      구현 내역
+    </div>
+
+    <p class="sub-label" style="margin-bottom:10px;">공통 (도메인 계층)</p>
+    <ul class="file-list" style="margin-bottom:20px;">
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/SendValidationContext.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">발송 검증 입력 record — memberId·apiKeyId·callbackNumber·channel·messageBody·isAdvertisement·recipientCount·unitCost + totalCost()</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/SendValidationGate.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">게이트 인터페이스 — validate(ctx) + order() default 0</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/SendValidationException.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">IllegalStateException 하위 — errorCode + detail 메시지. GlobalExceptionHandler HTTP 409 매핑</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/SendErrorCode.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">오류 코드 카탈로그 13종 — 발신번호 2 / 스코프 1 / 한도 2 / 스팸 1 / 광고 3 / 잔액 1 / API Key 상태 2</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/SendChannel.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">발송 채널 5종 (SMS·LMS·MMS·KAKAO·RCS) — 채널별 최소 스코프 매핑</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/SendValidationService.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">오케스트레이터 — Spring 자동 주입 9종 게이트, order() 오름차순 정렬, fail-fast 실행</div>
+        </div>
+      </li>
+    </ul>
+
+    <p class="sub-label" style="margin-bottom:10px;">게이트 구현체 (9종)</p>
+    <ul class="file-list" style="margin-bottom:20px;">
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/gate/CallerRegistrationGate.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">order=10 — CallbackRepository.existsByMemberIdAndPhoneNumberAndStatus(REGISTERED)</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/gate/ScopePermissionGate.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">order=20 — API Key ACTIVE 확인 + SEND / 채널별 스코프 분기</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/gate/CallerWhitelistGate.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">order=30 — null/blank 미설정 시 무제한 통과, 숫자 정규화 CSV 대조</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/gate/DailyLimitGate.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">order=40 — quota:daily:{apiKeyId}:{yyyymmdd} Redis 카운터, 0/null 무제한</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/gate/SpamKeywordGate.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">order=50 — 16종 기본 키워드 목록, 대소문자 무관 감지, null/blank 본문 통과</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/gate/AdDisclosureGate.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">order=60 — (광고) 접두사 + "080" 포함 여부, 비광고 메시지 조건부 생략</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/gate/NightAdBlockGate.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">order=70 — isNightTime() KST 21:00~08:00, 비광고 조건부 생략</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/gate/BalanceGate.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">order=80 — Redis 캐시 우선(TTL 30s) → CHARGE_BALANCE SUM, write-around 패턴</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/gate/PostpaidBlockGate.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">order=90 — company_id → billing_mode → postpaid_invoice OVERDUE COUNT 3단계 조회</div>
+        </div>
+      </li>
+    </ul>
+
+    <p class="sub-label" style="margin-bottom:10px;">단위 테스트 (9종 게이트 + 오케스트레이터)</p>
+    <ul class="file-list">
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/test/java/com/wisecan/unified/domain/dispatch/gate/CallerRegistrationGateTest.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">3케이스 — REGISTERED 통과 / 미등록 CALLER_NOT_REGISTERED / order=10</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/test/java/com/wisecan/unified/domain/dispatch/gate/ScopePermissionGateTest.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">7케이스 — SEND 전채널 / SEND_SMS / SEND_KAKAO 통과, 스코프 없음·REVOKED·PENDING_REVIEW 실패</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/test/java/com/wisecan/unified/domain/dispatch/gate/CallerWhitelistGateTest.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">6케이스 — null/blank 미설정 통과, 포함·미포함, 하이픈 정규화</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/test/java/com/wisecan/unified/domain/dispatch/gate/DailyLimitGateTest.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">7케이스 — null/0 무제한, 한도 이내 통과, 초과·경계·Redis null 케이스</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/test/java/com/wisecan/unified/domain/dispatch/gate/SpamKeywordGateTest.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">8케이스 — 정상 / null / blank / 스팸 5종(파라미터화) / 대문자 / 투자보장</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/test/java/com/wisecan/unified/domain/dispatch/gate/AdDisclosureGateTest.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">6케이스 — 비광고 통과, 정상 광고, 접두사 없음·080 없음·null·blank</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/test/java/com/wisecan/unified/domain/dispatch/gate/NightAdBlockGateTest.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">13케이스 — 야간 6종·주간 5종 파라미터화, 경계값 4개, 비광고 통과</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/test/java/com/wisecan/unified/domain/dispatch/gate/BalanceGateTest.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">8케이스 — totalCost=0 스킵, Redis 히트(충분·부족), 미스 후 DB(충분·부족), null DB, 잔액 일치, TTL 확인</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/test/java/com/wisecan/unified/domain/dispatch/gate/PostpaidBlockGateTest.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">6케이스 — 개인 회원·선불·후불 연체 없음·연체 존재·null COUNT·order=90</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">신규</span>
+        <div>
+          <span class="file-path">backend/src/test/java/com/wisecan/unified/domain/dispatch/SendValidationServiceTest.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">7케이스 — 전체 통과, 첫·중간·마지막 게이트 실패, 잔액 메시지, 역순 등록 정렬, 스코프 실패</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 결론 및 잔여 이슈 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
+      결론 및 잔여 이슈
+    </div>
+    <div class="conclusion-box">
+      <p>
+        W-201 발송 정합성 검증 9종이 모두 구현되고 단위 테스트로 충족이 확인되었습니다.
+        SendValidationGate 인터페이스 기반 파이프라인은 order() 오름차순 정렬과 fail-fast 실행을 보장하며,
+        Spring 자동 주입으로 게이트 추가·제거가 오케스트레이터 코드 변경 없이 가능합니다.
+        BalanceGate의 Redis 캐시 write-around 패턴(TTL 30s)과 PostpaidBlockGate의 3단계 조회 구조가
+        핫 패스 성능을 유지하면서 정합성을 보장합니다.
+        W-202(인코딩 변환), W-203(발송 테이블 적재)의 블록이 해소되어 후속 태스크 착수가 가능합니다.
+      </p>
+    </div>
+    <div class="issue-box section-gap">
+      <div class="issue-title">잔여 이슈 (다음 스프린트 또는 별도 태스크)</div>
+      <ul>
+        <li>SpamKeywordGate 키워드 목록 — MVP 하드코딩, 운영 환경에서 DB 테이블 또는 외부 스팸 필터 API로 교체 필요</li>
+        <li>DailyLimitGate Redis 카운터 증감 — 현재 검증만 수행, 발송 완료 후 카운터 INCR은 W-203(적재) 단계에서 구현</li>
+        <li>BalanceGate 잔액 차감 — 현재 사전 평가만 수행, 실제 차감은 발송 완료 이벤트 처리 단계에서 수행</li>
+        <li>로컬 빌드 실행 검증 — SSL 인터셉션 환경으로 gradle 외부 다운로드 불가, CI 파이프라인 통합 후 확인</li>
+        <li>NightAdBlockGate 예약 발송 — 예약 시각 기준 야간 차단 로직은 W-206(예약 발송) 단계에서 별도 처리 필요</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

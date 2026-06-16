@@ -1,14 +1,13 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { issueApiKey } from '@/entities/api-key';
-import type { IssueApiKeyRequest } from '@/entities/api-key';
+import { rotateApiKey } from '@/entities/api-key';
 
-export function useIssueApiKey() {
+export function useRotateApiKey() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: IssueApiKeyRequest) => issueApiKey(request),
+    mutationFn: (id: number) => rotateApiKey(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
     },

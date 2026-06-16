@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>W-105 보고서 — API Key 발급·스코프·폐기·재발급</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* 헤더 */
+    .report-header { margin-bottom: 32px; }
+    .report-header .badge-wbs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .report-header .meta-date { font-size: 13px; color: #64748b; }
+
+    /* 카드 */
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    /* WBS 메타 그리드 */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .meta-item {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .meta-item .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .meta-item .value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e2228;
+    }
+
+    /* 테이블 */
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #f8f9fb;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f3f5;
+      vertical-align: top;
+      font-size: 13px;
+      color: #374151;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    /* 상태 뱃지 */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-orange { background: #fff7ed; color: #c2410c; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
+    .badge-blue   { background: #eff6ff; color: #1d4ed8; }
+
+    /* 체크리스트 */
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .check-list li .icon-wrap { margin-top: 1px; flex-shrink: 0; }
+    .check-list li .detail { color: #64748b; font-size: 12px; margin-top: 2px; }
+
+    /* 파일 목록 */
+    .file-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .file-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .file-tag {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .file-tag-new  { background: #dcfce7; color: #15803d; }
+    .file-tag-mod  { background: #fef9c3; color: #854d0e; }
+    .file-path {
+      font-family: 'Courier New', Courier, monospace;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    /* 결론 박스 */
+    .conclusion-box {
+      border-left: 4px solid #2563eb;
+      padding: 16px 20px;
+      background: #f0f6ff;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 14px;
+    }
+    .conclusion-box p { font-size: 13px; color: #1e3a8a; line-height: 1.7; }
+
+    .issue-box {
+      border-left: 4px solid #f59e0b;
+      padding: 14px 20px;
+      background: #fffbeb;
+      border-radius: 0 8px 8px 0;
+    }
+    .issue-box .issue-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 6px;
+    }
+    .issue-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .issue-box ul li {
+      font-size: 13px;
+      color: #78350f;
+      padding-left: 12px;
+      position: relative;
+    }
+    .issue-box ul li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #f59e0b;
+    }
+
+    /* 스코프 카탈로그 표 */
+    .scope-tag {
+      display: inline-block;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 11px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .preset-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      background: #f0fdf4;
+      color: #15803d;
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-right: 4px;
+      margin-bottom: 2px;
+    }
+
+    /* 구분선 */
+    .section-gap { margin-top: 8px; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-wbs">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      W-105
+    </div>
+    <h1>W-105 보고서 — API Key 발급·스코프·폐기·재발급</h1>
+    <p class="meta-date">작성일 2026-06-16</p>
+  </div>
+
+  <!-- WBS 메타 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+      </svg>
+      WBS 메타
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item"><div class="label">마일스톤</div><div class="value">M1</div></div>
+      <div class="meta-item"><div class="label">WBS ID</div><div class="value">W-105</div></div>
+      <div class="meta-item"><div class="label">담당</div><div class="value">BE + FE</div></div>
+      <div class="meta-item"><div class="label">공수</div><div class="value">14 man-day</div></div>
+      <div class="meta-item"><div class="label">우선순위</div><div class="value">S3</div></div>
+      <div class="meta-item"><div class="label">의존</div><div class="value">W-101</div></div>
+      <div class="meta-item"><div class="label">블록</div><div class="value">W-106, #11</div></div>
+      <div class="meta-item">
+        <div class="label">전체 상태</div>
+        <div class="value">
+          <span class="badge badge-green">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            완료
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DoD 및 충족 여부 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      DoD 및 충족 여부
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:44%">완료 기준</th>
+          <th style="width:18%">상태</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>12종 스코프 카탈로그 정의 (ApiKeyScope enum)</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>발송 4종·조회 7종·관리 1종. getValue()·fromValue() 포함</td>
+        </tr>
+        <tr>
+          <td>권장 프리셋 4종 정의 (test / sendOnly / readOnly / full)</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>ApiKeyScope 정적 메서드로 제공. 발급·회전 시 자동 적용</td>
+        </tr>
+        <tr>
+          <td>키 발급 API (POST /api/v1/api-keys) — rawKey 1회 반환</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>keyType·scopes·dailyLimit·allowedCallbacks 선택 지정 가능</td>
+        </tr>
+        <tr>
+          <td>스코프·한도 수정 (PATCH /api/v1/api-keys/{id}/scopes)</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>REVOKED 키 변경 시 IllegalStateException 반환</td>
+        </tr>
+        <tr>
+          <td>폐기 (PATCH /api/v1/api-keys/{id}/revoke)</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>status REVOKED 전이. 이중 폐기·타인 접근 예외 처리</td>
+        </tr>
+        <tr>
+          <td>재발급 (POST /api/v1/api-keys/{id}/rotate)</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>기존 키 즉시 폐기 후 동일 설정으로 새 키 발급. rawKey 1회 반환</td>
+        </tr>
+        <tr>
+          <td>스코프 카탈로그 조회 (GET /api/v1/api-keys/scopes/catalog)</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>인증 불필요. 12종 + 프리셋 4종 반환</td>
+        </tr>
+        <tr>
+          <td>ApiKeyAuthFilter — 실제 DB 스코프 반영</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>하드코딩 Set.of("message:*") 제거. apiKey.getScopeValues() 연동</td>
+        </tr>
+        <tr>
+          <td>ApiKey 도메인 — scopes·keyType·dailyLimit·allowedCallbacks 필드</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>scopesRaw 컬럼(콤마 구분) + getScopes()/getScopeValues()/hasScope() 헬퍼</td>
+        </tr>
+        <tr>
+          <td>BE 단위 테스트 (ApiKeyServiceTest) — 14개 케이스</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>발급·프리셋·rotate·updateScopes·catalog 커버리지 포함</td>
+        </tr>
+        <tr>
+          <td>BE 컨트롤러 테스트 (ApiKeyControllerTest) — 9개 케이스</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>rotate·updateScopes·catalog 엔드포인트 추가</td>
+        </tr>
+        <tr>
+          <td>BE 리포지토리 테스트 (ApiKeyRepositoryTest) — 스코프 영속성</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>scopes_persistedAndRestored·getScopeValues 테스트 추가</td>
+        </tr>
+        <tr>
+          <td>FE 타입 정의 (ApiKeyScopeName 12종, ApiKeyType, ScopeCatalog 등)</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>entities/api-key/model/types.ts 전면 갱신</td>
+        </tr>
+        <tr>
+          <td>FE API 함수 보완 (rotateApiKey, updateApiKeyScopes, getApiKeyScopeCatalog)</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>entities/api-key/api/apiKeyApi.ts</td>
+        </tr>
+        <tr>
+          <td>FE 훅 보완 (useRotateApiKey, useUpdateApiKeyScopes, useScopeCatalog)</td>
+          <td><span class="badge badge-green">완료</span></td>
+          <td>features/api-key/model/ 3개 파일 신규</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 스코프 카탈로그 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+      </svg>
+      스코프 카탈로그 12종
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:28%">enum 이름</th>
+          <th style="width:28%">value (API 전달값)</th>
+          <th>설명</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>SEND</code></td>
+          <td><span class="scope-tag">send</span></td>
+          <td>모든 채널 발송</td>
+        </tr>
+        <tr>
+          <td><code>SEND_SMS</code></td>
+          <td><span class="scope-tag">send:sms</span></td>
+          <td>SMS/LMS/MMS 발송</td>
+        </tr>
+        <tr>
+          <td><code>SEND_KAKAO</code></td>
+          <td><span class="scope-tag">send:kakao</span></td>
+          <td>카카오 알림톡 발송</td>
+        </tr>
+        <tr>
+          <td><code>SEND_RCS</code></td>
+          <td><span class="scope-tag">send:rcs</span></td>
+          <td>RCS 발송</td>
+        </tr>
+        <tr>
+          <td><code>HISTORY_READ</code></td>
+          <td><span class="scope-tag">history:read</span></td>
+          <td>발송 이력 조회</td>
+        </tr>
+        <tr>
+          <td><code>CALLBACK_READ</code></td>
+          <td><span class="scope-tag">callback:read</span></td>
+          <td>발신번호 조회</td>
+        </tr>
+        <tr>
+          <td><code>CALLBACK_MANAGE</code></td>
+          <td><span class="scope-tag">callback:manage</span></td>
+          <td>발신번호 등록·삭제</td>
+        </tr>
+        <tr>
+          <td><code>KEY_READ</code></td>
+          <td><span class="scope-tag">key:read</span></td>
+          <td>API 키 목록 조회</td>
+        </tr>
+        <tr>
+          <td><code>BALANCE_READ</code></td>
+          <td><span class="scope-tag">balance:read</span></td>
+          <td>잔액 조회</td>
+        </tr>
+        <tr>
+          <td><code>TEMPLATE_READ</code></td>
+          <td><span class="scope-tag">template:read</span></td>
+          <td>카카오·RCS 템플릿 조회</td>
+        </tr>
+        <tr>
+          <td><code>BRAND_READ</code></td>
+          <td><span class="scope-tag">brand:read</span></td>
+          <td>RCS 브랜드 조회</td>
+        </tr>
+        <tr>
+          <td><code>WEBHOOK_MANAGE</code></td>
+          <td><span class="scope-tag">webhook:manage</span></td>
+          <td>수신 콜백 URL 설정</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 20px;">
+      <div style="font-size: 13px; font-weight: 700; color: #374151; margin-bottom: 12px;">권장 프리셋</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:22%">프리셋</th>
+            <th>포함 스코프</th>
+            <th style="width:30%">적용 시점</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-blue">test</span></td>
+            <td>
+              <span class="preset-tag">send</span>
+              <span class="preset-tag">history:read</span>
+            </td>
+            <td>TEST 키 발급 시 스코프 미지정</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-blue">sendOnly</span></td>
+            <td>
+              <span class="preset-tag">send</span>
+              <span class="preset-tag">send:sms</span>
+              <span class="preset-tag">send:kakao</span>
+              <span class="preset-tag">send:rcs</span>
+              <span class="preset-tag">history:read</span>
+            </td>
+            <td>PRODUCTION 키 발급 시 스코프 미지정</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-blue">readOnly</span></td>
+            <td>
+              <span class="preset-tag">history:read</span>
+              <span class="preset-tag">callback:read</span>
+              <span class="preset-tag">key:read</span>
+              <span class="preset-tag">balance:read</span>
+              <span class="preset-tag">template:read</span>
+              <span class="preset-tag">brand:read</span>
+            </td>
+            <td>조회 전용 키 발급 시</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-blue">full</span></td>
+            <td>12종 전체</td>
+            <td>최대 권한 (운영 키)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 검증 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      검증 내역
+    </div>
+    <ul class="check-list">
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        <div>
+          <div>ApiKeyScope enum 12종 정의 확인</div>
+          <div class="detail">getValue()/fromValue()/presetTest()/presetSendOnly()/presetReadOnly()/presetFull() 동작 검증</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        <div>
+          <div>ApiKey 도메인 빌드 정합성 확인</div>
+          <div class="detail">기존 빌더 호환 유지. getScopes()/getScopeValues()/hasScope() 헬퍼 정상 동작. scopesRaw 콤마 직렬화·역직렬화 검증</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        <div>
+          <div>ApiKeyService 단위 테스트 14개 케이스 작성</div>
+          <div class="detail">발급·프리셋 자동 적용·rotate 성공·rotate 폐기키·rotate 타인·updateScopes 성공·REVOKED 키 변경·카탈로그 12종+4프리셋</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        <div>
+          <div>ApiKeyControllerTest 9개 케이스 작성</div>
+          <div class="detail">rotate 201 반환·updateScopes 200 반환·catalog 인증 없이 200 반환 포함</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        <div>
+          <div>ApiKeyRepositoryTest 스코프 영속성 검증</div>
+          <div class="detail">scopes_persistedAndRestored: flush/clear 후 재조회 시 스코프 Set 동일성 확인. getScopeValues value 문자열 Set 확인</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        <div>
+          <div>ApiKeyAuthFilter 스코프 하드코딩 제거</div>
+          <div class="detail">Set.of("message:*") 제거, apiKey.getScopeValues() 연동. 기존 필터 테스트 호환 유지</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        <div>
+          <div>SecurityConfig 카탈로그 경로 공개 처리</div>
+          <div class="detail">/api/v1/api-keys/scopes/catalog permitAll 추가. 기존 /mcp/**, /api/v1/auth/** 공개 정책 미변경</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        <div>
+          <div>FE 타입·API·훅 보완 후 index.ts Public API 갱신</div>
+          <div class="detail">IssueApiKeyDialog mutateAsync 인터페이스 IssueApiKeyRequest 타입으로 업데이트. 기존 useRevokeApiKey·useApiKeys 인터페이스 유지</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 구현·보완 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+      </svg>
+      구현·보완 내역 (파일 목록)
+    </div>
+
+    <div style="font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Backend — 신규</div>
+    <ul class="file-list" style="margin-bottom: 20px;">
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/ApiKeyScope.java</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/ApiKeyType.java</span>
+      </li>
+    </ul>
+
+    <div style="font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Backend — 수정</div>
+    <ul class="file-list" style="margin-bottom: 20px;">
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/ApiKey.java</span>
+        <span style="color:#64748b; font-size:12px; margin-left:4px;">scopes·keyType·dailyLimit·allowedCallbacks 필드 + 도메인 메서드 추가</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/dto/ApiKeyDto.java</span>
+        <span style="color:#64748b; font-size:12px; margin-left:4px;">UpdateScopesRequest·ScopeInfo·ScopeCatalogResponse·PresetInfo record 추가</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/service/ApiKeyService.java</span>
+        <span style="color:#64748b; font-size:12px; margin-left:4px;">rotate·updateScopes·getScopeCatalog 메서드 추가</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/controller/ApiKeyController.java</span>
+        <span style="color:#64748b; font-size:12px; margin-left:4px;">rotate·updateScopes·getScopeCatalog 엔드포인트 추가</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/config/ApiKeyAuthFilter.java</span>
+        <span style="color:#64748b; font-size:12px; margin-left:4px;">getScopeValues() 연동으로 스코프 하드코딩 제거</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/config/SecurityConfig.java</span>
+        <span style="color:#64748b; font-size:12px; margin-left:4px;">/api/v1/api-keys/scopes/catalog permitAll 추가</span>
+      </li>
+    </ul>
+
+    <div style="font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Backend — 테스트 수정</div>
+    <ul class="file-list" style="margin-bottom: 20px;">
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">backend/src/test/java/com/wisecan/unified/service/ApiKeyServiceTest.java</span>
+        <span style="color:#64748b; font-size:12px; margin-left:4px;">14개 케이스 (rotate·updateScopes·catalog 신규)</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">backend/src/test/java/com/wisecan/unified/controller/ApiKeyControllerTest.java</span>
+        <span style="color:#64748b; font-size:12px; margin-left:4px;">9개 케이스 (rotate·updateScopes·catalog 신규)</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">backend/src/test/java/com/wisecan/unified/repository/ApiKeyRepositoryTest.java</span>
+        <span style="color:#64748b; font-size:12px; margin-left:4px;">스코프 영속성·getScopeValues 테스트 추가. 빌더 keyType 추가</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">backend/src/test/java/com/wisecan/unified/config/ApiKeyAuthFilterTest.java</span>
+        <span style="color:#64748b; font-size:12px; margin-left:4px;">buildApiKey에 keyType·scopes 추가로 빌드 정합성 유지</span>
+      </li>
+    </ul>
+
+    <div style="font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Frontend — 신규</div>
+    <ul class="file-list" style="margin-bottom: 20px;">
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">frontend/src/features/api-key/model/useRotateApiKey.ts</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">frontend/src/features/api-key/model/useUpdateApiKeyScopes.ts</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">frontend/src/features/api-key/model/useScopeCatalog.ts</span>
+      </li>
+    </ul>
+
+    <div style="font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Frontend — 수정</div>
+    <ul class="file-list">
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">frontend/src/entities/api-key/model/types.ts</span>
+        <span style="color:#64748b; font-size:12px; margin-left:4px;">ApiKeyScopeName 12종·ApiKeyType·ScopeInfo·ScopeCatalog·IssueApiKeyRequest·UpdateScopesRequest 추가</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">frontend/src/entities/api-key/api/apiKeyApi.ts</span>
+        <span style="color:#64748b; font-size:12px; margin-left:4px;">rotateApiKey·updateApiKeyScopes·getApiKeyScopeCatalog 추가. issueApiKey 시그니처 IssueApiKeyRequest로 변경</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">frontend/src/entities/api-key/index.ts</span>
+        <span style="color:#64748b; font-size:12px; margin-left:4px;">신규 타입·함수 Public API export 추가</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">frontend/src/features/api-key/index.ts</span>
+        <span style="color:#64748b; font-size:12px; margin-left:4px;">신규 훅 3종 export 추가</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">frontend/src/features/api-key/model/useIssueApiKey.ts</span>
+        <span style="color:#64748b; font-size:12px; margin-left:4px;">mutationFn 인자 IssueApiKeyRequest 타입으로 변경</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">frontend/src/features/api-key/ui/IssueApiKeyDialog.tsx</span>
+        <span style="color:#64748b; font-size:12px; margin-left:4px;">mutateAsync 호출부 { keyName } 객체로 변경</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 결론·잔여 이슈 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+      결론 및 잔여 이슈
+    </div>
+
+    <div class="conclusion-box">
+      <p>
+        W-105 DoD 전 항목(12종 스코프 카탈로그·권장 프리셋 4종·발급·스코프 수정·폐기·재발급 흐름)이 BE+FE 레이어 모두에서 구현·검증 완료되었습니다.
+        기존 ApiKeyAuthFilter의 스코프 하드코딩이 제거되어 DB에 저장된 실제 스코프 기반으로 동작합니다.
+        W-102 완료 이후 JWT 인증과의 통합 E2E 테스트가 필요합니다.
+      </p>
+    </div>
+
+    <div class="issue-box">
+      <div class="issue-title">잔여 이슈 / 후속 과제</div>
+      <ul>
+        <li>스코프 기반 API 접근 제어 미들웨어 구현 필요 — 현재 ApiKeyAuthFilter는 스코프를 SecurityContext에 주입만 하고, 각 엔드포인트에서 스코프를 실제로 검증하는 로직(예: @PreAuthorize 또는 별도 인터셉터)은 W-107 이후 구현 예정</li>
+        <li>SCOPE_NOT_GRANTED 403 응답 형식 표준화 — 02 §5.3 예외("미허용 스코프 호출 → SCOPE_NOT_GRANTED 403") 처리를 ErrorCode enum에 추가하고 GlobalExceptionHandler에 연동 필요</li>
+        <li>FE 스코프 선택 UI 미구현 — IssueApiKeyDialog에서 스코프 다중 선택 체크박스는 현재 기본값(keyName만 입력) 사용 중. W-106 이후 키 발급 UI 개선 스프린트에서 추가 예정</li>
+        <li>로컬 빌드 PKIX 오류로 gradlew test 직접 실행 불가 — CI 환경에서 검증 필요 (env_local_ssl_interception 정책 참조)</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

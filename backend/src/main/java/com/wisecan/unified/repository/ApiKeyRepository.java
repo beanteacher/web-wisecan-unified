@@ -14,4 +14,7 @@ public interface ApiKeyRepository extends JpaRepository<ApiKey, Long> {
     List<ApiKey> findByMemberIdOrderByCreatedAtDescIdDesc(Long memberId);
 
     Optional<ApiKey> findByKeyHash(String keyHash);
+
+    /** 운영자 검토 큐: PENDING_REVIEW 상태 전체 조회 (§12.6) */
+    List<ApiKey> findByStatus(ApiKeyStatus status);
 }

@@ -91,7 +91,7 @@ public class AnomalousHourGate implements SendValidationGate {
     }
 
     /** 새벽 시간대(00:00 ~ 06:00) 여부 */
-    static boolean isAnomalousHour(LocalTime time) {
+    public static boolean isAnomalousHour(LocalTime time) {
         return !time.isBefore(ANOMALOUS_START) && time.isBefore(ANOMALOUS_END);
     }
 

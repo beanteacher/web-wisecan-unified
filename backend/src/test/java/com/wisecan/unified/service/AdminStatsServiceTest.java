@@ -84,7 +84,7 @@ class AdminStatsServiceTest {
         LocalDate today = LocalDate.now();
         Object[] row = {today, 10L, 50L, 3000L};
         given(sendStatsRepository.aggregateDailyByCreatedAtBetween(any(), any()))
-                .willReturn(List.of(row));
+                .willReturn(List.<Object[]>of(row));
 
         // when
         AdminStatsDto.SendVolumeStats stats = adminStatsService.getDailySendStats();

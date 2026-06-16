@@ -1,9 +1,13 @@
 package com.wisecan.unified.service.billing;
 
+import com.wisecan.unified.domain.Company;
+import com.wisecan.unified.domain.Member;
 import com.wisecan.unified.domain.billing.*;
 import com.wisecan.unified.dto.billing.ChargeDto;
 import com.wisecan.unified.exception.BillingException;
 import com.wisecan.unified.exception.EntityNotFoundException;
+import com.wisecan.unified.repository.CompanyRepository;
+import com.wisecan.unified.repository.MemberRepository;
 import com.wisecan.unified.repository.billing.ChargeBalanceLedgerRepository;
 import com.wisecan.unified.repository.billing.ChargeBalanceRepository;
 import com.wisecan.unified.repository.billing.ChargeRepository;
@@ -42,11 +46,13 @@ public class ChargeService {
     private final ChargeBalanceLedgerRepository chargeBalanceLedgerRepository;
     private final PgPaymentPort pgPaymentPort;
     private final ApplicationEventPublisher eventPublisher;
+    private final MemberRepository memberRepository;
+    private final CompanyRepository companyRepository;
 
     /** 수동 충전 — POST /billing/charge */
     @Transactional(rollbackFor = Exception.class)
-    public ChargeDto.Response charge(Long memberId, String billingMode, ChargeDto.CreateRequest request) {
-        validatePrepaidMode(billingMode);
+    public ChargeDto.Response charge(Long memberId, ChargeDto.CreateRequest request) {
+        validatePrepaidMode(resolveBillingMode(memberId));
 
         PaymentMethod paymentMethod = paymentMethodRepository.findById(request.paymentMethodId())
                 .orElseThrow(() -> new EntityNotFoundException("결제수단을 찾을 수 없습니다: " + request.paymentMethodId()));
@@ -103,6 +109,18 @@ public class ChargeService {
         }
 
         return toResponse(charge, paymentMethod.getMethodType());
+    }
+
+    /** 회원의 청구 모드 해석 — 개인회원(companyId 없음)은 PREPAID, 회사 소속이면 Company.billingMode */
+    private String resolveBillingMode(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("Member", memberId));
+        if (member.getCompanyId() == null) {
+            return "PREPAID";
+        }
+        return companyRepository.findById(member.getCompanyId())
+                .map(Company::getBillingMode)
+                .orElse("PREPAID");
     }
 
     /** POSTPAID 회원은 수동 충전 불가 */

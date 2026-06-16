@@ -190,7 +190,7 @@ class McpToolEquivalenceTest {
         String sendId = "01ARZ3NDEKTSV4RRFFQ69G5FAV";
         SendHistoryDto.DetailItem expected = new SendHistoryDto.DetailItem(
                 sendId, SendChannel.SMS, "01012345678", "01098765432",
-                1, null, "테스트", SendRequestStatus.SENT, null,
+                1, null, "테스트", SendRequestStatus.QUEUED, null,
                 0L, 0L, null,
                 LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now());
         given(sendHistoryService.detail(anyLong(), anyLong(), any())).willReturn(expected);

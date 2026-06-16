@@ -14,34 +14,30 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
-import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * WebSendController 슬라이스 테스트 (W-206).
  *
- * <p>@WebMvcTest로 컨트롤러 레이어만 로드. WebSendService는 @MockBean.</p>
+ * <p>@WebMvcTest로 컨트롤러 레이어만 로드. WebSendService는 @MockitoBean.</p>
  * <p>UserPrincipal은 SecurityMockMvcRequestPostProcessors.user()로 주입.</p>
  */
 @WebMvcTest(WebSendController.class)
@@ -53,23 +49,29 @@ class WebSendControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private WebSendService webSendService;
 
     // SecurityConfig 의존 빈 — WebMvcTest 컨텍스트에 필요
-    @MockBean
+    @MockitoBean
     private MemberRepository memberRepository;
 
-    @MockBean
+    @MockitoBean
     private JwtProvider jwtProvider;
 
-    @MockBean
+    @MockitoBean
     private ApiKeyRepository apiKeyRepository;
 
     // ── 픽스처 ────────────────────────────────────────────────────────
 
     private UserPrincipal principal() {
         return new UserPrincipal(1L, "test@example.com", Set.of("ROLE_USER"));
+    }
+
+    // UserPrincipal 을 인증 주체로 주입하는 인증 토큰 post-processor (@AuthenticationPrincipal 대응)
+    private RequestPostProcessor auth() {
+        return SecurityMockMvcRequestPostProcessors.authentication(
+                new UsernamePasswordAuthenticationToken(principal(), null, List.of()));
     }
 
     private WebSendDto.AcceptResponse stubAccept(int recipientCount) {
@@ -106,7 +108,7 @@ class WebSendControllerTest {
 
         mockMvc.perform(post("/console/send")
                         .with(csrf())
-                        .with(user(principal()))
+                        .with(auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk())
@@ -141,7 +143,7 @@ class WebSendControllerTest {
 
         mockMvc.perform(post("/console/send")
                         .with(csrf())
-                        .with(user(principal()))
+                        .with(auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
@@ -158,7 +160,7 @@ class WebSendControllerTest {
 
         mockMvc.perform(post("/console/send")
                         .with(csrf())
-                        .with(user(principal()))
+                        .with(auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -174,7 +176,7 @@ class WebSendControllerTest {
 
         mockMvc.perform(post("/console/send")
                         .with(csrf())
-                        .with(user(principal()))
+                        .with(auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -193,7 +195,7 @@ class WebSendControllerTest {
 
         mockMvc.perform(post("/console/send")
                         .with(csrf())
-                        .with(user(principal()))
+                        .with(auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isNotFound())
@@ -216,7 +218,7 @@ class WebSendControllerTest {
 
         mockMvc.perform(post("/console/send/bulk")
                         .with(csrf())
-                        .with(user(principal()))
+                        .with(auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk())
@@ -248,7 +250,7 @@ class WebSendControllerTest {
 
         mockMvc.perform(post("/console/send/bulk")
                         .with(csrf())
-                        .with(user(principal()))
+                        .with(auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -269,7 +271,7 @@ class WebSendControllerTest {
 
         mockMvc.perform(post("/console/send/scheduled")
                         .with(csrf())
-                        .with(user(principal()))
+                        .with(auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk())
@@ -294,7 +296,7 @@ class WebSendControllerTest {
 
         mockMvc.perform(post("/console/send/scheduled")
                         .with(csrf())
-                        .with(user(principal()))
+                        .with(auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -335,7 +337,7 @@ class WebSendControllerTest {
                 .willReturn(new PageImpl<>(List.of(summary), PageRequest.of(0, 20), 1));
 
         mockMvc.perform(get("/console/send/scheduled")
-                        .with(user(principal())))
+                        .with(auth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.content").isArray())
@@ -358,7 +360,7 @@ class WebSendControllerTest {
                 .willReturn(new PageImpl<>(List.of(), PageRequest.of(0, 20), 0));
 
         mockMvc.perform(get("/console/send/scheduled")
-                        .with(user(principal())))
+                        .with(auth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content").isArray())
                 .andExpect(jsonPath("$.data.content").isEmpty())
@@ -375,7 +377,7 @@ class WebSendControllerTest {
 
         mockMvc.perform(delete("/console/send/scheduled/01ARZ3NDEKTSV4RRFFQ69G5FAV")
                         .with(csrf())
-                        .with(user(principal()))
+                        .with(auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new WebSendDto.CancelRequest("테스트 취소"))))
@@ -392,7 +394,7 @@ class WebSendControllerTest {
 
         mockMvc.perform(delete("/console/send/scheduled/01ARZ3NDEKTSV4RRFFQ69G5FAV")
                         .with(csrf())
-                        .with(user(principal())))
+                        .with(auth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
     }
@@ -406,7 +408,7 @@ class WebSendControllerTest {
 
         mockMvc.perform(delete("/console/send/scheduled/NOTEXIST0000000000000000000")
                         .with(csrf())
-                        .with(user(principal())))
+                        .with(auth()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.success").value(false));
     }
@@ -428,7 +430,7 @@ class WebSendControllerTest {
 
         mockMvc.perform(delete("/console/send/scheduled/01ARZ3NDEKTSV4RRFFQ69G5FAV")
                         .with(csrf())
-                        .with(user(principal())))
+                        .with(auth()))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false));
     }

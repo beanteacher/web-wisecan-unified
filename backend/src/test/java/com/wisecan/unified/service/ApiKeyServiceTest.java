@@ -39,7 +39,7 @@ class ApiKeyServiceTest {
             .email("test@example.com")
             .password("pw")
             .name("테스터")
-            .role(MemberRole.USER)
+            .role(MemberRole.MEMBER)
             .status(MemberStatus.ACTIVE)
             .build();
         ReflectionTestUtils.setField(member, "id", id);

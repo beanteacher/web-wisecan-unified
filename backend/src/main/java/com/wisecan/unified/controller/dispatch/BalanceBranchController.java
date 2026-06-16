@@ -44,7 +44,7 @@ public class BalanceBranchController {
             @RequestBody @Valid BalanceBranchDto.EvaluateRequest request
     ) {
         BalanceBranchResult result = insufficientBalanceRouter.route(
-                principal.getMemberId(),
+                principal.memberId(),
                 request.companyId(),
                 request.totalCost(),
                 request.allRecipients(),

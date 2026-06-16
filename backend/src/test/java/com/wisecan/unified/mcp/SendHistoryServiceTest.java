@@ -138,7 +138,7 @@ class SendHistoryServiceTest {
                 .unitCost(0L)
                 .build();
         ReflectionTestUtils.setField(entity, "sendId", sendId);
-        ReflectionTestUtils.setField(entity, "status", SendRequestStatus.SENT);
+        ReflectionTestUtils.setField(entity, "status", SendRequestStatus.QUEUED);
         return entity;
     }
 }

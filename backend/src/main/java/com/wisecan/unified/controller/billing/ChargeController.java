@@ -33,11 +33,7 @@ public class ChargeController {
     public ResponseEntity<ApiResponse<ChargeDto.Response>> charge(
             @AuthenticationPrincipal Member member,
             @RequestBody @Valid ChargeDto.CreateRequest request) {
-        ChargeDto.Response response = chargeService.charge(
-                member.getId(),
-                member.getCompany() != null ? member.getCompany().getBillingMode() : "PREPAID",
-                request
-        );
+        ChargeDto.Response response = chargeService.charge(member.getId(), request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

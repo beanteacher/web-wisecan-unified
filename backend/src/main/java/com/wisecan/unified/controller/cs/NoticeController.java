@@ -56,7 +56,7 @@ public class NoticeController {
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestBody @Valid NoticeDto.CreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(noticeService.create(principal.getMemberId(), request)));
+                .body(ApiResponse.success(noticeService.create(principal.memberId(), request)));
     }
 
     /** 관리자: 공지 수정 */

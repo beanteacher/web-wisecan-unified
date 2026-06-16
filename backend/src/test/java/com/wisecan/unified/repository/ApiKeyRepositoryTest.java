@@ -34,7 +34,7 @@ class ApiKeyRepositoryTest {
             .email("test@example.com")
             .password("password")
             .name("테스터")
-            .role(MemberRole.USER)
+            .role(MemberRole.MEMBER)
             .status(MemberStatus.ACTIVE)
             .build());
         entityManager.flush();

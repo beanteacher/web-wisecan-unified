@@ -44,8 +44,8 @@ public class SendRequestController {
             @RequestBody @Valid SendRequestDto.SingleRequest request
     ) {
         SendRequestDto.AcceptResponse response = sendRequestService.sendSingle(
-                principal.getMemberId(),
-                principal.getApiKeyId(),
+                principal.memberId(),
+                principal.apiKeyId(),
                 unitCost,
                 networkType,
                 request
@@ -66,8 +66,8 @@ public class SendRequestController {
             @RequestBody @Valid SendRequestDto.BulkRequest request
     ) {
         SendRequestDto.AcceptResponse response = sendRequestService.sendBulk(
-                principal.getMemberId(),
-                principal.getApiKeyId(),
+                principal.memberId(),
+                principal.apiKeyId(),
                 unitCost,
                 networkType,
                 request

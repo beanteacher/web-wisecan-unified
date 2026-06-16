@@ -1,13 +1,18 @@
 package com.wisecan.unified.service.billing;
 
+import com.wisecan.unified.domain.Company;
+import com.wisecan.unified.domain.Member;
 import com.wisecan.unified.domain.billing.*;
 import com.wisecan.unified.dto.billing.ChargeDto;
 import com.wisecan.unified.exception.BillingException;
 import com.wisecan.unified.exception.EntityNotFoundException;
+import com.wisecan.unified.repository.CompanyRepository;
+import com.wisecan.unified.repository.MemberRepository;
 import com.wisecan.unified.repository.billing.ChargeBalanceLedgerRepository;
 import com.wisecan.unified.repository.billing.ChargeBalanceRepository;
 import com.wisecan.unified.repository.billing.ChargeRepository;
 import com.wisecan.unified.repository.billing.PaymentMethodRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +28,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class ChargeServiceTest {
@@ -33,15 +40,32 @@ class ChargeServiceTest {
     @Mock ChargeBalanceLedgerRepository chargeBalanceLedgerRepository;
     @Mock PgPaymentPort pgPaymentPort;
     @Mock ApplicationEventPublisher eventPublisher;
+    @Mock MemberRepository memberRepository;
+    @Mock CompanyRepository companyRepository;
 
     @InjectMocks ChargeService chargeService;
+
+    /** 기본: memberId 100L 은 개인회원(companyId 없음) → PREPAID 로 해석 */
+    @BeforeEach
+    void setUpPrepaidMember() {
+        Member prepaidMember = mock(Member.class);
+        lenient().when(prepaidMember.getCompanyId()).thenReturn(null);
+        lenient().when(memberRepository.findById(100L)).thenReturn(Optional.of(prepaidMember));
+    }
 
     @Test
     @DisplayName("POSTPAID 회원은 수동 충전 불가 — BillingException")
     void charge_postpaidMember_throwsBillingException() {
+        Member companyMember = mock(Member.class);
+        given(companyMember.getCompanyId()).willReturn(5L);
+        given(memberRepository.findById(100L)).willReturn(Optional.of(companyMember));
+        Company company = mock(Company.class);
+        given(company.getBillingMode()).willReturn("POSTPAID");
+        given(companyRepository.findById(5L)).willReturn(Optional.of(company));
+
         ChargeDto.CreateRequest request = new ChargeDto.CreateRequest(1L, 10_000L);
 
-        assertThatThrownBy(() -> chargeService.charge(100L, "POSTPAID", request))
+        assertThatThrownBy(() -> chargeService.charge(100L, request))
                 .isInstanceOf(BillingException.class)
                 .hasMessageContaining("후불 정산 회원");
     }
@@ -52,7 +76,7 @@ class ChargeServiceTest {
         given(paymentMethodRepository.findById(99L)).willReturn(Optional.empty());
         ChargeDto.CreateRequest request = new ChargeDto.CreateRequest(99L, 10_000L);
 
-        assertThatThrownBy(() -> chargeService.charge(100L, "PREPAID", request))
+        assertThatThrownBy(() -> chargeService.charge(100L, request))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
@@ -67,7 +91,7 @@ class ChargeServiceTest {
         given(paymentMethodRepository.findById(1L)).willReturn(Optional.of(pm));
         ChargeDto.CreateRequest request = new ChargeDto.CreateRequest(1L, 10_000L);
 
-        assertThatThrownBy(() -> chargeService.charge(100L, "PREPAID", request))
+        assertThatThrownBy(() -> chargeService.charge(100L, request))
                 .isInstanceOf(BillingException.class)
                 .hasMessageContaining("본인의 결제수단이 아닙니다");
     }
@@ -84,7 +108,7 @@ class ChargeServiceTest {
         given(paymentMethodRepository.findById(1L)).willReturn(Optional.of(pm));
         ChargeDto.CreateRequest request = new ChargeDto.CreateRequest(1L, 10_000L);
 
-        assertThatThrownBy(() -> chargeService.charge(100L, "PREPAID", request))
+        assertThatThrownBy(() -> chargeService.charge(100L, request))
                 .isInstanceOf(BillingException.class)
                 .hasMessageContaining("비활성화된 결제수단");
     }
@@ -109,7 +133,7 @@ class ChargeServiceTest {
 
         ChargeDto.CreateRequest request = new ChargeDto.CreateRequest(1L, 10_000L);
 
-        assertThatThrownBy(() -> chargeService.charge(100L, "PREPAID", request))
+        assertThatThrownBy(() -> chargeService.charge(100L, request))
                 .isInstanceOf(BillingException.class)
                 .hasMessageContaining("결제 실패");
 
@@ -144,7 +168,7 @@ class ChargeServiceTest {
         given(chargeBalanceRepository.save(any(ChargeBalance.class))).willReturn(savedBalance);
 
         ChargeDto.CreateRequest request = new ChargeDto.CreateRequest(1L, 10_000L);
-        ChargeDto.Response response = chargeService.charge(100L, "PREPAID", request);
+        ChargeDto.Response response = chargeService.charge(100L, request);
 
         assertThat(response.status()).isEqualTo(ChargeStatus.SUCCESS);
         assertThat(response.pgTxId()).isEqualTo("STUB-TX-001");

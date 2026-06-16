@@ -12,7 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -33,16 +33,16 @@ class UsageControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UsageService usageService;
 
-    @MockBean
+    @MockitoBean
     private MemberRepository memberRepository;
 
-    @MockBean
+    @MockitoBean
     private JwtProvider jwtProvider;
 
-    @MockBean
+    @MockitoBean
     private ApiKeyRepository apiKeyRepository;
 
     private Member stubMember() {
@@ -50,7 +50,7 @@ class UsageControllerTest {
             .email("test@example.com")
             .password("pw")
             .name("테스터")
-            .role(MemberRole.USER)
+            .role(MemberRole.MEMBER)
             .status(MemberStatus.ACTIVE)
             .build();
         org.springframework.test.util.ReflectionTestUtils.setField(member, "id", 1L);

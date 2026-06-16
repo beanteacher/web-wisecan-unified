@@ -63,7 +63,7 @@ class ApiKeyAuthFilterTest {
             .email("test@test.com")
             .password("encoded")
             .name("테스터")
-            .role(MemberRole.USER)
+            .role(MemberRole.MEMBER)
             .status(MemberStatus.ACTIVE)
             .build();
         ReflectionTestUtils.setField(member, "id", 1L);

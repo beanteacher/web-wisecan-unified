@@ -2,7 +2,6 @@ package com.wisecan.unified.controller.billing;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wisecan.unified.config.JwtProvider;
-import com.wisecan.unified.domain.Member;
 import com.wisecan.unified.domain.billing.ChargeStatus;
 import com.wisecan.unified.domain.billing.ChargeType;
 import com.wisecan.unified.domain.billing.PaymentMethodType;
@@ -16,19 +15,21 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ChargeController.class)
 class ChargeControllerTest {
@@ -36,11 +37,11 @@ class ChargeControllerTest {
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
 
-    @MockBean ChargeService chargeService;
-    @MockBean BalanceQueryService balanceQueryService;
-    @MockBean JwtProvider jwtProvider;
-    @MockBean ApiKeyRepository apiKeyRepository;
-    @MockBean TokenBlacklistService tokenBlacklistService;
+    @MockitoBean ChargeService chargeService;
+    @MockitoBean BalanceQueryService balanceQueryService;
+    @MockitoBean JwtProvider jwtProvider;
+    @MockitoBean ApiKeyRepository apiKeyRepository;
+    @MockitoBean TokenBlacklistService tokenBlacklistService;
 
     @Test
     @DisplayName("POST /billing/charge — 충전 성공 200 OK")
@@ -51,7 +52,7 @@ class ChargeControllerTest {
                 ChargeType.MANUAL, ChargeStatus.SUCCESS, "STUB-TX-001",
                 LocalDateTime.now(), LocalDateTime.now()
         );
-        given(chargeService.charge(anyLong(), anyString(), any(ChargeDto.CreateRequest.class)))
+        given(chargeService.charge(anyLong(), any(ChargeDto.CreateRequest.class)))
                 .willReturn(response);
 
         ChargeDto.CreateRequest request = new ChargeDto.CreateRequest(1L, 10_000L);
@@ -96,7 +97,7 @@ class ChargeControllerTest {
     @DisplayName("POST /billing/charge — POSTPAID 회원 BillingException → 400")
     @WithMockUser
     void charge_postpaidMember_returns400() throws Exception {
-        given(chargeService.charge(anyLong(), anyString(), any()))
+        given(chargeService.charge(anyLong(), any()))
                 .willThrow(new BillingException("후불 정산 회원은 수동 충전을 이용할 수 없습니다."));
 
         ChargeDto.CreateRequest request = new ChargeDto.CreateRequest(1L, 10_000L);

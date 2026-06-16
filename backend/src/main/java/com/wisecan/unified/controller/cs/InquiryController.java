@@ -35,7 +35,7 @@ public class InquiryController {
     public ResponseEntity<ApiResponse<InquiryDto.Detail>> create(
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestBody @Valid InquiryDto.CreateRequest request) {
-        InquiryDto.Detail detail = inquiryService.create(principal.getMemberId(), request);
+        InquiryDto.Detail detail = inquiryService.create(principal.memberId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(detail));
     }
 
@@ -46,7 +46,7 @@ public class InquiryController {
             @AuthenticationPrincipal UserPrincipal principal,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(
-                inquiryService.listByMember(principal.getMemberId(), pageable)));
+                inquiryService.listByMember(principal.memberId(), pageable)));
     }
 
     /** 내 문의 단건 조회 */
@@ -56,7 +56,7 @@ public class InquiryController {
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(
-                inquiryService.detailByMember(principal.getMemberId(), id)));
+                inquiryService.detailByMember(principal.memberId(), id)));
     }
 
     /** 회원이 문의 종료 처리 */
@@ -65,7 +65,7 @@ public class InquiryController {
     public ResponseEntity<ApiResponse<Void>> close(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Long id) {
-        inquiryService.close(principal.getMemberId(), id);
+        inquiryService.close(principal.memberId(), id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
@@ -105,7 +105,7 @@ public class InquiryController {
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestBody @Valid InquiryDto.AnswerRequest request) {
         return ResponseEntity.ok(ApiResponse.success(
-                inquiryService.answer(id, principal.getMemberId(), request)));
+                inquiryService.answer(id, principal.memberId(), request)));
     }
 
     /** SLA 통계 조회 */

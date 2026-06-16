@@ -25,7 +25,7 @@ class MemberRepositoryTest {
             .email(email)
             .password("encodedPassword")
             .name("테스트유저")
-            .role(MemberRole.USER)
+            .role(MemberRole.MEMBER)
             .status(MemberStatus.ACTIVE)
             .build());
     }

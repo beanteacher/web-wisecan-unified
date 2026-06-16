@@ -48,7 +48,7 @@ public class ApiKeyTool {
             return akp.memberId();
         }
         if (principal instanceof UserPrincipal up) {
-            return up.getMemberId();
+            return up.memberId();
         }
         throw new IllegalStateException("MCP API 키 도구는 인증이 필요합니다.");
     }

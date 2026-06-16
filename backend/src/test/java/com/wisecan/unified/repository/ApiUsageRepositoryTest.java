@@ -38,7 +38,7 @@ class ApiUsageRepositoryTest {
             .email("usage@example.com")
             .password("password")
             .name("사용자")
-            .role(MemberRole.USER)
+            .role(MemberRole.MEMBER)
             .status(MemberStatus.ACTIVE)
             .build());
 

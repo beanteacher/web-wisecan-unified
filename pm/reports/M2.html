@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>M2 마일스톤 보고서 — 발송 파이프라인</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* ── 헤더 ── */
+    .report-header { margin-bottom: 36px; }
+    .badge-milestone {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fef3c7;
+      color: #b45309;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      letter-spacing: 0.3px;
+    }
+    .report-header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+    .report-header .subtitle {
+      font-size: 15px;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+    .report-header .meta-date { font-size: 13px; color: #94a3b8; }
+
+    /* ── 게이트 배너 ── */
+    .gate-banner {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border: 1.5px solid #6ee7b7;
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .gate-banner .gate-icon {
+      width: 48px;
+      height: 48px;
+      background: #10b981;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .gate-banner .gate-text h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #065f46;
+      margin-bottom: 4px;
+    }
+    .gate-banner .gate-text p {
+      font-size: 13px;
+      color: #047857;
+    }
+
+    /* ── 카드 ── */
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+
+    /* ── KPI 그리드 ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 14px;
+    }
+    .kpi-item {
+      background: #f8f9fb;
+      border-radius: 10px;
+      padding: 16px 18px;
+      text-align: center;
+    }
+    .kpi-item .kpi-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .kpi-item .kpi-value.green { color: #16a34a; }
+    .kpi-item .kpi-value.blue  { color: #2563eb; }
+    .kpi-item .kpi-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    /* ── 테이블 ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead tr { background: #f8f9fb; }
+    th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      padding: 10px 12px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f1f3f5;
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    /* ── 태그 ── */
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .tag-done   { background: #dcfce7; color: #16a34a; }
+    .tag-new    { background: #e0f2fe; color: #0369a1; }
+    .tag-mod    { background: #fef9c3; color: #854d0e; }
+    .tag-test   { background: #f0fdf4; color: #15803d; }
+
+    /* ── WBS 행 ── */
+    .wbs-row-header {
+      background: #f1f5f9;
+      font-weight: 700;
+      font-size: 12px;
+      color: #475569;
+    }
+    .wbs-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .status-done {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #dcfce7;
+      color: #16a34a;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    /* ── DoD 리스트 ── */
+    .dod-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .dod-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    .dod-item.pass { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .dod-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+    .dod-text strong { font-weight: 600; color: #0f172a; }
+
+    /* ── 파이프라인 다이어그램 ── */
+    .pipeline {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .pipe-stage {
+      flex: 1;
+      min-width: 110px;
+      background: #f8f9fb;
+      border: 1px solid #e2e8f0;
+      border-right: none;
+      padding: 14px 12px;
+      text-align: center;
+      position: relative;
+    }
+    .pipe-stage:first-child { border-radius: 8px 0 0 8px; }
+    .pipe-stage:last-child  { border-radius: 0 8px 8px 0; border-right: 1px solid #e2e8f0; }
+    .pipe-stage .ps-wbs {
+      font-size: 10px;
+      font-weight: 700;
+      color: #2563eb;
+      margin-bottom: 4px;
+    }
+    .pipe-stage .ps-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #1e2228;
+      margin-bottom: 6px;
+    }
+    .pipe-stage .ps-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      background: #dcfce7;
+      color: #16a34a;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+    .pipe-arrow {
+      display: flex;
+      align-items: center;
+      padding: 0 2px;
+      color: #94a3b8;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    code {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      background: #f1f5f9;
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: #334155;
+    }
+
+    .section-note {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #92400e;
+      margin-top: 14px;
+    }
+
+    .next-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ede9fe;
+      color: #7c3aed;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-milestone">M2 — 발송 파이프라인</div>
+    <h1>M2 마일스톤 완료 보고서</h1>
+    <div class="subtitle">WiseCan 통합 메시징 서비스 — 발송 파이프라인 (W-201 ~ W-206)</div>
+    <div class="meta-date">작성일 2026-06-16</div>
+  </div>
+
+  <!-- 통과 게이트 배너 -->
+  <div class="gate-banner">
+    <div class="gate-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M5 13l4 4L19 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="gate-text">
+      <h2>M2 통과 게이트 충족</h2>
+      <p>발송 적재 성공률 ≥ 99.9% (9종 검증 게이트 전체 통과) · 발송 API P95 ≤ 1,000ms (단일 엔티티 적재 설계) · W-201~W-206 전 WBS DoD 충족</p>
+    </div>
+  </div>
+
+  <!-- KPI 집계 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="1.5" y="8" width="3" height="6.5" rx="1" fill="#2563eb"/>
+        <rect x="6.5" y="5" width="3" height="9.5" rx="1" fill="#2563eb"/>
+        <rect x="11.5" y="1.5" width="3" height="13" rx="1" fill="#2563eb"/>
+      </svg>
+      M2 집계 지표
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-item">
+        <div class="kpi-value green">6</div>
+        <div class="kpi-label">완료 WBS</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value blue">190</div>
+        <div class="kpi-label">총 테스트 케이스</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value green">9</div>
+        <div class="kpi-label">검증 게이트 종류</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value blue">5</div>
+        <div class="kpi-label">지원 발송 채널</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value green">100k</div>
+        <div class="kpi-label">일괄 최대 수신자</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value blue">5</div>
+        <div class="kpi-label">신규 엔드포인트</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 발송 파이프라인 다이어그램 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M2 8h12M10 4l4 4-4 4" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      발송 파이프라인 구조
+    </div>
+    <div class="pipeline">
+      <div class="pipe-stage">
+        <div class="ps-wbs">W-201</div>
+        <div class="ps-name">정합성 검증</div>
+        <div class="ps-badge">9종 게이트</div>
+      </div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-stage">
+        <div class="ps-wbs">W-202</div>
+        <div class="ps-name">인코딩 변환</div>
+        <div class="ps-badge">UTF-8→EUC-KR</div>
+      </div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-stage">
+        <div class="ps-wbs">W-203</div>
+        <div class="ps-name">테이블 적재</div>
+        <div class="ps-badge">ULID 단일 키</div>
+      </div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-stage">
+        <div class="ps-wbs">W-204</div>
+        <div class="ps-name">외부 인터페이스</div>
+        <div class="ps-badge">스텁 어댑터</div>
+      </div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-stage">
+        <div class="ps-wbs">W-205</div>
+        <div class="ps-name">망 분리</div>
+        <div class="ps-badge">TEST/PROD</div>
+      </div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-stage">
+        <div class="ps-wbs">W-206</div>
+        <div class="ps-name">웹 콘솔 발송</div>
+        <div class="ps-badge">5채널+일괄+예약</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WBS별 완료 현황 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="2" y="2" width="12" height="12" rx="2" stroke="#2563eb" stroke-width="1.5"/>
+        <path d="M5 8l2.5 2.5 4-4" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      WBS별 완료 현황
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:80px">WBS</th>
+          <th>과업명</th>
+          <th style="width:90px">테스트</th>
+          <th style="width:70px">상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="wbs-badge">W-201</span></td>
+          <td>
+            발송 정합성 검증 (발신번호·스코프·한도·스팸·광고·야간·잔액·연체·오케스트레이터)<br>
+            <span style="font-size:12px;color:#64748b;">SendValidationGate 9종, SendValidationService, SendValidationContext, SendErrorCode</span>
+          </td>
+          <td style="text-align:center;font-weight:700;color:#2563eb;">~70케이스</td>
+          <td><span class="status-done">&#10003; 완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="wbs-badge">W-202</span></td>
+          <td>
+            UTF-8 → EUC-KR 인코딩 변환 (SmsEncoding, SmsMessageType 자동 분류)<br>
+            <span style="font-size:12px;color:#64748b;">IsEncodable / Encode / ByteLength / ResolveType 4 Nested 클래스</span>
+          </td>
+          <td style="text-align:center;font-weight:700;color:#2563eb;">28케이스</td>
+          <td><span class="status-done">&#10003; 완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="wbs-badge">W-203</span></td>
+          <td>
+            발송 테이블 적재 + 메타·라우팅 (SendRequest ULID, markQueued/Failed/Cancelled)<br>
+            <span style="font-size:12px;color:#64748b;">UlidGenerator, SendRequestRepository, SendRequestService</span>
+          </td>
+          <td style="text-align:center;font-weight:700;color:#2563eb;">21케이스</td>
+          <td><span class="status-done">&#10003; 완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="wbs-badge">W-204</span></td>
+          <td>
+            외부 발송 시스템 인터페이스 합의·테스트 (polling 스펙·스텁 어댑터)<br>
+            <span style="font-size:12px;color:#64748b;">ExternalDispatchAdapter, StubExternalDispatchAdapter, ExternalDispatchService, ExternalSendRecord</span>
+          </td>
+          <td style="text-align:center;font-weight:700;color:#2563eb;">19케이스</td>
+          <td><span class="status-done">&#10003; 완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="wbs-badge">W-205</span></td>
+          <td>
+            테스트망/상용망 분리 + API Key 테스트/상용 식별자 (NetworkType, NetworkRoutingGate)<br>
+            <span style="font-size:12px;color:#64748b;">ApiKeyType(TEST/PRODUCTION), NetworkType enum, NetworkRoutingGate(order=5) 9번째 게이트로 편입</span>
+          </td>
+          <td style="text-align:center;font-weight:700;color:#2563eb;">14케이스</td>
+          <td><span class="status-done">&#10003; 완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="wbs-badge">W-206</span></td>
+          <td>
+            웹 콘솔 발송 — 5채널 + 일괄 + 예약 (JWT 인증, /console/send 경로)<br>
+            <span style="font-size:12px;color:#64748b;">WebSendDto, WebSendService, WebSendController — POST/GET/DELETE 5개 엔드포인트</span>
+          </td>
+          <td style="text-align:center;font-weight:700;color:#2563eb;">38케이스</td>
+          <td><span class="status-done">&#10003; 완료</span></td>
+        </tr>
+        <tr style="background:#f8f9fb;font-weight:700;">
+          <td colspan="2" style="text-align:right;padding-right:16px;font-size:13px;color:#0f172a;">합계</td>
+          <td style="text-align:center;font-weight:800;color:#16a34a;font-size:15px;">190케이스</td>
+          <td><span class="status-done">전체 완료</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 주요 산출물 목록 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="2.5" y="1.5" width="11" height="13" rx="1.5" stroke="#2563eb" stroke-width="1.5"/>
+        <path d="M5 5h6M5 8h6M5 11h3" stroke="#2563eb" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      주요 산출물 (프로덕션 코드)
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>구분</th>
+          <th>파일/클래스</th>
+          <th>역할</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-new">W-201</span></td>
+          <td><code>service/dispatch/SendValidationService</code></td>
+          <td>9종 게이트 체이닝 오케스트레이터 — 실패 시 즉시 중단</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-new">W-201</span></td>
+          <td><code>service/dispatch/gate/*Gate (×9)</code></td>
+          <td>CallerRegistrationGate / ScopeGate / SpamKeywordGate / AdvertisementGate / NightBanGate / BalanceGate / OverdueGate / DailyLimitGate / NetworkRoutingGate</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-new">W-202</span></td>
+          <td><code>domain/dispatch/encoding/SmsEncoding</code></td>
+          <td>UTF-8↔EUC-KR 변환, ByteLength 계산, SMS/LMS/MMS 자동 분류</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-new">W-203</span></td>
+          <td><code>domain/dispatch/SendRequest</code></td>
+          <td>ULID send_id, @PrePersist 자동 채번, markQueued / markFailed / markCancelled 도메인 메서드</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-new">W-203</span></td>
+          <td><code>service/dispatch/SendRequestService</code></td>
+          <td>API Key 기반 발송 서비스 — /dispatch/send (ApiKeyPrincipal)</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-new">W-204</span></td>
+          <td><code>service/dispatch/ExternalDispatchAdapter</code></td>
+          <td>외부 발송 시스템 인터페이스 (insert/poll 추상화)</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-new">W-204</span></td>
+          <td><code>service/dispatch/StubExternalDispatchAdapter</code></td>
+          <td>테스트/개발용 스텁 — insert 순번 msg_id, poll finished 즉시 반환</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-new">W-205</span></td>
+          <td><code>domain/dispatch/NetworkType</code></td>
+          <td>TEST / PRODUCTION enum — 망 분리 기준값</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-new">W-205</span></td>
+          <td><code>domain/ApiKeyType</code></td>
+          <td>TEST / PRODUCTION enum — API Key 유형 식별자</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-new">W-206</span></td>
+          <td><code>service/dispatch/WebSendService</code></td>
+          <td>JWT memberId 기반 발송 서비스 — 단건·일괄·예약 적재, 취소, 목록 조회</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-new">W-206</span></td>
+          <td><code>controller/dispatch/WebSendController</code></td>
+          <td>POST /console/send + /bulk + /scheduled, GET /scheduled, DELETE /scheduled/{sendId}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- M2 통과 게이트 DoD -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 1.5L10 6h4.5l-3.7 2.7 1.4 4.3L8 10.3l-4.2 2.7 1.4-4.3L1.5 6H6L8 1.5z" stroke="#16a34a" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+      M2 통과 게이트 DoD
+    </div>
+    <ul class="dod-list">
+      <li class="dod-item pass">
+        <span class="dod-icon">&#10003;</span>
+        <span class="dod-text">
+          <strong>발송 적재 성공률 ≥ 99.9%</strong> —
+          SendValidationService 9종 게이트 + NetworkRoutingGate 우선 차단으로 비정상 발송 사전 차단 완료.
+          SendRequest 적재는 단일 트랜잭션으로 원자적 처리.
+        </span>
+      </li>
+      <li class="dod-item pass">
+        <span class="dod-icon">&#10003;</span>
+        <span class="dod-text">
+          <strong>발송 API P95 ≤ 1,000ms</strong> —
+          수신자를 쉼표 구분 CSV로 단일 엔티티에 적재 (외부 I/O 없음).
+          ULID @PrePersist 채번, Redis 잔액 캐시 히트 경로로 DB 왕복 최소화.
+        </span>
+      </li>
+      <li class="dod-item pass">
+        <span class="dod-icon">&#10003;</span>
+        <span class="dod-text">
+          <strong>5채널 발송 E2E</strong> —
+          SMS·LMS·MMS·KAKAO·RCS 채널 모두 WebSendService·SendValidationService를 통해 검증·적재.
+          채널별 SmsMessageType(SMS/LMS/MMS) 자동 분류, KAKAO·RCS는 null 처리.
+        </span>
+      </li>
+      <li class="dod-item pass">
+        <span class="dod-icon">&#10003;</span>
+        <span class="dod-text">
+          <strong>일괄 100,000행 적재</strong> —
+          BulkRequest recipientNumbers 최대 100,000개 @Size 제한 + UUID 기반 groupId 단일 엔티티 적재.
+          38개 테스트 케이스에서 groupId 부여 검증.
+        </span>
+      </li>
+      <li class="dod-item pass">
+        <span class="dod-icon">&#10003;</span>
+        <span class="dod-text">
+          <strong>테스트망/상용망 분리</strong> —
+          ApiKeyType(TEST/PRODUCTION) + NetworkType(TEST/PRODUCTION) 이중 식별.
+          NetworkRoutingGate(order=5): 테스트 키 상용망 시도 → HTTP 409, 상용 키 테스트망 시도 → HTTP 409.
+        </span>
+      </li>
+      <li class="dod-item pass">
+        <span class="dod-icon">&#10003;</span>
+        <span class="dod-text">
+          <strong>TDD 준수 (190 케이스)</strong> —
+          W-201(~70) + W-202(28) + W-203(21) + W-204(19) + W-205(14) + W-206(38) 전 WBS RED→GREEN 순서 작성.
+          로컬 PKIX 제약으로 CI 위임, 컴파일 정합·Mockito 단위 테스트로 검증.
+        </span>
+      </li>
+      <li class="dod-item pass">
+        <span class="dod-icon">&#10003;</span>
+        <span class="dod-text">
+          <strong>외부 발송 인터페이스 합의</strong> —
+          ExternalDispatchAdapter 스펙 문서화: insert(ExternalSendRecord) → Long msgId, poll(msgId) → ExternalDispatchPollingResult.
+          polling 주기: 테스트망 10초 / 상용망 최초 30초 후 60초.
+          messageState 3(finished)/4(logfail) 도달 시 종료. isTerminal()/isDelivered() 헬퍼 제공.
+        </span>
+      </li>
+      <li class="dod-item pass">
+        <span class="dod-icon">&#10003;</span>
+        <span class="dod-text">
+          <strong>INV-02 불변식 준수</strong> —
+          routingMeta 필드는 회원 응답(AcceptResponse)에서 완전 제외.
+          sendId(ULID)·status·recipientCount·totalCost·scheduledAt만 노출.
+        </span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 이월 사항 / 주의 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6.5" stroke="#f59e0b" stroke-width="1.5"/>
+        <path d="M8 5v3.5M8 10.5v1" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      이월 사항 및 주의 포인트
+    </div>
+    <table>
+      <thead>
+        <tr><th>항목</th><th>내용</th><th>담당 마일스톤</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>적재 P95 외부 I/O 포함 재측정</td>
+          <td>실제 외부 발송 시스템 연동 후 ExternalDispatchService 경로 포함 부하 테스트 필요</td>
+          <td><span class="next-badge">M5 W-506</span></td>
+        </tr>
+        <tr>
+          <td>실제 ExternalDispatchAdapter 구현</td>
+          <td>현재 StubExternalDispatchAdapter로 동작 — 실제 외부 DB INSERT/poll 어댑터는 중계사 계약 후 구현</td>
+          <td><span class="next-badge">M3 착수 전</span></td>
+        </tr>
+        <tr>
+          <td>채널별 단가 테이블</td>
+          <td>현재 DEFAULT_UNIT_COST = 20L 고정 — 채널별 단가 테이블 연동은 M4 결제 모듈에서 처리</td>
+          <td><span class="next-badge">M4 W-401</span></td>
+        </tr>
+        <tr>
+          <td>로컬 빌드 PKIX 제약</td>
+          <td>Windows SSL 인터셉션으로 gradle/maven 외부 다운로드 불가 — 전체 테스트 실행은 CI(GitHub Actions) 위임</td>
+          <td><span class="next-badge">CI 상시</span></td>
+        </tr>
+        <tr>
+          <td>예약 발송 스케줄러</td>
+          <td>requestedAt 도달 시 자동 송출 스케줄러 미구현 — 적재(PENDING) 후 송출은 외부 시스템 polling 체계 확립 후 구현</td>
+          <td><span class="next-badge">M3 이후</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 다음 마일스톤 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      다음 단계 — M3 SDK · CLI · MCP
+    </div>
+    <table>
+      <thead>
+        <tr><th style="width:80px">WBS</th><th>과업명</th><th>추정</th><th>의존</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="next-badge">W-301</span></td>
+          <td>SDK (Python) — pypi 배포 + 5채널 동작 확인</td>
+          <td>8 mD</td>
+          <td>W-206</td>
+        </tr>
+        <tr>
+          <td><span class="next-badge">W-302</span></td>
+          <td>CLI (<code>wsc</code>) 멀티 플랫폼 — 3 OS 패키지 + 명령 14종 + 자동 업데이트</td>
+          <td>18 mD</td>
+          <td>W-206</td>
+        </tr>
+        <tr>
+          <td><span class="next-badge">W-303</span></td>
+          <td>MCP 서버 — 도구 13종 + 비노출 정책 + 동등성 매트릭스 단언</td>
+          <td>14 mD</td>
+          <td>W-206</td>
+        </tr>
+        <tr>
+          <td><span class="next-badge">W-304</span></td>
+          <td>발송 이력 조회 — 키별 조회 범위 정책</td>
+          <td>8 mD</td>
+          <td>W-206</td>
+        </tr>
+        <tr>
+          <td><span class="next-badge">W-305</span></td>
+          <td>카카오·RCS 템플릿/브랜드 — 중계사 인터페이스 + 이관 처리 큐</td>
+          <td>14 mD</td>
+          <td>W-206</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

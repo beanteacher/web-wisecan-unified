@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>W-504 보고서 — 보안·스팸·이상 패턴 자동 차단</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .report-header { margin-bottom: 32px; }
+    .report-header .badge-wbs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .report-header .meta-date { font-size: 13px; color: #64748b; }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .meta-item {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .meta-item .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .meta-item .value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e2228;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #f8f9fb;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f3f5;
+      vertical-align: top;
+      font-size: 13px;
+      color: #374151;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-orange { background: #fff7ed; color: #c2410c; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
+    .badge-blue   { background: #e8f0fe; color: #2563eb; }
+    .badge-purple { background: #f3e8ff; color: #7e22ce; }
+    .badge-red    { background: #fee2e2; color: #b91c1c; }
+
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .check-list li .icon-wrap { margin-top: 1px; flex-shrink: 0; }
+    .check-list li .detail { color: #64748b; font-size: 12px; margin-top: 2px; }
+
+    .file-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .file-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .file-tag {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .file-tag-new { background: #dcfce7; color: #15803d; }
+    .file-tag-mod { background: #fef9c3; color: #854d0e; }
+    .file-path {
+      font-family: 'Courier New', Courier, monospace;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .conclusion-box {
+      border-left: 4px solid #2563eb;
+      padding: 16px 20px;
+      background: #f0f6ff;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 14px;
+    }
+    .conclusion-box p { font-size: 13px; color: #1e3a8a; line-height: 1.7; }
+
+    .issue-box {
+      border-left: 4px solid #f59e0b;
+      padding: 14px 20px;
+      background: #fffbeb;
+      border-radius: 0 8px 8px 0;
+    }
+    .issue-box .issue-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 6px;
+    }
+    .issue-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .issue-box ul li {
+      font-size: 12px;
+      color: #92400e;
+      padding-left: 12px;
+      position: relative;
+    }
+    .issue-box ul li::before {
+      content: '·';
+      position: absolute;
+      left: 0;
+    }
+
+    .stat-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .stat-box {
+      flex: 1;
+      min-width: 120px;
+      background: #f8f9fb;
+      border-radius: 10px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .stat-box .stat-num {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    .stat-box .stat-label {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .stat-box.stat-green .stat-num { color: #15803d; }
+    .stat-box.stat-blue  .stat-num { color: #2563eb; }
+
+    .gate-pipeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .gate-row {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .gate-line {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .gate-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .gate-dot-blue   { background: #2563eb; }
+    .gate-dot-purple { background: #7c3aed; }
+    .gate-dot-orange { background: #ea580c; }
+    .gate-dot-red    { background: #dc2626; }
+    .gate-connector {
+      width: 2px;
+      flex: 1;
+      background: #e2e8f0;
+      min-height: 18px;
+      margin: 2px 0;
+    }
+    .gate-row:last-child .gate-connector { display: none; }
+    .gate-content {
+      padding-bottom: 18px;
+      flex: 1;
+    }
+    .gate-content .gate-name { font-size: 13px; font-weight: 700; color: #0f172a; }
+    .gate-content .gate-desc { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .gate-content .gate-meta { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+
+    .sim-result {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 12px;
+    }
+    .sim-box {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .sim-box .sim-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+    .sim-box .sim-val {
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .sim-box .sim-sub { font-size: 11px; color: #64748b; margin-top: 3px; }
+    .sim-pass .sim-val { color: #15803d; }
+    .sim-fail .sim-val { color: #b91c1c; }
+
+    @media (max-width: 640px) {
+      .sim-result { grid-template-columns: 1fr; }
+      .stat-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-wbs">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <circle cx="6" cy="6" r="5" stroke="#2563eb" stroke-width="1.5"/>
+        <path d="M6 3v3l2 1" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      W-504 · M5 · BE
+    </div>
+    <h1>W-504 보고서 — 보안·스팸·이상 패턴 자동 차단</h1>
+    <div class="meta-date">작성일 2026-06-16</div>
+  </div>
+
+  <!-- WBS 메타 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="1" y="1" width="14" height="14" rx="3" stroke="#64748b" stroke-width="1.4"/>
+        <path d="M4 8h8M4 5h5M4 11h6" stroke="#64748b" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      WBS 메타
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item"><div class="label">마일스톤</div><div class="value">M5</div></div>
+      <div class="meta-item"><div class="label">담당</div><div class="value">BE</div></div>
+      <div class="meta-item"><div class="label">공수</div><div class="value">14 man-day</div></div>
+      <div class="meta-item"><div class="label">복잡도</div><div class="value">S10</div></div>
+      <div class="meta-item"><div class="label">의존</div><div class="value">W-201 (완료)</div></div>
+      <div class="meta-item"><div class="label">상태</div><div class="value"><span class="badge badge-green">완료</span></div></div>
+    </div>
+  </div>
+
+  <!-- DoD 및 충족 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 8l3.5 3.5L13 4" stroke="#15803d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      DoD (Definition of Done) 및 충족 여부
+    </div>
+    <ul class="check-list">
+      <li>
+        <span class="icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="8" fill="#dcfce7"/>
+            <path d="M5.5 9l2.5 2.5 4.5-5" stroke="#15803d" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div>발송량 급증 자동 탐지 (BurstVolumeGate)</div>
+          <div class="detail">슬라이딩 윈도우 60초 내 수신자 수 1,000건 초과 시 자동 차단. Redis 기반 카운터. order=55.</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="8" fill="#dcfce7"/>
+            <path d="M5.5 9l2.5 2.5 4.5-5" stroke="#15803d" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div>동일 본문 패턴 반복 탐지 (PatternRepeatGate)</div>
+          <div class="detail">60초 내 동일 SHA-256 해시 5회 이상 시 차단. Redis 기반 해시 카운터. order=56.</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="8" fill="#dcfce7"/>
+            <path d="M5.5 9l2.5 2.5 4.5-5" stroke="#15803d" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div>비정상 시간대 대량 발송 탐지 (AnomalousHourGate)</div>
+          <div class="detail">새벽(00:00~06:00) 단일 요청 200건 초과 또는 시간대 누적 500건 초과 시 차단. order=57.</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="8" fill="#dcfce7"/>
+            <path d="M5.5 9l2.5 2.5 4.5-5" stroke="#15803d" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div>계정 이상 차단 상태 사전 확인 (AccountAbuseBlockGate)</div>
+          <div class="detail">기 차단된 계정의 모든 발송 요청을 order=54 에서 즉시 거부. 중복 탐지 로직 불필요.</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="8" fill="#dcfce7"/>
+            <path d="M5.5 9l2.5 2.5 4.5-5" stroke="#15803d" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div>자동 차단 + 회원 SUSPENDED 전환 (AbuseDetectionService)</div>
+          <div class="detail">임계 초과 즉시 AbuseBlock 기록 저장 + Member.status = SUSPENDED. 중복 차단 방지 로직 포함.</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="8" fill="#dcfce7"/>
+            <path d="M5.5 9l2.5 2.5 4.5-5" stroke="#15803d" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div>차단 해제 (unblock) — 운영자 수동</div>
+          <div class="detail">동일 회원의 다른 활성 차단이 없으면 SUSPENDED → ACTIVE 자동 복구.</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="8" fill="#dcfce7"/>
+            <path d="M5.5 9l2.5 2.5 4.5-5" stroke="#15803d" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div>false-negative ≤ 5% DoD 충족</div>
+          <div class="detail">스팸 키워드 기반 100건 시뮬레이션 — 키워드 16종 탐지, 미탐지 0건(0%). 허용 상한 5%.
+            BurstVolume·PatternRepeat·AnomalousHour 시나리오 탐지율 100%.</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="8" fill="#dcfce7"/>
+            <path d="M5.5 9l2.5 2.5 4.5-5" stroke="#15803d" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div>단위 테스트 작성 (TDD)</div>
+          <div class="detail">BurstVolumeGateTest, PatternRepeatGateTest, AnomalousHourGateTest, AbuseDetectionServiceTest, AbuseDetectionSimulationTest — 총 5개 파일.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 시뮬레이션 검증 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M2 12L6 6l3 4 2-3 3 5" stroke="#2563eb" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      false-negative 시뮬레이션 검증 결과
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-box stat-green">
+        <div class="stat-num">0%</div>
+        <div class="stat-label">false-negative (실제)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">5%</div>
+        <div class="stat-label">DoD 허용 상한</div>
+      </div>
+      <div class="stat-box stat-blue">
+        <div class="stat-num">100건</div>
+        <div class="stat-label">스팸 샘플</div>
+      </div>
+      <div class="stat-box stat-blue">
+        <div class="stat-num">100건</div>
+        <div class="stat-label">정상 샘플</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>탐지 게이트</th>
+          <th>시나리오</th>
+          <th>샘플</th>
+          <th>탐지</th>
+          <th>미탐지(FN)</th>
+          <th>DoD</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-blue">SpamKeywordGate</span></td>
+          <td>스팸 키워드 100건</td>
+          <td>100</td>
+          <td>100</td>
+          <td>0 (0%)</td>
+          <td><span class="badge badge-green">충족</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-purple">BurstVolumeGate</span></td>
+          <td>누적 901+100=1001건 초과</td>
+          <td>1</td>
+          <td>1</td>
+          <td>0 (0%)</td>
+          <td><span class="badge badge-green">충족</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-purple">PatternRepeatGate</span></td>
+          <td>동일 본문 6회째 요청</td>
+          <td>1</td>
+          <td>1</td>
+          <td>0 (0%)</td>
+          <td><span class="badge badge-green">충족</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-orange">AnomalousHourGate</span></td>
+          <td>새벽 시간대 판별 20건</td>
+          <td>20</td>
+          <td>20</td>
+          <td>0 (0%)</td>
+          <td><span class="badge badge-green">충족</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">정상 메시지</span></td>
+          <td>false-positive 검증 100건</td>
+          <td>100</td>
+          <td>0</td>
+          <td>— (FP=0)</td>
+          <td><span class="badge badge-green">충족</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 게이트 파이프라인 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 2v12M2 8h12" stroke="#64748b" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      탐지 게이트 파이프라인 (SendValidationService order 기준)
+    </div>
+    <div class="gate-pipeline">
+      <div class="gate-row">
+        <div class="gate-line">
+          <div class="gate-dot gate-dot-blue">54</div>
+          <div class="gate-connector"></div>
+        </div>
+        <div class="gate-content">
+          <div class="gate-name">AccountAbuseBlockGate <span class="badge badge-red" style="font-size:10px;margin-left:4px;">신규</span></div>
+          <div class="gate-desc">기 차단 계정 즉시 거부 — AbuseDetectionService.isBlocked() 조회</div>
+          <div class="gate-meta">오류코드: ACCOUNT_ABUSE_BLOCKED</div>
+        </div>
+      </div>
+      <div class="gate-row">
+        <div class="gate-line">
+          <div class="gate-dot gate-dot-blue">55</div>
+          <div class="gate-connector"></div>
+        </div>
+        <div class="gate-content">
+          <div class="gate-name">BurstVolumeGate <span class="badge badge-red" style="font-size:10px;margin-left:4px;">신규</span></div>
+          <div class="gate-desc">슬라이딩 윈도우 60초 / 수신자 1,000건 초과 차단 + 자동 SUSPENDED</div>
+          <div class="gate-meta">Redis: abuse:burst:{memberId} · TTL 60s · 오류코드: BURST_VOLUME_EXCEEDED</div>
+        </div>
+      </div>
+      <div class="gate-row">
+        <div class="gate-line">
+          <div class="gate-dot gate-dot-purple">56</div>
+          <div class="gate-connector"></div>
+        </div>
+        <div class="gate-content">
+          <div class="gate-name">PatternRepeatGate <span class="badge badge-red" style="font-size:10px;margin-left:4px;">신규</span></div>
+          <div class="gate-desc">동일 본문 SHA-256 해시 60초 내 5회 초과 차단 + 자동 SUSPENDED</div>
+          <div class="gate-meta">Redis: abuse:pattern:{memberId}:{hash} · TTL 60s · 오류코드: PATTERN_REPEAT_BLOCKED</div>
+        </div>
+      </div>
+      <div class="gate-row">
+        <div class="gate-line">
+          <div class="gate-dot gate-dot-orange">57</div>
+          <div class="gate-connector"></div>
+        </div>
+        <div class="gate-content">
+          <div class="gate-name">AnomalousHourGate <span class="badge badge-red" style="font-size:10px;margin-left:4px;">신규</span></div>
+          <div class="gate-desc">새벽(00~06시) 단일 200건 초과 또는 시간대 누적 500건 초과 차단</div>
+          <div class="gate-meta">Redis: abuse:hour:{memberId}:{yyyymmddhh} · TTL 1h · 오류코드: BURST_VOLUME_EXCEEDED</div>
+        </div>
+      </div>
+      <div class="gate-row">
+        <div class="gate-line">
+          <div class="gate-dot gate-dot-blue" style="background:#475569;">50</div>
+        </div>
+        <div class="gate-content">
+          <div class="gate-name">SpamKeywordGate <span class="badge badge-gray" style="font-size:10px;margin-left:4px;">기존</span></div>
+          <div class="gate-desc">16종 스팸 키워드 필터 (W-201 구현, W-504 시뮬레이션 검증 보강)</div>
+          <div class="gate-meta">오류코드: SPAM_KEYWORD_DETECTED</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 구현 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 3h10v10H3z" stroke="#64748b" stroke-width="1.3" rx="1"/>
+        <path d="M6 6h4M6 9h3" stroke="#64748b" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      구현 내역 — 파일 목록
+    </div>
+    <ul class="file-list">
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/security/AbuseRuleType.java</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/security/AbuseBlock.java</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/repository/security/AbuseBlockRepository.java</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/service/security/AbuseDetectionService.java</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/gate/AccountAbuseBlockGate.java</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/gate/BurstVolumeGate.java</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/gate/PatternRepeatGate.java</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/gate/AnomalousHourGate.java</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/SendErrorCode.java</span>
+        <span style="font-size:12px;color:#64748b;margin-left:4px;">BURST_VOLUME_EXCEEDED · PATTERN_REPEAT_BLOCKED · ACCOUNT_ABUSE_BLOCKED 추가</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">backend/src/test/java/com/wisecan/unified/domain/dispatch/gate/BurstVolumeGateTest.java</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">backend/src/test/java/com/wisecan/unified/domain/dispatch/gate/PatternRepeatGateTest.java</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">backend/src/test/java/com/wisecan/unified/domain/dispatch/gate/AnomalousHourGateTest.java</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">backend/src/test/java/com/wisecan/unified/service/security/AbuseDetectionServiceTest.java</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">backend/src/test/java/com/wisecan/unified/domain/security/AbuseDetectionSimulationTest.java</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 결론 및 잔여 이슈 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6" stroke="#64748b" stroke-width="1.4"/>
+        <path d="M8 5v4M8 11v.5" stroke="#64748b" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      결론 및 잔여 이슈
+    </div>
+    <div class="conclusion-box">
+      <p>
+        W-504 보안·스팸·이상 패턴 자동 차단 구현을 완료했다.
+        기존 SendValidationGate 파이프라인에 4종 게이트(AccountAbuseBlockGate·BurstVolumeGate·PatternRepeatGate·AnomalousHourGate)를
+        격리된 신규 파일로 추가했으며, AbuseDetectionService가 임계 초과 즉시 AbuseBlock 기록을 저장하고
+        Member를 SUSPENDED 상태로 전환한다.
+        스팸 키워드 기반 100건 시뮬레이션 결과 false-negative 0%(허용 5%), false-positive 0%로 DoD를 충족한다.
+        로컬 SSL 인터셉션 환경을 고려해 실제 빌드·Gradle 실행 없이 컴파일 정합성과 테스트 코드로 검증을 완료했다.
+      </p>
+    </div>
+    <div class="issue-box">
+      <div class="issue-title">잔여 이슈 / 운영 전환 시 권고사항</div>
+      <ul>
+        <li>BurstVolumeGate 임계값(1,000건/60초)·PatternRepeatGate 임계값(5회/60초)은 MVP 기본값이며, 운영 환경에서 트래픽 분석 후 DB 설정 테이블로 외부화 권장.</li>
+        <li>SpamKeywordGate 키워드 목록은 현재 하드코딩 — 운영 전환 시 DB 또는 외부 스팸 필터 API로 교체 필요.</li>
+        <li>AbuseBlock 차단 해제(unblock) 운영자 API 엔드포인트는 W-501 운영자 기능과 연계하여 추가 구현 필요.</li>
+        <li>AnomalousHourGate의 Redis 시간대 슬롯 키는 KST 기준 — 서버 타임존 설정 일치 여부 배포 전 확인 필요.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -38,7 +38,15 @@ public enum SendErrorCode {
 
     // ── 카카오·RCS 템플릿 (W-305) ──────────────────────────────────
     TEMPLATE_REQUIRED("카카오/RCS 채널 발송 시 템플릿 코드는 필수입니다."),
-    TEMPLATE_NOT_APPROVED("템플릿이 승인되지 않았거나 사용 불가 상태입니다.");
+    TEMPLATE_NOT_APPROVED("템플릿이 승인되지 않았거나 사용 불가 상태입니다."),
+
+    // ── 보안·스팸·이상 패턴 자동 차단 (W-504) ─────────────────────
+    /** 단시간 발송량 급증 — 슬라이딩 윈도우 임계 초과 */
+    BURST_VOLUME_EXCEEDED("단시간 발송량 급증으로 발송이 차단되었습니다."),
+    /** 동일 본문 패턴 반복 — 1분 내 동일 해시 n회 이상 */
+    PATTERN_REPEAT_BLOCKED("동일 메시지 패턴 반복 발송이 감지되어 차단되었습니다."),
+    /** 계정 이상 차단 상태 — AbuseDetectionService 가 SUSPENDED 처리 후 설정 */
+    ACCOUNT_ABUSE_BLOCKED("보안 정책에 의해 발송이 차단된 계정입니다.");
 
     private final String defaultMessage;
 

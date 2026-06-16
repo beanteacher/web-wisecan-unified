@@ -3,6 +3,10 @@ package com.wisecan.unified.exception;
 import com.wisecan.unified.domain.dispatch.SendValidationException;
 import com.wisecan.unified.dto.ApiResponse;
 import com.wisecan.unified.exception.AccountLockedException;
+import com.wisecan.unified.exception.BillingException;
+import com.wisecan.unified.exception.InsufficientFundsException;
+import com.wisecan.unified.service.trial.TrialAbuseBlockedException;
+import com.wisecan.unified.service.trial.TrialSessionExpiredException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -47,6 +51,33 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleAccountLocked(AccountLockedException e) {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
             .body(ApiResponse.error(e.getMessage()));
+    }
+
+    /** 체험 모드 어뷰징 차단 — HTTP 429 Too Many Requests (W-406) */
+    @ExceptionHandler(TrialAbuseBlockedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTrialAbuseBlocked(TrialAbuseBlockedException e) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(ApiResponse.error(e.getMessage()));
+    }
+
+    /** 체험 세션 만료 — HTTP 401 Unauthorized (W-406) */
+    @ExceptionHandler(TrialSessionExpiredException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTrialSessionExpired(TrialSessionExpiredException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(e.getMessage()));
+    }
+
+    /** 과금/충전 비즈니스 오류 — HTTP 400 Bad Request (W-401) */
+    @ExceptionHandler(BillingException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBilling(BillingException e) {
+        return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+    }
+
+    /** 잔액 부족 전체 취소 — HTTP 402 Payment Required (W-405) */
+    @ExceptionHandler(InsufficientFundsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInsufficientFunds(InsufficientFundsException e) {
+        return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
+                .body(ApiResponse.error(e.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

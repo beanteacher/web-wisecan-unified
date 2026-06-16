@@ -45,6 +45,9 @@ spring.ai:
       type: SYNC                    # SYNC | ASYNC
       instructions: "wisecan B2C 메시지 발송/조회 도구"
 
+pg:
+  stub: true   # MVP/개발 환경 PG Stub 활성화. 실 PG 연동 시 false로 변경
+
 wisecan:
   rate-limit:
     per-minute: 60

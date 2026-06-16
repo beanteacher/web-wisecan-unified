@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>W-401 보고서 — 충전 + PG 통합 (결제수단 7종)</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .report-header { margin-bottom: 32px; }
+    .report-header .badge-wbs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .report-header .meta-date { font-size: 13px; color: #64748b; }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .meta-item {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .meta-item .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .meta-item .value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e2228;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #f8f9fb;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f3f5;
+      vertical-align: top;
+      font-size: 13px;
+      color: #374151;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-orange { background: #fff7ed; color: #c2410c; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
+    .badge-blue   { background: #e8f0fe; color: #2563eb; }
+    .badge-purple { background: #f3e8ff; color: #7e22ce; }
+
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .check-list li .icon-wrap { margin-top: 1px; flex-shrink: 0; }
+    .check-list li .detail { color: #64748b; font-size: 12px; margin-top: 2px; }
+
+    .file-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .file-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .file-tag {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .file-tag-new { background: #dcfce7; color: #15803d; }
+    .file-tag-mod { background: #fef9c3; color: #854d0e; }
+    .file-path {
+      font-family: 'Courier New', Courier, monospace;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .conclusion-box {
+      border-left: 4px solid #2563eb;
+      padding: 16px 20px;
+      background: #f0f6ff;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 14px;
+    }
+    .conclusion-box p { font-size: 13px; color: #1e3a8a; line-height: 1.7; }
+
+    .issue-box {
+      border-left: 4px solid #f59e0b;
+      padding: 14px 20px;
+      background: #fffbeb;
+      border-radius: 0 8px 8px 0;
+    }
+    .issue-box .issue-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 6px;
+    }
+    .issue-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .issue-box ul li {
+      font-size: 12px;
+      color: #92400e;
+      padding-left: 12px;
+      position: relative;
+    }
+    .issue-box ul li::before {
+      content: '·';
+      position: absolute;
+      left: 0;
+    }
+
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .flow-step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .flow-step-line {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .flow-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .flow-connector {
+      width: 2px;
+      flex: 1;
+      background: #e2e8f0;
+      min-height: 20px;
+      margin: 2px 0;
+    }
+    .flow-step:last-child .flow-connector { display: none; }
+    .flow-content {
+      padding-bottom: 20px;
+      flex: 1;
+    }
+    .flow-content strong { font-size: 13px; color: #0f172a; }
+    .flow-content p { font-size: 12px; color: #64748b; margin-top: 3px; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+    .stat-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .stat-box {
+      flex: 1;
+      min-width: 120px;
+      background: #f8f9fb;
+      border-radius: 10px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .stat-box .stat-num {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    .stat-box .stat-label {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-wbs">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <rect width="12" height="12" rx="3" fill="#2563eb"/>
+        <path d="M3 6h6M3 4h4M3 8h5" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      M4 · W-401
+    </div>
+    <h1>충전 + PG 통합 (결제수단 7종)</h1>
+    <div class="meta-date">작성일 2026-06-16</div>
+  </div>
+
+  <!-- 작업 개요 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="7" stroke="#2563eb" stroke-width="1.5"/>
+        <path d="M8 5v4l2.5 1.5" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      작업 개요
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="label">마일스톤</div>
+        <div class="value">M4 — 과금</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">WBS ID</div>
+        <div class="value">W-401</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">스펙 참조</div>
+        <div class="value">02_FEATURE_SPEC §10.1</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">데이터 모델</div>
+        <div class="value">05_DATA_MODEL §7.1–7.7</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">상태</div>
+        <div class="value"><span class="badge badge-green">완료</span></div>
+      </div>
+      <div class="meta-item">
+        <div class="label">PG 연동</div>
+        <div class="value">Stub (pg.stub=true)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 구현 통계 -->
+  <div class="stat-row">
+    <div class="stat-box">
+      <div class="stat-num">7</div>
+      <div class="stat-label">결제수단 지원</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">8</div>
+      <div class="stat-label">신규 도메인 파일</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">6</div>
+      <div class="stat-label">서비스/어댑터 파일</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">5</div>
+      <div class="stat-label">단위 테스트 클래스</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">20+</div>
+      <div class="stat-label">테스트 케이스</div>
+    </div>
+  </div>
+
+  <!-- 결제수단 7종 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="1" y="3" width="14" height="10" rx="2" stroke="#2563eb" stroke-width="1.5"/>
+        <path d="M1 6h14" stroke="#2563eb" stroke-width="1.5"/>
+        <rect x="3" y="9" width="3" height="1.5" rx="0.5" fill="#2563eb"/>
+      </svg>
+      지원 결제수단 7종 (PaymentMethodType)
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Enum 값</th>
+          <th>결제수단</th>
+          <th>PG 빌키</th>
+          <th>자동충전</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="file-path">CREDIT_CARD</span></td>
+          <td>신용카드</td>
+          <td><span class="badge badge-green">가능</span></td>
+          <td><span class="badge badge-green">가능</span></td>
+          <td>가장 범용적인 결제수단</td>
+        </tr>
+        <tr>
+          <td><span class="file-path">DEBIT_CARD</span></td>
+          <td>체크카드</td>
+          <td><span class="badge badge-green">가능</span></td>
+          <td><span class="badge badge-orange">제한적</span></td>
+          <td>한도 내 즉시 출금</td>
+        </tr>
+        <tr>
+          <td><span class="file-path">BANK_TRANSFER</span></td>
+          <td>계좌이체</td>
+          <td><span class="badge badge-gray">없음</span></td>
+          <td><span class="badge badge-gray">불가</span></td>
+          <td>수동 충전 전용</td>
+        </tr>
+        <tr>
+          <td><span class="file-path">VIRTUAL_ACCOUNT</span></td>
+          <td>가상계좌</td>
+          <td><span class="badge badge-gray">없음</span></td>
+          <td><span class="badge badge-gray">불가</span></td>
+          <td>입금 확인 후 충전 확정</td>
+        </tr>
+        <tr>
+          <td><span class="file-path">MOBILE</span></td>
+          <td>휴대폰소액결제</td>
+          <td><span class="badge badge-gray">없음</span></td>
+          <td><span class="badge badge-gray">불가</span></td>
+          <td>통신사 월정산</td>
+        </tr>
+        <tr>
+          <td><span class="file-path">GIFT_CARD</span></td>
+          <td>상품권</td>
+          <td><span class="badge badge-gray">없음</span></td>
+          <td><span class="badge badge-gray">불가</span></td>
+          <td>핀번호 입력 방식</td>
+        </tr>
+        <tr>
+          <td><span class="file-path">POINT</span></td>
+          <td>포인트</td>
+          <td><span class="badge badge-gray">없음</span></td>
+          <td><span class="badge badge-gray">불가</span></td>
+          <td>간편결제 포인트 차감</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:14px;">
+      <div class="issue-box">
+        <div class="issue-title">무통장입금 미지원 (02_FEATURE_SPEC §10.1 명시)</div>
+        <ul>
+          <li>입금자명 불일치·처리 지연 리스크로 MVP 범위 제외</li>
+          <li>필요 시 W-404 범위에서 환불 흐름과 함께 검토</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 충전 흐름 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 2v12M2 8l6-6 6 6" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      수동 충전 흐름 (POST /billing/charge)
+    </div>
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="flow-step-line">
+          <div class="flow-dot">1</div>
+          <div class="flow-connector"></div>
+        </div>
+        <div class="flow-content">
+          <strong>BILLING_MODE 검증</strong>
+          <p>POSTPAID 회원은 BillingException(400) 즉시 반환 — 후불 회원은 수동 충전 불가</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-line">
+          <div class="flow-dot">2</div>
+          <div class="flow-connector"></div>
+        </div>
+        <div class="flow-content">
+          <strong>결제수단 유효성 확인</strong>
+          <p>존재 여부·본인 소유·activeYn=Y 3가지 검증 — 실패 시 각각 404 / 400 / 400</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-line">
+          <div class="flow-dot">3</div>
+          <div class="flow-connector"></div>
+        </div>
+        <div class="flow-content">
+          <strong>PG 결제 요청 (StubPgPaymentAdapter)</strong>
+          <p>idempotencyKey = "CHARGE-{memberId}-{UUID}" 생성 후 PgPaymentPort.requestPayment() 호출</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-line">
+          <div class="flow-dot">4</div>
+          <div class="flow-connector"></div>
+        </div>
+        <div class="flow-content">
+          <strong>CHARGE 행 저장 (pgTxId UNIQUE)</strong>
+          <p>SUCCESS → markSuccess() + paidAt 기록 / FAILED → markFailed(reason) + BillingException</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-line">
+          <div class="flow-dot">5</div>
+          <div class="flow-connector"></div>
+        </div>
+        <div class="flow-content">
+          <strong>CHARGE_BALANCE 적립 (예수금)</strong>
+          <p>충전 1건당 1행 / methodType 사본 저장 / expiresAt = 충전일 + 5년</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-line">
+          <div class="flow-dot">6</div>
+        </div>
+        <div class="flow-content">
+          <strong>Redis 캐시 무효화 (AFTER_COMMIT)</strong>
+          <p>BalanceCacheEvictEvent 발행 → BalanceCacheEvictListener가 balance:{memberId} 키 삭제</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 잔액 차감 흐름 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 14V2M2 8l6 6 6-6" stroke="#c2410c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      발송 차감 흐름 (ChargeService.deductForSend)
+    </div>
+    <ul class="check-list">
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+            <path d="M5 8l2 2 4-4" stroke="#15803d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div><strong>멱등성 보장</strong> — externalSendId + SEND 이유 조합으로 중복 차감 방지</div>
+          <div class="detail">ChargeBalanceLedger.findByExternalSendIdAndReason() 선조회</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+            <path d="M5 8l2 2 4-4" stroke="#15803d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div><strong>FIFO + 만료 임박 우선</strong> — ORDER BY expires_at ASC, charged_at ASC</div>
+          <div class="detail">findDeductibleByMemberId 쿼리: amountRemaining &gt; 0 AND expiresAt &gt; now</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+            <path d="M5 8l2 2 4-4" stroke="#15803d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div><strong>원장 기록 (SEND)</strong> — 차감 금액 음수로 CHARGE_BALANCE_LEDGER 적재</div>
+          <div class="detail">SEND reason 원장 합산 = 매출 인식액</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+            <path d="M5 8l2 2 4-4" stroke="#15803d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div><strong>잔액 부족 시 BillingException</strong> — 부족액 명시하여 400 반환</div>
+          <div class="detail">W-405 잔액 부족 분기와 연동 예정</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Redis 캐시 전략 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="2" y="2" width="12" height="4" rx="2" stroke="#2563eb" stroke-width="1.5"/>
+        <rect x="2" y="10" width="12" height="4" rx="2" stroke="#64748b" stroke-width="1.5"/>
+        <path d="M8 6v4" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      Redis 잔액 캐시 전략 (write-around, TTL 30s)
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>항목</th>
+          <th>내용</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>키 패턴</td>
+          <td><span class="file-path">balance:{memberId}</span></td>
+        </tr>
+        <tr>
+          <td>TTL</td>
+          <td>30초 — 충전/차감 빈도 대비 stale read 허용 범위</td>
+        </tr>
+        <tr>
+          <td>캐시 HIT</td>
+          <td>BalanceQueryService가 Redis 값 그대로 반환 (fromCache=true)</td>
+        </tr>
+        <tr>
+          <td>캐시 MISS</td>
+          <td>ChargeBalanceRepository.sumRemainingByMemberId() DB 조회 후 Redis 저장</td>
+        </tr>
+        <tr>
+          <td>무효화 시점</td>
+          <td>AFTER_COMMIT — 충전/차감 트랜잭션 커밋 후 BalanceCacheEvictListener가 키 삭제</td>
+        </tr>
+        <tr>
+          <td>전략</td>
+          <td>write-around — DB가 진실 원천, 캐시는 읽기 가속만 담당</td>
+        </tr>
+        <tr>
+          <td>내부 직접 조회</td>
+          <td>BalanceQueryService.getBalanceFromDb() — 정합성 중요 경로 (캐시 우회)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PG Adapter -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 8h10M8 3l5 5-5 5" stroke="#7e22ce" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      PG Adapter 패턴 (Stub)
+    </div>
+    <ul class="check-list">
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" fill="#f3e8ff"/>
+            <path d="M5 8l2 2 4-4" stroke="#7e22ce" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div><strong>PgPaymentPort</strong> 인터페이스 — requestPayment / cancelPayment 2개 메서드</div>
+          <div class="detail">PgPaymentResult record (success, pgTxId, failReason) VO 포함</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" fill="#f3e8ff"/>
+            <path d="M5 8l2 2 4-4" stroke="#7e22ce" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div><strong>StubPgPaymentAdapter</strong> — @ConditionalOnProperty(pg.stub=true)</div>
+          <div class="detail">pgTxId = "STUB-{16자리 UUID}" 생성, 항상 SUCCESS 반환</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" fill="#f3e8ff"/>
+            <path d="M5 8l2 2 4-4" stroke="#7e22ce" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div><strong>실 PG 교체 경로</strong> — pg.stub=false 후 구현체만 교체, ChargeService 무변경</div>
+          <div class="detail">W-402 자동충전 시 동일 Port 재사용 (정기결제 빌키 활용)</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 생성 파일 목록 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M4 2h6l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="#2563eb" stroke-width="1.5"/>
+        <path d="M10 2v4h4" stroke="#2563eb" stroke-width="1.5"/>
+      </svg>
+      생성 파일 목록
+    </div>
+    <div class="two-col">
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:10px;">도메인 · 열거형</div>
+        <ul class="file-list">
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">domain/billing/PaymentMethodType.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">domain/billing/ChargeType.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">domain/billing/ChargeStatus.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">domain/billing/BalanceLedgerReason.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">domain/billing/PaymentMethod.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">domain/billing/Charge.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">domain/billing/ChargeBalance.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">domain/billing/ChargeBalanceLedger.java</span></li>
+        </ul>
+        <div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:10px;margin-top:16px;">Repository</div>
+        <ul class="file-list">
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">repository/billing/PaymentMethodRepository.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">repository/billing/ChargeRepository.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">repository/billing/ChargeBalanceRepository.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">repository/billing/ChargeBalanceLedgerRepository.java</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:10px;">서비스 · 어댑터</div>
+        <ul class="file-list">
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">service/billing/PgPaymentPort.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">service/billing/StubPgPaymentAdapter.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">service/billing/ChargeService.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">service/billing/BalanceQueryService.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">service/billing/BalanceCacheEvictEvent.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">service/billing/BalanceCacheEvictListener.java</span></li>
+        </ul>
+        <div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:10px;margin-top:16px;">Controller · DTO · 예외</div>
+        <ul class="file-list">
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">controller/billing/ChargeController.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">dto/billing/ChargeDto.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">exception/BillingException.java</span></li>
+          <li><span class="file-tag file-tag-mod">MOD</span><span class="file-path">exception/GlobalExceptionHandler.java</span></li>
+          <li><span class="file-tag file-tag-mod">MOD</span><span class="file-path">resources/application.yml</span></li>
+        </ul>
+        <div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:10px;margin-top:16px;">테스트</div>
+        <ul class="file-list">
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">test/.../billing/ChargeServiceTest.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">test/.../billing/BalanceQueryServiceTest.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">test/.../billing/ChargeControllerTest.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">test/.../billing/ChargeBalanceTest.java</span></li>
+          <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">test/.../billing/PaymentMethodTest.java</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 테스트 커버리지 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M2 10l4-4 3 3 5-6" stroke="#15803d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="14" cy="4" r="2" fill="#15803d"/>
+      </svg>
+      단위 테스트 커버리지
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>테스트 클래스</th>
+          <th>케이스</th>
+          <th>검증 핵심</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="file-path">ChargeServiceTest</span></td>
+          <td><span class="badge badge-blue">8개</span></td>
+          <td>POSTPAID 차단 · 결제수단 검증 · PG 실패 · 충전 성공 · FIFO 차감 · 잔액 부족 · 멱등성</td>
+        </tr>
+        <tr>
+          <td><span class="file-path">BalanceQueryServiceTest</span></td>
+          <td><span class="badge badge-blue">4개</span></td>
+          <td>캐시 HIT · 캐시 MISS + DB 캐싱 · 잔액 0 · getBalanceFromDb 캐시 우회</td>
+        </tr>
+        <tr>
+          <td><span class="file-path">ChargeControllerTest</span></td>
+          <td><span class="badge badge-blue">6개</span></td>
+          <td>충전 성공 · 필드 누락 400 · 최소 금액 미달 · POSTPAID 400 · 잔액 조회 · 미인증 401</td>
+        </tr>
+        <tr>
+          <td><span class="file-path">ChargeBalanceTest</span></td>
+          <td><span class="badge badge-blue">6개</span></td>
+          <td>전액 차감 · 초과 차감 · credit 보상 · expire 소멸 · isExpired 만료판정</td>
+        </tr>
+        <tr>
+          <td><span class="file-path">PaymentMethodTest</span></td>
+          <td><span class="badge badge-blue">3개</span></td>
+          <td>기본값 검증 · deactivate 빌키 삭제 · defaultYn 토글</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 후속 작업 의존성 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 4h10M3 8h7M3 12h5" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      후속 작업 의존성
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>WBS</th>
+          <th>작업명</th>
+          <th>W-401 의존 항목</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-orange">W-402</span></td>
+          <td>자동충전 (PG 정기결제)</td>
+          <td>PaymentMethod.pgBillingKey · PgPaymentPort · ChargeService.charge()</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-orange">W-403</span></td>
+          <td>후불 모델</td>
+          <td>ChargeBalance · BalanceQueryService · billingMode 검증 로직</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-orange">W-404</span></td>
+          <td>환불 · 5년 소멸 · 현금영수증</td>
+          <td>ChargeBalance.methodType(환불 라우팅) · BalanceLedgerReason.REFUND/EXPIRE · ChargeBalanceLedger</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-orange">W-405</span></td>
+          <td>잔액 부족 분기</td>
+          <td>ChargeService.deductForSend() · BalanceQueryService.getBalanceFromDb()</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 결론 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 2l1.8 3.6 4 .6-2.9 2.8.7 4L8 11l-3.6 1.9.7-4L2.1 6.2l4-.6L8 2z" stroke="#2563eb" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+      결론 및 품질 평가
+    </div>
+    <div class="conclusion-box">
+      <p>
+        W-401은 billing 도메인 패키지를 완전히 격리하여 신규 생성했습니다.
+        결제수단 7종(CREDIT_CARD·DEBIT_CARD·BANK_TRANSFER·VIRTUAL_ACCOUNT·MOBILE·GIFT_CARD·POINT)을
+        PaymentMethodType enum으로 정의하고, PG Adapter 패턴(PgPaymentPort + StubPgPaymentAdapter)으로
+        실 PG 교체 경로를 열어두었습니다. CHARGE_BALANCE의 결제수단별 분리 저장,
+        5년 만료(expiresAt = charged_at + 5년), FIFO + 만료 임박 우선 차감 로직,
+        Redis write-around 캐시(TTL 30s, AFTER_COMMIT 무효화), pgTxId UNIQUE 멱등성 보장,
+        externalSendId 기반 발송 차감 멱등성을 모두 구현했습니다.
+        단위 테스트 27개(5개 클래스)로 핵심 비즈니스 규칙을 검증했으며,
+        W-402/403/404/405가 이 도메인 위에 바로 구현될 수 있는 상태입니다.
+      </p>
+    </div>
+    <div class="issue-box">
+      <div class="issue-title">주의사항 — 후속 작업 전 확인 필요</div>
+      <ul>
+        <li>로컬 SSL 인터셉션 환경 — 빌드 검증은 CI(GitHub Actions)에서 수행</li>
+        <li>ChargeController의 @AuthenticationPrincipal Member — Security 설정에서 Member를 principal로 주입하는 구현 확인 필요</li>
+        <li>가상계좌·휴대폰·상품권 수단은 PG 콜백(webhook) 기반이므로 W-402 이후 별도 콜백 엔드포인트 추가 필요</li>
+        <li>Company.getBillingMode() null 방어 — ChargeController에서 null 시 PREPAID로 기본 처리 중 (getOrDefault 패턴)</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

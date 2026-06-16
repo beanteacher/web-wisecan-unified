@@ -1,5 +1,6 @@
 export { LoginForm } from './ui/LoginForm';
 export { RegisterForm } from './ui/RegisterForm';
+export { BusinessRegisterForm } from './ui/BusinessRegisterForm';
 export { LogoutButton } from './ui/LogoutButton';
 export { useAuthStore } from './model/authStore';
 export { useLogout } from './model/useLogout';

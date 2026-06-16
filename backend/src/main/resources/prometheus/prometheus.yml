@@ -1,0 +1,29 @@
+# Prometheus scrape 설정 — 정본: pm/06_OBSERVABILITY.md §8 (W-003 산출물)
+# 백엔드 /actuator/prometheus 를 스크레이프하고, 알림 룰을 Alertmanager 로 전달한다.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    service: wisecan-unified
+
+rule_files:
+  - /etc/prometheus/alerts/wisecan-alerts.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+scrape_configs:
+  # 백엔드 애플리케이션 도메인 메트릭 (적재까지만 — §1.3)
+  - job_name: wisecan-backend
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['backend:8080']
+        labels:
+          application: wisecan-unified
+
+  # Prometheus 자체 메트릭
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']

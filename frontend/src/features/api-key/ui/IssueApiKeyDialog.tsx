@@ -36,7 +36,7 @@ export function IssueApiKeyDialog() {
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: FormData) => {
-    const result = await mutateAsync(data.keyName);
+    const result = await mutateAsync({ keyName: data.keyName });
     if (result.rawKey) {
       setRawKey(result.rawKey);
     }

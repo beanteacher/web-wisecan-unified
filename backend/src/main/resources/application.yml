@@ -27,7 +27,15 @@ spring:
   cache:
     type: redis
     redis:
-      time-to-live: 3600000  # 1시간
+      time-to-live: 300000  # 기본 5분 (W-503 DoD: 데이터 갱신 5분 이하)
+    cache-names:
+      - admin:dashboard
+      - admin:stats:send:daily
+      - admin:stats:send:weekly
+      - admin:stats:send:monthly
+      - admin:stats:member:daily
+      - admin:stats:channel
+      - admin:settings
 
 jwt:
   secret: wisecan-unified-jwt-secret-key-must-be-at-least-256-bits-long-for-hs256
@@ -44,6 +52,9 @@ spring.ai:
       sse-message-endpoint: /mcp    # Streamable HTTP 엔드포인트 (기본 /mcp)
       type: SYNC                    # SYNC | ASYNC
       instructions: "wisecan B2C 메시지 발송/조회 도구"
+
+pg:
+  stub: true   # MVP/개발 환경 PG Stub 활성화. 실 PG 연동 시 false로 변경
 
 wisecan:
   rate-limit:

@@ -18,6 +18,14 @@ export const registerSchema = z
       .regex(/[a-zA-Z]/, '영문과 숫자를 모두 포함해야 합니다')
       .regex(/[0-9]/, '영문과 숫자를 모두 포함해야 합니다'),
     confirmPassword: z.string().min(1, '비밀번호 확인을 입력해주세요'),
+    phone: z.string().optional(),
+    agreeTerms: z.boolean().refine((v) => v === true, {
+      message: '이용약관에 동의해주세요',
+    }),
+    agreePrivacy: z.boolean().refine((v) => v === true, {
+      message: '개인정보처리방침에 동의해주세요',
+    }),
+    agreeMarketing: z.boolean().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: '비밀번호가 일치하지 않습니다',

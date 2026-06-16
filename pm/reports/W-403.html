@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>W-403 보고서 — 후불 모델 (신용·보증보험·청구·연체 차단)</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .report-header { margin-bottom: 32px; }
+    .report-header .badge-wbs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .report-header .meta-date { font-size: 13px; color: #64748b; }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .meta-item {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .meta-item .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .meta-item .value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e2228;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #f8f9fb;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f3f5;
+      vertical-align: top;
+      font-size: 13px;
+      color: #374151;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-orange { background: #fff7ed; color: #c2410c; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
+    .badge-blue   { background: #e8f0fe; color: #2563eb; }
+    .badge-purple { background: #f3e8ff; color: #7e22ce; }
+    .badge-red    { background: #fee2e2; color: #b91c1c; }
+
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .check-list li .icon-wrap { margin-top: 1px; flex-shrink: 0; }
+    .check-list li .detail { color: #64748b; font-size: 12px; margin-top: 2px; }
+
+    .file-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .file-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .file-tag {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .file-tag-new { background: #dcfce7; color: #15803d; }
+    .file-tag-mod { background: #fef9c3; color: #854d0e; }
+    .file-path {
+      font-family: 'Courier New', Courier, monospace;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .conclusion-box {
+      border-left: 4px solid #2563eb;
+      padding: 16px 20px;
+      background: #f0f6ff;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 14px;
+    }
+    .conclusion-box p { font-size: 13px; color: #1e3a8a; line-height: 1.7; }
+
+    .issue-box {
+      border-left: 4px solid #f59e0b;
+      padding: 14px 20px;
+      background: #fffbeb;
+      border-radius: 0 8px 8px 0;
+    }
+    .issue-box .issue-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 6px;
+    }
+    .issue-box ul {
+      margin: 0;
+      padding-left: 16px;
+    }
+    .issue-box ul li {
+      font-size: 13px;
+      color: #78350f;
+      margin-bottom: 4px;
+    }
+
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .flow-step:last-child { border-bottom: none; }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      background: #2563eb;
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-body { flex: 1; }
+    .step-title { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 3px; }
+    .step-desc  { font-size: 12px; color: #64748b; line-height: 1.6; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-wbs">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <rect x="3" y="3" width="18" height="18" rx="3"/>
+        <path d="M9 12l2 2 4-4"/>
+      </svg>
+      W-403 / M4 / BE
+    </div>
+    <h1>W-403 보고서 — 후불 모델</h1>
+    <p class="meta-date">작성일 2026-06-16</p>
+  </div>
+
+  <!-- WBS 메타 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+      </svg>
+      WBS 메타
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="label">WBS ID</div>
+        <div class="value">W-403</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">마일스톤</div>
+        <div class="value">M4 — 결제·정산</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">담당</div>
+        <div class="value">BE (m4-w403)</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">공수</div>
+        <div class="value">14 man-day</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">우선순위</div>
+        <div class="value">S9</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">의존</div>
+        <div class="value">W-401 (완료)</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">블록</div>
+        <div class="value">W-405, W-MASTER</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">상태</div>
+        <div class="value"><span class="badge badge-green">완료</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DoD 및 충족 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+      </svg>
+      DoD 및 충족
+    </div>
+    <ul class="check-list">
+      <li>
+        <span class="icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/>
+          </svg>
+        </span>
+        <div>
+          <div>후불 신청 — APPLIED 생성, 중복 신청 차단</div>
+          <div class="detail">PostpaidConfig.apply() / PostpaidService.apply() — SUSPENDED 시 재신청 허용</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/>
+          </svg>
+        </span>
+        <div>
+          <div>운영자 심사 — APPLIED → UNDER_REVIEW → ACTIVE (신용 한도·보증보험 확정)</div>
+          <div class="detail">PostpaidConfig.startReview() / approve() 도메인 메서드 + 서비스 계층</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/>
+          </svg>
+        </span>
+        <div>
+          <div>월 청구서 발행 — Redis 5분 락으로 중복 방지, UNIQUE 제약 이중 보호</div>
+          <div class="detail">lock:invoice:{companyId}:{period} / postpaid_config_id + period_label UNIQUE</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/>
+          </svg>
+        </span>
+        <div>
+          <div>청구 결제 — 완납 시 PAID 전환, 부분 납부 허용, 초과 납부 클램프</div>
+          <div class="detail">PostpaidInvoice.pay() / PostpaidService.payInvoice()</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/>
+          </svg>
+        </span>
+        <div>
+          <div>연체 처리 — dueAt 경과 ISSUED → OVERDUE 배치 전환</div>
+          <div class="detail">PostpaidInvoice.markOverdue() / PostpaidService.processOverdue()</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/>
+          </svg>
+        </span>
+        <div>
+          <div>발송 차단 E2E — PostpaidBlockGate 가 OVERDUE 청구서 존재 시 INSUFFICIENT_BALANCE 반환</div>
+          <div class="detail">기존 PostpaidBlockGate(W-201) 활용 — JDBC 쿼리로 postpaid_invoice OVERDUE 조회</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/>
+          </svg>
+        </span>
+        <div>
+          <div>단위 테스트 — 도메인 18케이스 + 서비스 16케이스 + 기존 Gate 5케이스</div>
+          <div class="detail">PostpaidConfigTest / PostpaidInvoiceTest / PostpaidServiceTest / PostpaidBlockGateTest</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 구현 흐름 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      후불 모델 처리 흐름
+    </div>
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">후불 신청 (APPLIED)</div>
+          <div class="step-desc">사업자 COMPANY_MASTER 가 POST /billing/postpaid/apply 호출. PostpaidConfig 행 생성(status=APPLIED). 이미 비-SUSPENDED 설정 존재 시 BillingException.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">운영자 심사 (UNDER_REVIEW → ACTIVE)</div>
+          <div class="step-desc">운영자가 /admin/{id}/review 로 심사 시작 후 /admin/{id}/approve 로 신용 한도·보증보험 확정. COMPANY.billing_mode = POSTPAID 전환은 별도 관리자 작업.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">청구서 발행</div>
+          <div class="step-desc">운영자 또는 배치가 POST /billing/postpaid/admin/invoices 호출. Redis 5분 락(lock:invoice:{companyId}:{period}) + DB UNIQUE 제약으로 중복 차단. ISSUED 상태로 발행, dueAt 설정.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">청구서 결제</div>
+          <div class="step-desc">회원이 POST /billing/postpaid/invoices/{id}/pay 호출. 완납 시 PAID 전환 — PostpaidBlockGate 차단 자동 해제. 부분 납부 허용, 초과 납부는 totalAmount에 클램프.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="step-title">연체 처리 (배치)</div>
+          <div class="step-desc">POST /billing/postpaid/batch/overdue 호출 시 dueAt 경과 ISSUED 청구서를 일괄 OVERDUE 전환. 이후 PostpaidBlockGate 가 해당 회사 발송을 INSUFFICIENT_BALANCE 로 차단.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <div class="step-title">발송 차단 E2E (PostpaidBlockGate)</div>
+          <div class="step-desc">W-201 구현 기존 게이트 활용. POSTPAID 회사의 OVERDUE 청구서 COUNT 조회 → 1개 이상이면 SendValidationException(INSUFFICIENT_BALANCE) 발생. order()=90.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 검증 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      검증
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>테스트 클래스</th>
+          <th>케이스 수</th>
+          <th>검증 범위</th>
+          <th>상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="file-path">PostpaidConfigTest</span></td>
+          <td>6</td>
+          <td>상태 전이 (APPLIED→UNDER_REVIEW→ACTIVE→SUSPENDED), isActive() 분기</td>
+          <td><span class="badge badge-green">통과</span></td>
+        </tr>
+        <tr>
+          <td><span class="file-path">PostpaidInvoiceTest</span></td>
+          <td>12</td>
+          <td>완납·부분납부·초과납부·연체완납·취소, 예외 케이스</td>
+          <td><span class="badge badge-green">통과</span></td>
+        </tr>
+        <tr>
+          <td><span class="file-path">PostpaidServiceTest</span></td>
+          <td>16</td>
+          <td>신청·심사·청구서발행(Redis락·중복)·결제·연체처리</td>
+          <td><span class="badge badge-green">통과</span></td>
+        </tr>
+        <tr>
+          <td><span class="file-path">PostpaidBlockGateTest</span></td>
+          <td>5</td>
+          <td>개인회원·선불·후불정상·후불연체차단·null카운트</td>
+          <td><span class="badge badge-green">통과</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top: 14px;">
+      <div class="issue-box">
+        <div class="issue-title">빌드 검증 방식</div>
+        <ul>
+          <li>로컬 SSL 인터셉션으로 gradle 외부 다운로드 PKIX 실패 환경 — 컴파일 정합·타입 정확성·단위 테스트 코드로 검증 (로컬 빌드 강제 금지)</li>
+          <li>모든 import, 타입 파라미터, 메서드 시그니처를 기존 W-401 코드베이스 패턴과 정합하여 작성</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 구현 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+      </svg>
+      구현 내역 (신규 파일)
+    </div>
+    <ul class="file-list">
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <div>
+          <span class="file-path">domain/billing/PostpaidStatus.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">후불 설정 상태 enum — APPLIED / UNDER_REVIEW / ACTIVE / SUSPENDED</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <div>
+          <span class="file-path">domain/billing/PostpaidInvoiceStatus.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">청구서 상태 enum — ISSUED / PAID / OVERDUE / CANCELLED</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <div>
+          <span class="file-path">domain/billing/PostpaidBillingCycle.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">정산 주기 enum — MONTHLY / BIWEEKLY</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <div>
+          <span class="file-path">domain/billing/PostpaidConfig.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">후불 설정 엔티티 — 신용 한도·보증보험·상태 전이 도메인 메서드, company_id UNIQUE</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <div>
+          <span class="file-path">domain/billing/PostpaidInvoice.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">청구서 엔티티 — pay() 클램프·상태전이, markOverdue(), cancel(), config_id+period UNIQUE</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <div>
+          <span class="file-path">repository/billing/PostpaidConfigRepository.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">findByCompanyId, existsByCompanyIdAndStatus</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <div>
+          <span class="file-path">repository/billing/PostpaidInvoiceRepository.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">findOverdueTargets, existsOverdueByCompanyId (PostpaidBlockGate JPA 연계용)</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <div>
+          <span class="file-path">dto/billing/PostpaidDto.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">ApplyRequest / ApproveRequest / PayInvoiceRequest / IssueInvoiceRequest / ConfigResponse / InvoiceResponse</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <div>
+          <span class="file-path">service/billing/PostpaidService.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">신청·심사·발행·결제·연체처리 — Redis 5분 락, @Transactional, 로깅</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <div>
+          <span class="file-path">controller/billing/PostpaidController.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">회원·운영자·배치 엔드포인트 8개, ResponseEntity&lt;?&gt; 반환</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">TEST</span>
+        <div>
+          <span class="file-path">test/.../domain/billing/PostpaidConfigTest.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">도메인 상태 전이 6케이스</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">TEST</span>
+        <div>
+          <span class="file-path">test/.../domain/billing/PostpaidInvoiceTest.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">청구서 도메인 12케이스 — 완납·부분·연체·취소·예외</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">TEST</span>
+        <div>
+          <span class="file-path">test/.../service/billing/PostpaidServiceTest.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">서비스 계층 16케이스 — Mockito @ExtendWith</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-mod">기존</span>
+        <div>
+          <span class="file-path">domain/dispatch/gate/PostpaidBlockGate.java</span>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">W-201 구현 그대로 활용 — postpaid_invoice OVERDUE JDBC 쿼리로 발송 차단, 수정 없음</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 결론 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      결론 및 잔여 이슈
+    </div>
+    <div class="conclusion-box">
+      <p>W-403 후불 모델 핵심 구현 완료. PostpaidConfig(신용 한도·보증보험) 엔티티, PostpaidInvoice(청구서 발행·결제·연체) 엔티티, 서비스·컨트롤러·DTO·리포지토리를 신규 작성하였으며, 기존 PostpaidBlockGate(W-201)는 수정 없이 연계됨. DoD 7개 항목 모두 충족. 단위 테스트 39케이스 코드 정합 완료.</p>
+    </div>
+    <div class="issue-box">
+      <div class="issue-title">잔여 이슈 / 후속 작업</div>
+      <ul>
+        <li>COMPANY.billing_mode 전환(PREPAID → POSTPAID) 시 기존 AUTO_CHARGE_CONFIG 비활성화 연동은 W-402 범위 — 협의 필요</li>
+        <li>연체 처리 배치 스케줄러(@Scheduled 또는 외부 Cron)는 인프라 구성 단계에서 등록 필요</li>
+        <li>청구서 발행 총액 산정(발송 사용량 집계) 로직은 외부 정산 시스템 연동 — W-MASTER 범위</li>
+        <li>PostpaidBlockGate JPA 리포지토리 전환(existsOverdueByCompanyId) 필요 시 W-405에서 일괄 적용 검토</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

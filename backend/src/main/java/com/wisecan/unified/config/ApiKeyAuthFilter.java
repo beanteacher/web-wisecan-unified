@@ -112,11 +112,11 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        // SecurityContext에 ApiKeyPrincipal 주입
+        // SecurityContext에 ApiKeyPrincipal 주입 — DB에 저장된 실제 스코프 반영
         ApiKeyPrincipal principal = new ApiKeyPrincipal(
             apiKey.getId(),
             apiKey.getMember().getId(),
-            Set.of("message:*")
+            apiKey.getScopeValues()
         );
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
             principal,

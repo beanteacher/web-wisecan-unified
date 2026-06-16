@@ -140,11 +140,13 @@
 
 ### 3.2. 라우팅 (Alertmanager `route`)
 
+> 운영 알림 채널은 **모두 Discord 로 통일**한다(2026-06-15 결정). 심각도 분기는 유지하되 전송처만 Discord. webhook URL 은 `webhook_url_file` 시크릿으로 주입(`infra/alertmanager/`).
+
 | 심각도 | 채널 | 대상 |
 |---|---|---|
-| **P0** | PagerDuty(전화) + Slack `#alerts` | BE 온콜 + PM |
-| **P1** | Slack `#alerts` + 이메일 | BE 온콜 |
-| **P2** | Slack `#dev` | 담당 에이전트 |
+| **P0** | Discord (group_wait 0s, 1h 반복) | BE 온콜 + PM |
+| **P1** | Discord | BE 온콜 |
+| **P2** | Discord | 담당 에이전트 |
 | **회원 알림** (잔액 임계·만료 임박) | 인앱 + 이메일 | 회원 직접 — 본 라우팅 대상 외, 도메인 이벤트로 처리 (`05_DATA_MODEL §결제·키`) |
 
 ---

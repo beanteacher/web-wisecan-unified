@@ -83,9 +83,15 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // 공개 경로: 인증 없이 접근 가능
-                .requestMatchers("/api/v1/auth/**", "/actuator/**").permitAll()
+                .requestMatchers("/api/v1/auth/**", "/actuator/**",
+                        "/api/v1/company/invitations/accept",
+                        "/api/v1/api-keys/scopes/catalog").permitAll()
+                // 체험 모드: 비회원 익명 접근 허용 (W-406)
+                .requestMatchers("/trial/**").permitAll()
                 // MCP 도구 경로: ApiKeyAuthFilter가 /mcp/**에서 인증 처리 (JWT 필터는 shouldNotFilter로 통과)
                 .requestMatchers("/mcp/**").permitAll()
+                // 발송 이력 조회: ApiKeyAuthFilter가 /histories/**에서 인증 처리 (W-304)
+                .requestMatchers("/histories/**").permitAll()
                 // 나머지: JWT 인증 필요
                 .anyRequest().authenticated()
             )

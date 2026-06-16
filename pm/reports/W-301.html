@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>W-301 보고서 — Python SDK</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .report-header { margin-bottom: 32px; }
+    .report-header .badge-wbs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .report-header .meta-date { font-size: 13px; color: #64748b; }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .meta-item {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .meta-item .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .meta-item .value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e2228;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #f8f9fb;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f3f5;
+      vertical-align: top;
+      font-size: 13px;
+      color: #374151;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-orange { background: #fff7ed; color: #c2410c; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
+    .badge-blue   { background: #e8f0fe; color: #2563eb; }
+
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .check-list li .icon-wrap { margin-top: 1px; flex-shrink: 0; }
+    .check-list li .detail { color: #64748b; font-size: 12px; margin-top: 2px; }
+
+    .file-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .file-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .file-tag {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .file-tag-new { background: #dcfce7; color: #15803d; }
+    .file-path {
+      font-family: 'Courier New', Courier, monospace;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .conclusion-box {
+      border-left: 4px solid #2563eb;
+      padding: 16px 20px;
+      background: #f0f6ff;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 14px;
+    }
+    .conclusion-box p { font-size: 13px; color: #1e3a8a; line-height: 1.7; }
+
+    .issue-box {
+      border-left: 4px solid #f59e0b;
+      padding: 14px 20px;
+      background: #fffbeb;
+      border-radius: 0 8px 8px 0;
+    }
+    .issue-box .issue-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 6px;
+    }
+    .issue-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .issue-box ul li {
+      font-size: 13px;
+      color: #78350f;
+      padding-left: 12px;
+      position: relative;
+    }
+    .issue-box ul li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #f59e0b;
+    }
+
+    .test-summary {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .test-count {
+      font-size: 32px;
+      font-weight: 700;
+      color: #15803d;
+      line-height: 1;
+    }
+    .test-label { font-size: 12px; color: #166534; font-weight: 600; }
+
+    .section-gap { margin-top: 8px; }
+    .sub-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-wbs">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      W-301
+    </div>
+    <h1>W-301 보고서 — Python SDK</h1>
+    <p class="meta-date">작성일 2026-06-16</p>
+  </div>
+
+  <!-- WBS 메타 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+      </svg>
+      WBS 메타
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item"><div class="label">마일스톤</div><div class="value">M3</div></div>
+      <div class="meta-item"><div class="label">WBS ID</div><div class="value">W-301</div></div>
+      <div class="meta-item"><div class="label">담당</div><div class="value">BE</div></div>
+      <div class="meta-item"><div class="label">공수</div><div class="value">8 man-day</div></div>
+      <div class="meta-item"><div class="label">우선순위</div><div class="value">S6</div></div>
+      <div class="meta-item"><div class="label">의존</div><div class="value">W-206</div></div>
+      <div class="meta-item"><div class="label">블록</div><div class="value">#24 (MASTER)</div></div>
+      <div class="meta-item">
+        <div class="label">전체 상태</div>
+        <div class="value">
+          <span class="badge badge-green">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            완료
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DoD 및 충족 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      DoD 및 충족 여부
+    </div>
+    <ul class="check-list">
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <span>
+          <strong>PyPI 배포 준비 완료</strong>
+          <div class="detail">pyproject.toml — setuptools build_meta, wisecan-sdk 0.1.0, Python 3.9+ classifiers, MIT 라이선스, httpx 의존성 명시</div>
+        </span>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <span>
+          <strong>5채널 발송 메서드 구현</strong>
+          <div class="detail">send_sms / send_lms / send_mms / send_kakao / send_rcs — 백엔드 SendChannel enum 5종 완전 대응</div>
+        </span>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <span>
+          <strong>API Key 인증 구현</strong>
+          <div class="detail">Authorization: ApiKey {key} 헤더, wsc_live_ / wsc_test_ 접두사로 운영·테스트 환경 자동 분기</div>
+        </span>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <span>
+          <strong>발송 이력 조회 구현</strong>
+          <div class="detail">get_send_history(page, size, channel, status) — 페이지네이션, 채널/상태 필터, get_send_detail(send_id) 단건 조회</div>
+        </span>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <span>
+          <strong>예외 처리 계층 구현</strong>
+          <div class="detail">WiseCanError 하위 6종 — AuthenticationError / PermissionError / ValidationError / RateLimitError / InsufficientBalanceError / SendError, HTTP 상태 코드 자동 매핑</div>
+        </span>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <span>
+          <strong>pytest 단위 테스트 62개 전체 통과</strong>
+          <div class="detail">test_client(23) / test_exceptions(11) / test_http(16) / test_models(12) — 실 HTTP 없이 mock/respx 기반 검증</div>
+        </span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 검증 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      검증 내역
+    </div>
+
+    <div class="test-summary">
+      <div>
+        <div class="test-count">62</div>
+        <div class="test-label">PASSED</div>
+      </div>
+      <div>
+        <svg width="2" height="40" viewBox="0 0 2 40"><line x1="1" y1="0" x2="1" y2="40" stroke="#bbf7d0" stroke-width="2"/></svg>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;color:#166534;margin-bottom:4px;">python -m pytest tests/ -v — 62 passed in 8.99s</div>
+        <div style="font-size:12px;color:#4ade80;">0 failed · 0 error · 0 skipped</div>
+        <div style="font-size:12px;color:#64748b;margin-top:4px;">Python 3.12.10 · pytest 8.3.4 · respx 0.23.1 · pytest-mock 3.15.1</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>테스트 모듈</th>
+          <th>케이스 수</th>
+          <th>검증 대상</th>
+          <th>결과</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="file-path">test_client.py</span></td>
+          <td>23</td>
+          <td>WiseCan 클라이언트 — 5채널 발송, 예약 발송, 이력 조회, 컨텍스트 매니저, 파라미터 검증</td>
+          <td><span class="badge badge-green">PASS</span></td>
+        </tr>
+        <tr>
+          <td><span class="file-path">test_exceptions.py</span></td>
+          <td>11</td>
+          <td>예외 계층 — WiseCanError 속성, _from_response HTTP 상태 코드별 분기 (400/401/402/403/429/5xx)</td>
+          <td><span class="badge badge-green">PASS</span></td>
+        </tr>
+        <tr>
+          <td><span class="file-path">test_http.py</span></td>
+          <td>16</td>
+          <td>HttpClient — 환경 분기, Authorization 헤더, POST/GET 성공·오류 응답, 네트워크 장애, 잘못된 JSON</td>
+          <td><span class="badge badge-green">PASS</span></td>
+        </tr>
+        <tr>
+          <td><span class="file-path">test_models.py</span></td>
+          <td>12</td>
+          <td>SendChannel·SendRequestStatus enum, SendResult·SendHistoryItem·SendHistoryPage 역직렬화</td>
+          <td><span class="badge badge-green">PASS</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 구현 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+      </svg>
+      구현 파일 목록
+    </div>
+
+    <div class="sub-label" style="margin-bottom:12px;">패키지 소스</div>
+    <ul class="file-list" style="margin-bottom:20px;">
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">sdk/python/src/wisecan/__init__.py</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">공개 API 진입점 — WiseCan, 예외 6종, 모델 5종 re-export</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">sdk/python/src/wisecan/client.py</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">WiseCan 메인 클라이언트 — 5채널 발송, 이력 조회, 컨텍스트 매니저</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">sdk/python/src/wisecan/http.py</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">HttpClient — httpx 기반, 인증 헤더, 환경 분기, 오류 변환</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">sdk/python/src/wisecan/models.py</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">SendChannel / SendRequestStatus enum, SendResult / SendHistoryItem / SendHistoryPage dataclass</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">sdk/python/src/wisecan/exceptions.py</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">WiseCanError 계층 6종 + _from_response 팩토리</span>
+      </li>
+    </ul>
+
+    <div class="sub-label" style="margin-bottom:12px;">테스트</div>
+    <ul class="file-list" style="margin-bottom:20px;">
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">sdk/python/tests/test_client.py</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">클라이언트 단위 테스트 23개</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">sdk/python/tests/test_exceptions.py</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">예외 단위 테스트 11개</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">sdk/python/tests/test_http.py</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">HttpClient 단위 테스트 16개 (respx 인터셉트)</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">sdk/python/tests/test_models.py</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">모델 단위 테스트 12개</span>
+      </li>
+    </ul>
+
+    <div class="sub-label" style="margin-bottom:12px;">배포·문서</div>
+    <ul class="file-list">
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">sdk/python/pyproject.toml</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">PyPI 배포 메타 — 패키지명 wisecan-sdk, Python 3.9+, setuptools build_meta</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">sdk/python/README.md</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">설치·빠른 시작·채널별 예제·예외 처리 가이드</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 결론·잔여 이슈 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      결론 및 잔여 이슈
+    </div>
+
+    <div class="conclusion-box">
+      <p>
+        W-301 Python SDK 구현이 완료되었습니다. <code>sdk/python/</code> 신규 디렉토리에 패키지 소스(5모듈),
+        pytest 단위 테스트(62개 전체 통과), pyproject.toml(PyPI 배포 메타), README.md를 포함한
+        총 11개 파일이 생성되었습니다. 백엔드 SendChannel 5종(SMS/LMS/MMS/KAKAO/RCS)과
+        SendRequestStatus enum이 1:1 대응하며, WebSendController /console/send 계열 API 계약을
+        준수합니다. API Key 접두사(wsc_live_ / wsc_test_)로 운영·테스트 환경이 자동 분기되고,
+        HTTP 오류 상태 코드별 예외가 정확히 매핑됩니다.
+      </p>
+    </div>
+
+    <div class="issue-box">
+      <div class="issue-title">잔여 이슈 / 후속 작업</div>
+      <ul>
+        <li>실제 PyPI publish는 운영 배포 시점(M5 릴리즈 게이트)에서 수행 — 현재는 로컬 editable 설치만 검증</li>
+        <li>비동기(asyncio) 클라이언트 미구현 — httpx.AsyncClient 기반 AsyncWiseCan 추가는 1차 외 범위(02 §7.1 "Python 1차")</li>
+        <li>MMS 첨부 파일(이미지) 업로드 API는 백엔드 엔드포인트 미확정 — 엔드포인트 확정 후 send_mms에 media_url 파라미터 추가 필요</li>
+        <li>로컬 SSL 인터셉션 환경 — 외부 httpx 설치는 이미 완료된 환경 의존, CI 파이프라인에서 재검증 권장</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>M5 마일스톤 보고서 — 운영·CS·보안·GA 준비</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8; color: #1e2228; font-size: 14px; line-height: 1.6;
+    }
+
+    .page { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    .report-header { margin-bottom: 36px; }
+    .badge-milestone {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #f0fdf4; color: #16a34a;
+      font-size: 12px; font-weight: 700;
+      padding: 4px 12px; border-radius: 6px; margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 28px; font-weight: 800; color: #0f172a;
+      letter-spacing: -0.5px; margin-bottom: 6px;
+    }
+    .report-header .subtitle { font-size: 15px; color: #475569; margin-bottom: 6px; }
+    .report-header .meta-date { font-size: 13px; color: #94a3b8; }
+
+    .gate-banner {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border: 1.5px solid #6ee7b7; border-radius: 12px;
+      padding: 20px 28px; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .gate-icon {
+      width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: #10b981;
+    }
+    .gate-text h2 { font-size: 17px; font-weight: 700; color: #065f46; margin-bottom: 4px; }
+    .gate-text p  { font-size: 13px; color: #047857; }
+
+    .card {
+      background: #fff; border: 1px solid #e8eaed;
+      border-radius: 12px; padding: 24px 28px; margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 15px; font-weight: 700; color: #0f172a;
+      margin-bottom: 18px; padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+    }
+    .kpi-box {
+      background: #f8fafc; border-radius: 10px;
+      padding: 16px 18px; text-align: center;
+    }
+    .kpi-value { font-size: 28px; font-weight: 800; color: #0f172a; line-height: 1.1; }
+    .kpi-value.green  { color: #16a34a; }
+    .kpi-value.blue   { color: #2563eb; }
+    .kpi-value.purple { color: #7c3aed; }
+    .kpi-label { font-size: 11px; color: #64748b; margin-top: 5px; line-height: 1.4; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead tr { background: #f8f9fb; }
+    th {
+      text-align: left; font-size: 11px; font-weight: 700; color: #64748b;
+      text-transform: uppercase; letter-spacing: 0.4px;
+      padding: 10px 12px; border-bottom: 1px solid #e8eaed;
+    }
+    td { padding: 10px 12px; border-bottom: 1px solid #f1f3f5; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafbfc; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px; white-space: nowrap;
+    }
+    .badge-green  { background: #dcfce7; color: #16a34a; }
+    .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+    .badge-amber  { background: #fef3c7; color: #b45309; }
+    .badge-purple { background: #f3e8ff; color: #7e22ce; }
+    .badge-orange { background: #ffedd5; color: #9a3412; }
+
+    code {
+      font-family: 'Courier New', monospace; font-size: 12px;
+      background: #f1f5f9; padding: 1px 5px; border-radius: 3px; color: #334155;
+    }
+
+    .progress-bar { background: #e8eaed; border-radius: 4px; height: 8px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 4px; background: #16a34a; }
+
+    .nfr-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .nfr-item {
+      background: #f0fdf4; border: 1px solid #bbf7d0;
+      border-radius: 10px; padding: 14px 16px;
+    }
+    .nfr-item .nfr-id {
+      font-size: 11px; font-weight: 700; color: #166534;
+      text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px;
+    }
+    .nfr-item .nfr-target { font-size: 20px; font-weight: 700; color: #15803d; margin-bottom: 2px; }
+    .nfr-item .nfr-desc { font-size: 12px; color: #166534; }
+
+    .timeline { display: flex; flex-direction: column; }
+    .tl-row { display: flex; align-items: stretch; }
+    .tl-left { display: flex; flex-direction: column; align-items: center; width: 36px; flex-shrink: 0; }
+    .tl-dot {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .tl-line { width: 2px; background: #e2e8f0; flex: 1; margin: 2px 0; min-height: 18px; }
+    .tl-row:last-child .tl-line { display: none; }
+    .tl-content { padding: 0 0 20px 14px; flex: 1; }
+    .tl-name { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+    .tl-meta { font-size: 12px; color: #64748b; margin-bottom: 4px; }
+    .tl-items { font-size: 12px; color: #475569; line-height: 1.8; }
+
+    .dot-m0 { background: #94a3b8; }
+    .dot-m1 { background: #3b82f6; }
+    .dot-m2 { background: #8b5cf6; }
+    .dot-m3 { background: #f59e0b; }
+    .dot-m4 { background: #ef4444; }
+    .dot-m5 { background: #16a34a; }
+
+    .issue-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .issue-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: #fff7ed; border: 1px solid #fed7aa;
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 13px; color: #9a3412;
+    }
+
+    .conclusion-box {
+      border-left: 4px solid #16a34a; padding: 16px 20px;
+      background: #f0fdf4; border-radius: 0 8px 8px 0; margin-bottom: 14px;
+    }
+    .conclusion-box p { font-size: 13px; color: #14532d; line-height: 1.7; }
+    .conclusion-box.blue { border-left-color: #2563eb; background: #eff6ff; }
+    .conclusion-box.blue p { color: #1e3a8a; }
+
+    @media (max-width: 640px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .nfr-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-milestone">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <circle cx="6" cy="6" r="5.5" fill="#16a34a"/>
+        <path d="M3.5 6l1.5 1.5 3-3" stroke="#fff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      MILESTONE M5 · Sprint 11 · 22주차
+    </div>
+    <h1>M5 마일스톤 보고서</h1>
+    <p class="subtitle">운영자 콘솔 · CS · 보안·이상 탐지 · GA 준비 — 전체 프로그램 종합</p>
+    <p class="meta-date">작성일 2026-06-16</p>
+  </div>
+
+  <!-- 게이트 통과 배너 -->
+  <div class="gate-banner">
+    <div class="gate-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M5 12l4 4 10-10" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="gate-text">
+      <h2>M5 통과 게이트 충족 — GA 전환 준비 완료</h2>
+      <p>W-501~506 전체 DoD 충족. 운영자 콘솔·CS·보안·이상 탐지·부하 테스트 시나리오 완성. 22주 WBS 전 마일스톤(M0~M5) 완료.</p>
+    </div>
+  </div>
+
+  <!-- KPI 집계 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="1" y="8" width="3" height="7" rx="1" fill="#16a34a"/>
+        <rect x="6" y="5" width="3" height="10" rx="1" fill="#16a34a"/>
+        <rect x="11" y="2" width="3" height="13" rx="1" fill="#16a34a"/>
+      </svg>
+      M5 KPI 집계
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-box">
+        <div class="kpi-value green">6</div>
+        <div class="kpi-label">WBS 태스크 (W-501~506)<br>전체 완료</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-value blue">70+</div>
+        <div class="kpi-label">신규 파일<br>(도메인·서비스·컨트롤러·테스트)</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-value green">71+</div>
+        <div class="kpi-label">단위 테스트 케이스<br>(W-501~505 합산)</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-value blue">20+</div>
+        <div class="kpi-label">Admin REST<br>엔드포인트</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-value purple">4</div>
+        <div class="kpi-label">GA 릴리즈 게이트<br>(기능·품질·운영·보안)</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-value blue">3</div>
+        <div class="kpi-label">k6 부하 테스트<br>시나리오</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-value green">4</div>
+        <div class="kpi-label">NFR 검증 항목<br>(PERF·AVAIL·RELY)</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-value green">100%</div>
+        <div class="kpi-label">DoD 충족률<br>M5 전체</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WBS W-501~506 요약 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="1" y="1" width="14" height="14" rx="3" stroke="#64748b" stroke-width="1.4"/>
+        <path d="M4 5h8M4 8h8M4 11h5" stroke="#64748b" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      WBS W-501~506 완료 현황
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>태스크</th>
+          <th>제목</th>
+          <th>공수</th>
+          <th>신규 파일</th>
+          <th>테스트</th>
+          <th>엔드포인트</th>
+          <th>상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-blue">W-501</span></td>
+          <td>운영자 — 회원 통제·라우팅·재무</td>
+          <td>18mD</td>
+          <td>13 신규 + 5 수정</td>
+          <td>21개</td>
+          <td>10개</td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">W-502</span></td>
+          <td>운영자 — 통합관리·OCR·내부 감사</td>
+          <td>14mD</td>
+          <td>14 신규</td>
+          <td>12개</td>
+          <td>4개 (audit·ocr)</td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">W-503</span></td>
+          <td>운영자 — 대시보드·통계·시스템 설정</td>
+          <td>14mD</td>
+          <td>다수</td>
+          <td>14개</td>
+          <td>다수</td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">W-504</span></td>
+          <td>보안·스팸·이상 패턴 자동 차단</td>
+          <td>12mD</td>
+          <td>이상탐지 격리 패키지</td>
+          <td>5개 파일<br>(Gate 3종+Service+Simulation)</td>
+          <td>AbuseBlock API</td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">W-505</span></td>
+          <td>CS — 1:1 문의·챗봇·FAQ·공지</td>
+          <td>14mD</td>
+          <td>BE 4 도메인 + FE 5 컴포넌트</td>
+          <td>19개</td>
+          <td>BE 4개 컨트롤러</td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">W-506</span></td>
+          <td>베타→GA 안정화 + 부하 테스트</td>
+          <td>14mD</td>
+          <td>3 문서</td>
+          <td>k6 시나리오 3종</td>
+          <td>NFR 4종 문서화</td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:14px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:6px;">
+        <span>M5 가중 완료율</span>
+        <span style="font-weight:700;color:#16a34a;">100% (86/86 mD)</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:100%;"></div></div>
+    </div>
+  </div>
+
+  <!-- 전체 프로그램 종합 (M0~M5) -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6.5" stroke="#64748b" stroke-width="1.4"/>
+        <path d="M8 4v4.5l3 1.5" stroke="#64748b" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      전체 프로그램 종합 (M0~M5 · 22주)
+    </div>
+    <div class="timeline">
+      <div class="tl-row">
+        <div class="tl-left">
+          <div class="tl-dot dot-m0">M0</div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-name">M0 — 프로젝트 셋업 (W-001~003)</div>
+          <div class="tl-meta">Sprint 1~2 · GitHub Actions CI · Docker 컨테이너 · Prometheus/Alertmanager/Grafana</div>
+          <div class="tl-items">인프라 파이프라인 완성. 디자인 토큰 정합. 옵저버빌리티 스택 1차 셋업.</div>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-left">
+          <div class="tl-dot dot-m1">M1</div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-name">M1 — 회원·인증·운영자 심사 (W-101~106)</div>
+          <div class="tl-meta">Sprint 3~5 · 84mD · REST 40+ · 단위 테스트 60+</div>
+          <div class="tl-items">가입·인증·JWT·운영자 심사·사업자 전환·API Key 발급 완성.</div>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-left">
+          <div class="tl-dot dot-m2">M2</div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-name">M2 — 발송·SDK·API Key (W-201~206)</div>
+          <div class="tl-meta">Sprint 6~8 · 테스트 케이스 38+</div>
+          <div class="tl-items">SMS/LMS/MMS/카카오/RCS 발송. SDK 패키지(win/mac/linux). groupId 부여·이력.</div>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-left">
+          <div class="tl-dot dot-m3">M3</div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-name">M3 — 템플릿·채널·발신번호 (W-301~305)</div>
+          <div class="tl-meta">Sprint 9~10 · 62mD · 단위 테스트 150종</div>
+          <div class="tl-items">카카오·RCS 템플릿 승인 게이트. scope:key/member API Key 정책. FE 패널 3종.</div>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-left">
+          <div class="tl-dot dot-m4">M4</div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-name">M4 — 결제·캐시·체험 모드 (W-401~406)</div>
+          <div class="tl-meta">Sprint 10~11 · 84mD · 단위 테스트 116종</div>
+          <div class="tl-items">ChargeService FIFO 차감. AutoCharge 30일 제한. sealed interface 4종 발송 분기. 체험 모드 격리.</div>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-left">
+          <div class="tl-dot dot-m5">M5</div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-name">M5 — 운영·CS·보안·GA 준비 (W-501~506)</div>
+          <div class="tl-meta">Sprint 11 · 86mD · 단위 테스트 71종+ · k6 시나리오 3종</div>
+          <div class="tl-items">운영자 회원통제·재무. OCR 어댑터 스텁 + 연간 감사. 이상 탐지 Gate 3종. CS 챗봇·FAQ·공지. GA 릴리즈 체크리스트 4개 게이트.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;background:#f8fafc;border-radius:10px;padding:16px 20px;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center;">
+        <div>
+          <div style="font-size:22px;font-weight:800;color:#16a34a;">6</div>
+          <div style="font-size:11px;color:#64748b;">마일스톤 완료</div>
+        </div>
+        <div>
+          <div style="font-size:22px;font-weight:800;color:#2563eb;">22주</div>
+          <div style="font-size:11px;color:#64748b;">전체 개발 기간</div>
+        </div>
+        <div>
+          <div style="font-size:22px;font-weight:800;color:#7c3aed;">376+</div>
+          <div style="font-size:11px;color:#64748b;">전체 단위 테스트</div>
+        </div>
+        <div>
+          <div style="font-size:22px;font-weight:800;color:#16a34a;">100%</div>
+          <div style="font-size:11px;color:#64748b;">DoD 충족률</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NFR 게이트 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 2l1.5 4.5H14l-3.75 2.7 1.45 4.4L8 11.1l-3.7 2.6L5.75 9.2 2 6.5h4.5L8 2z" fill="#f59e0b"/>
+      </svg>
+      GA 통과 게이트 — NFR 기준
+    </div>
+    <div class="nfr-grid">
+      <div class="nfr-item">
+        <div class="nfr-id">NFR-PERF-301</div>
+        <div class="nfr-target">≤ 1,000ms</div>
+        <div class="nfr-desc">발송 API P95 응답시간 (k6 시나리오 A)</div>
+      </div>
+      <div class="nfr-item">
+        <div class="nfr-id">NFR-PERF-302</div>
+        <div class="nfr-target">≥ 99.9%</div>
+        <div class="nfr-desc">발송 테이블 적재 성공률 (k6 시나리오 B)</div>
+      </div>
+      <div class="nfr-item">
+        <div class="nfr-id">NFR-AVAIL-001</div>
+        <div class="nfr-target">≥ 99.5%</div>
+        <div class="nfr-desc">발송 API 가용성 (k6 시나리오 C)</div>
+      </div>
+      <div class="nfr-item">
+        <div class="nfr-id">NFR-RELY-203</div>
+        <div class="nfr-target">≤ 1%</div>
+        <div class="nfr-desc">자동충전 결제 실패율 (Prometheus 쿼리)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GA 릴리즈 체크리스트 요약 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="2" y="2" width="12" height="12" rx="3" stroke="#2563eb" stroke-width="1.5"/>
+        <path d="M5 8l2 2 4-4" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      GA 릴리즈 체크리스트 요약 (§8.1~8.4)
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>게이트</th>
+          <th>명칭</th>
+          <th>핵심 기준</th>
+          <th>문서</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-blue">§8.1</span></td>
+          <td>기능 게이트</td>
+          <td>M1~M5 전 DoD · E2E 5종 그린 · 보류 항목 비활성 · 체험 모드 격리</td>
+          <td><code>ga-release-checklist.md §Gate1</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">§8.2</span></td>
+          <td>품질 게이트</td>
+          <td>라인 커버리지 ≥ 70% · 핵심 도메인 ≥ 85% · 회귀 0 fail · critical 0건</td>
+          <td><code>ga-release-checklist.md §Gate2</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-purple">§8.3</span></td>
+          <td>운영 게이트</td>
+          <td>k6 A·B·C threshold green · NFR 4종 충족 · Prometheus 알림 active · Grafana 정상</td>
+          <td><code>load-test-scenario.md</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-orange">§8.4</span></td>
+          <td>보안 게이트</td>
+          <td>TLS 1.2+ · mTLS · 운영자 2FA · 감사 로그 5년 보존 · OWASP Top10 5종</td>
+          <td><code>ga-release-checklist.md §Gate4</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 도메인별 주요 구현 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="1" y="3" width="14" height="10" rx="2" stroke="#64748b" stroke-width="1.4"/>
+        <path d="M5 3V2M11 3V2" stroke="#64748b" stroke-width="1.3" stroke-linecap="round"/>
+        <path d="M4 7h8M4 10h5" stroke="#64748b" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      M5 도메인별 주요 구현
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>도메인</th>
+          <th>핵심 구현</th>
+          <th>적용 패턴</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>운영자 회원통제</strong><br><code style="font-size:11px;">W-501</code></td>
+          <td>회원 정지·해지 상태 전이, 자동충전 강제 해지, 발신 라우팅 우선순위, CS 잔액 조정</td>
+          <td>State Machine, Strategy, ApplicationEvent</td>
+        </tr>
+        <tr>
+          <td><strong>OCR·내부 감사</strong><br><code style="font-size:11px;">W-502</code></td>
+          <td>OcrAdapter 인터페이스 + StubOcrAdapter (@ConditionalOnProperty), 연간 감사 CSV 이중 출력, 감사 로그 13개 이벤트</td>
+          <td>Adapter, Strategy, Observer</td>
+        </tr>
+        <tr>
+          <td><strong>대시보드·통계</strong><br><code style="font-size:11px;">W-503</code></td>
+          <td>어드민 통계 서비스·컨트롤러, 시스템 설정 API</td>
+          <td>Repository, Facade</td>
+        </tr>
+        <tr>
+          <td><strong>이상 탐지·차단</strong><br><code style="font-size:11px;">W-504</code></td>
+          <td>BurstVolumeGate · PatternRepeatGate · AnomalousHourGate · AbuseDetectionService, 격리 패키지, false-negative 0%</td>
+          <td>Chain of Responsibility, Strategy, Factory</td>
+        </tr>
+        <tr>
+          <td><strong>CS 문의·챗봇</strong><br><code style="font-size:11px;">W-505</code></td>
+          <td>1:1 문의 SLA 24h, ChatbotService 키워드 매칭, FAQ·공지 CRUD, FE 5 컴포넌트</td>
+          <td>Strategy (챗봇), Observer (상태 전이)</td>
+        </tr>
+        <tr>
+          <td><strong>GA 부하 테스트</strong><br><code style="font-size:11px;">W-506</code></td>
+          <td>k6 시나리오 A·B·C, NFR 기준표, Prometheus PromQL 4종, GA 릴리즈 4게이트 체크리스트</td>
+          <td>문서·시나리오 (CI 실행)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 잔여 이슈 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 2L14 13H2L8 2z" stroke="#f59e0b" stroke-width="1.4"/>
+        <path d="M8 6v3.5M8 11v.5" stroke="#f59e0b" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      잔여 이슈 및 후속 과제
+    </div>
+    <ul class="issue-list">
+      <li class="issue-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px">
+          <circle cx="8" cy="8" r="7" stroke="#f97316" stroke-width="1.4"/>
+          <path d="M8 5v4M8 10.5v.5" stroke="#f97316" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <span><strong>부하 테스트 실제 실행</strong> — 로컬 SSL 인터셉션 환경 제약으로 CI/스테이징 위임. GA 게이트 §8.3 통과 시 results-a/b/c.json 첨부 필요.</span>
+      </li>
+      <li class="issue-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px">
+          <circle cx="8" cy="8" r="7" stroke="#f97316" stroke-width="1.4"/>
+          <path d="M8 5v4M8 10.5v.5" stroke="#f97316" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <span><strong>AbuseBlock 차단 해제 API</strong> — W-504에서 W-501 운영자 기능과 연계해 추후 구현 필요. (현재 AbuseBlock 저장·조회까지 완료)</span>
+      </li>
+      <li class="issue-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px">
+          <circle cx="8" cy="8" r="7" stroke="#f97316" stroke-width="1.4"/>
+          <path d="M8 5v4M8 10.5v.5" stroke="#f97316" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <span><strong>OCR 실 엔진 연동</strong> — StubOcrAdapter 사용 중. <code>ocr.stub=false</code> 설정 + 실 OCR 엔진 Adapter 구현체 교체 필요 (GA 이후).</span>
+      </li>
+      <li class="issue-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px">
+          <circle cx="8" cy="8" r="7" stroke="#f97316" stroke-width="1.4"/>
+          <path d="M8 5v4M8 10.5v.5" stroke="#f97316" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <span><strong>문의 파일 첨부</strong> — W-505 1:1 문의 이미지 업로드는 MVP 미포함. 추후 스프린트에서 S3 연동 구현 필요.</span>
+      </li>
+      <li class="issue-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px">
+          <circle cx="8" cy="8" r="7" stroke="#f97316" stroke-width="1.4"/>
+          <path d="M8 5v4M8 10.5v.5" stroke="#f97316" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <span><strong>W-402 PG 콜백(webhook)</strong> — 가상계좌·휴대폰·상품권 PG 콜백 엔드포인트 추가 필요 (M4 잔여 이슈 이월).</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 결론 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      결론 — 전체 프로그램 종합
+    </div>
+    <div class="conclusion-box">
+      <p>
+        WiseCan 통합 메시징 서비스 22주 개발 프로그램이 M0~M5 전 마일스톤을 완료했다.
+        M1(회원·인증)에서 시작해 M2(발송·SDK), M3(템플릿·채널), M4(결제·캐시·체험), M5(운영·CS·보안·GA 준비)까지
+        6개 마일스톤, 30개 이상의 WBS 태스크, 전체 단위 테스트 376종 이상을 TDD 원칙 하에 구현했다.
+      </p>
+    </div>
+    <div class="conclusion-box blue">
+      <p>
+        M5에서는 운영자 콘솔(회원통제·OCR·감사·대시보드), 이상 탐지(Gate 3종 Chain of Responsibility), CS(챗봇·SLA), GA 부하 테스트(k6 3종)를 완성했다.
+        GA 전환을 위한 4개 릴리즈 게이트(기능·품질·운영NFR·보안) 체크리스트가 문서화되었으며,
+        Prometheus 알림 룰·Grafana 대시보드가 연결된 운영 관측 체계가 갖추어진 상태다.
+        부하 테스트 실 실행과 PG 콜백 추가는 GA 직전 CI/스테이징에서 완료한다.
+      </p>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>인계 항목</th>
+          <th>내용</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>부하 테스트 실행</td>
+          <td>CI에서 <code>k6 run</code> 3종 실행 · BASE_URL, API_KEY, JWT 환경변수 주입</td>
+        </tr>
+        <tr>
+          <td>NFR 모니터링</td>
+          <td>Prometheus + Grafana 4종 메트릭 실시간 모니터링 (06_OBSERVABILITY 참조)</td>
+        </tr>
+        <tr>
+          <td>GA 선언 조건</td>
+          <td>W-501~506 DoD 전체 + k6 threshold green + 보안 게이트 4종 통과 후 공개 URL 개방</td>
+        </tr>
+        <tr>
+          <td>GA 후 1주 모니터링</td>
+          <td>Discord 알림 채널 상시 대기 · 일별 가입자·발송량 추이 · CS SLA 24h 이내 처리율</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

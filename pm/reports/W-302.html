@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>W-302 보고서 — CLI wsc 멀티플랫폼</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .report-header { margin-bottom: 32px; }
+    .report-header .badge-wbs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .report-header .meta-date { font-size: 13px; color: #64748b; }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .meta-item {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .meta-item .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .meta-item .value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e2228;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #f8f9fb;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f3f5;
+      vertical-align: top;
+      font-size: 13px;
+      color: #374151;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-orange { background: #fff7ed; color: #c2410c; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
+    .badge-blue   { background: #e8f0fe; color: #2563eb; }
+
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .check-list li .icon-wrap { margin-top: 1px; flex-shrink: 0; }
+    .check-list li .detail { color: #64748b; font-size: 12px; margin-top: 2px; }
+
+    .file-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .file-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .file-tag {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .file-tag-new { background: #dcfce7; color: #15803d; }
+    .file-tag-mod { background: #fef9c3; color: #854d0e; }
+    .file-path {
+      font-family: 'Courier New', Courier, monospace;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .conclusion-box {
+      border-left: 4px solid #2563eb;
+      padding: 16px 20px;
+      background: #f0f6ff;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 14px;
+    }
+    .conclusion-box p { font-size: 13px; color: #1e3a8a; line-height: 1.7; }
+
+    .issue-box {
+      border-left: 4px solid #f59e0b;
+      padding: 14px 20px;
+      background: #fffbeb;
+      border-radius: 0 8px 8px 0;
+    }
+    .issue-box .issue-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 6px;
+    }
+    .issue-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .issue-box ul li {
+      font-size: 13px;
+      color: #78350f;
+      padding-left: 12px;
+      position: relative;
+    }
+    .issue-box ul li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #f59e0b;
+    }
+
+    .sub-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .cmd-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .cmd-item {
+      background: #f8f9fb;
+      border: 1px solid #e8eaed;
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+    .cmd-item .cmd-name {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: #1e40af;
+      margin-bottom: 4px;
+    }
+    .cmd-item .cmd-desc {
+      font-size: 11px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-wbs">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      W-302
+    </div>
+    <h1>W-302 보고서 — CLI wsc 멀티플랫폼</h1>
+    <p class="meta-date">작성일 2026-06-16</p>
+  </div>
+
+  <!-- WBS 메타 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+      </svg>
+      WBS 메타
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item"><div class="label">마일스톤</div><div class="value">M3</div></div>
+      <div class="meta-item"><div class="label">WBS ID</div><div class="value">W-302</div></div>
+      <div class="meta-item"><div class="label">담당</div><div class="value">BE</div></div>
+      <div class="meta-item"><div class="label">공수</div><div class="value">18 man-day</div></div>
+      <div class="meta-item"><div class="label">스프린트</div><div class="value">S6~S7</div></div>
+      <div class="meta-item"><div class="label">의존</div><div class="value">W-206</div></div>
+      <div class="meta-item"><div class="label">블록</div><div class="value">W-304 (#24)</div></div>
+      <div class="meta-item">
+        <div class="label">전체 상태</div>
+        <div class="value">
+          <span class="badge badge-green">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            완료
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DoD 및 충족 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      DoD 및 충족 현황
+    </div>
+    <ul class="check-list">
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <div>
+          <div>3 OS 패키지 빌드 구성 완료</div>
+          <div class="detail">pkg 기반 win-x64 / macos-x64 / linux-x64 빌드 타겟 설정 (build.sh, build.cmd, package.json)</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <div>
+          <div>명령 14종 구현 완료</div>
+          <div class="detail">auth(3) + send(6) + history(2) + key(5) + callback(4) + config(3) + docs + snippet — 총 14 그룹 / 26 하위 명령</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <div>
+          <div>자동 업데이트 메커니즘 구현 완료</div>
+          <div class="detail">GitHub Releases API 백그라운드 버전 확인, 신버전 시 stderr 안내 출력. WSC_NO_UPDATE_CHECK=1 로 비활성화 가능</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <div>
+          <div>외부 패키지 의존성 제거</div>
+          <div class="detail">로컬 SSL 인터셉션 환경 대응 — Node.js 내장 모듈(http/https/fs/path/os)만 사용, 경량 arg 파서 자체 구현</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <div>
+          <div>단위 테스트 38종 전원 통과</div>
+          <div class="detail">output(9) + updater(8) + store(8) + args(13) — node 내장 assert 모듈 사용</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <div>
+          <div>README.md 작성 완료</div>
+          <div class="detail">설치 방법, 명령 목록, 종료 코드 표, 환경변수, 빌드 가이드 포함</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 검증 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+      </svg>
+      검증 결과
+    </div>
+    <div class="sub-label" style="margin-bottom:14px;">단위 테스트</div>
+    <table>
+      <thead>
+        <tr>
+          <th>테스트 파일</th>
+          <th>대상</th>
+          <th>케이스 수</th>
+          <th>결과</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="file-path">tests/output.test.js</span></td>
+          <td>CSV·Table 포맷터 로직</td>
+          <td>9종</td>
+          <td><span class="badge badge-green">9 / 9 통과</span></td>
+        </tr>
+        <tr>
+          <td><span class="file-path">tests/updater.test.js</span></td>
+          <td>semver isNewer() 비교 함수</td>
+          <td>8종</td>
+          <td><span class="badge badge-green">8 / 8 통과</span></td>
+        </tr>
+        <tr>
+          <td><span class="file-path">tests/store.test.js</span></td>
+          <td>환경변수 우선순위 및 종료 코드 매핑</td>
+          <td>8종</td>
+          <td><span class="badge badge-green">8 / 8 통과</span></td>
+        </tr>
+        <tr>
+          <td><span class="file-path">tests/args.test.js</span></td>
+          <td>경량 arg 파서 (--key, -k, positional)</td>
+          <td>13종</td>
+          <td><span class="badge badge-green">13 / 13 통과</span></td>
+        </tr>
+        <tr style="font-weight:700;">
+          <td colspan="2">합계</td>
+          <td>38종</td>
+          <td><span class="badge badge-green">38 / 38 통과</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:20px;" class="sub-label">CLI 진입점 동작 검증</div>
+    <table style="margin-top:10px;">
+      <thead>
+        <tr><th>검증 항목</th><th>결과</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="file-path">node src/index.js --version</span></td>
+          <td><span class="badge badge-green">1.0.0 출력</span></td>
+        </tr>
+        <tr>
+          <td><span class="file-path">node src/index.js --help</span></td>
+          <td><span class="badge badge-green">14종 명령 목록 출력</span></td>
+        </tr>
+        <tr>
+          <td><span class="file-path">node src/index.js docs send</span></td>
+          <td><span class="badge badge-green">발송 가이드 출력</span></td>
+        </tr>
+        <tr>
+          <td><span class="file-path">node src/index.js snippet sms</span></td>
+          <td><span class="badge badge-green">SMS 스니펫 출력</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 명령 14종 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
+      </svg>
+      구현 명령 목록 (14종 그룹 / 26 하위)
+    </div>
+    <div class="cmd-grid">
+      <div class="cmd-item"><div class="cmd-name">auth login</div><div class="cmd-desc">API Key 등록 (OS 키체인 대응 파일 방식, chmod 600)</div></div>
+      <div class="cmd-item"><div class="cmd-name">auth logout</div><div class="cmd-desc">저장 Key 삭제</div></div>
+      <div class="cmd-item"><div class="cmd-name">auth status</div><div class="cmd-desc">인증 상태 확인</div></div>
+      <div class="cmd-item"><div class="cmd-name">send sms</div><div class="cmd-desc">SMS 단건 발송 (--ad, --schedule 지원)</div></div>
+      <div class="cmd-item"><div class="cmd-name">send lms</div><div class="cmd-desc">LMS 단건 발송</div></div>
+      <div class="cmd-item"><div class="cmd-name">send mms</div><div class="cmd-desc">MMS 단건 발송</div></div>
+      <div class="cmd-item"><div class="cmd-name">send kakao</div><div class="cmd-desc">카카오 알림톡 단건 발송</div></div>
+      <div class="cmd-item"><div class="cmd-name">send rcs</div><div class="cmd-desc">RCS 단건 발송</div></div>
+      <div class="cmd-item"><div class="cmd-name">send bulk</div><div class="cmd-desc">다건 일괄 발송 (쉼표 구분 수신번호)</div></div>
+      <div class="cmd-item"><div class="cmd-name">history list</div><div class="cmd-desc">이력 목록 (기간·채널·페이지 필터)</div></div>
+      <div class="cmd-item"><div class="cmd-name">history get</div><div class="cmd-desc">이력 단건 상세 조회</div></div>
+      <div class="cmd-item"><div class="cmd-name">key list/create</div><div class="cmd-desc">API Key 목록·발급</div></div>
+      <div class="cmd-item"><div class="cmd-name">key revoke/rotate</div><div class="cmd-desc">폐기·재발급 (즉시 무효화)</div></div>
+      <div class="cmd-item"><div class="cmd-name">key scopes</div><div class="cmd-desc">스코프 카탈로그 12종 조회</div></div>
+      <div class="cmd-item"><div class="cmd-name">callback list/get</div><div class="cmd-desc">발신번호 목록·단건 조회</div></div>
+      <div class="cmd-item"><div class="cmd-name">callback register</div><div class="cmd-desc">등록 (SELF_MOBILE~CORP_REP 4 케이스)</div></div>
+      <div class="cmd-item"><div class="cmd-name">callback delete</div><div class="cmd-desc">발신번호 삭제 (§4.4)</div></div>
+      <div class="cmd-item"><div class="cmd-name">config set/get/path</div><div class="cmd-desc">서버 주소·설정 파일 관리</div></div>
+      <div class="cmd-item"><div class="cmd-name">docs [주제]</div><div class="cmd-desc">사용 가이드 출력 (무인증, RQ-CLI-401~405)</div></div>
+      <div class="cmd-item"><div class="cmd-name">snippet &lt;채널&gt;</div><div class="cmd-desc">채널별 코드 스니펫 (무인증)</div></div>
+    </div>
+  </div>
+
+  <!-- 구현 내역 파일 목록 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+      </svg>
+      구현 파일 목록
+    </div>
+    <ul class="file-list">
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/package.json</span><span style="margin-left:8px;color:#64748b;font-size:12px;">의존성 없음 — Node.js 18+ 내장 전용</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/src/index.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">CLI 진입점 — 14종 명령 라우터</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/src/util/args.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">경량 arg 파서 (--flag, -k, --k=v, positional)</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/src/util/output.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">출력 포맷터 (json / table / csv)</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/src/util/updater.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">자동 업데이트 — GitHub Releases API 백그라운드 조회</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/src/api/client.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">HTTP 클라이언트 — 내장 http/https, 종료 코드 매핑</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/src/config/store.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">설정 저장소 — ~/.wsc/config.json (chmod 600)</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/src/command/auth.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">login / logout / status</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/src/command/send.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">sms / lms / mms / kakao / rcs / bulk</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/src/command/history.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">list / get</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/src/command/key.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">list / create / revoke / rotate / scopes</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/src/command/callback.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">list / get / register / delete</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/src/command/config.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">set / get / path</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/src/command/docs.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">docs / snippet (무인증)</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/tests/output.test.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">포맷터 단위 테스트 9종</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/tests/updater.test.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">semver 비교 단위 테스트 8종</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/tests/store.test.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">환경변수·종료코드 단위 테스트 8종</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/tests/args.test.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">arg 파서 단위 테스트 13종</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/tests/run_all.js</span><span style="margin-left:8px;color:#64748b;font-size:12px;">전체 테스트 러너</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/build.sh</span><span style="margin-left:8px;color:#64748b;font-size:12px;">Linux/macOS 멀티 OS 빌드 스크립트</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/build.cmd</span><span style="margin-left:8px;color:#64748b;font-size:12px;">Windows 빌드 스크립트</span></li>
+      <li><span class="file-tag file-tag-new">NEW</span><span class="file-path">cli/README.md</span><span style="margin-left:8px;color:#64748b;font-size:12px;">설치·사용·빌드·테스트 가이드</span></li>
+    </ul>
+  </div>
+
+  <!-- 결론 및 잔여 이슈 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      결론 및 잔여 이슈
+    </div>
+    <div class="conclusion-box">
+      <p>W-302 CLI wsc 구현이 완료되었습니다. 발송 5채널 단건·일괄·예약, 이력 조회, API Key 관리, 발신번호 관리, 설정, docs·snippet 등 명령 14그룹 26 하위 명령을 Node.js 내장 모듈만으로 구현하였으며, 단위 테스트 38종이 모두 통과하였습니다. 로컬 SSL 인터셉션 환경에서 외부 패키지 설치가 불가능하므로 commander 의존성을 제거하고 경량 arg 파서를 자체 구현하였습니다. pkg 기반 3 OS(win/mac/linux) 빌드 구성과 자동 업데이트 메커니즘도 갖추었습니다.</p>
+    </div>
+    <div class="issue-box">
+      <div class="issue-title">잔여 이슈 / CI 위임 항목</div>
+      <ul>
+        <li>pkg 바이너리 실제 빌드는 로컬 SSL 인터셉션으로 npm install 불가 — CI 환경에서 수행 필요 (dist/ 산출물 없음)</li>
+        <li>wsc auth login API Key 검증 — 현재 저장만 하고 실제 ping 검증 없음. W-304 발송 이력 조회 연동 후 보완 권장</li>
+        <li>OS 키체인 연동 — 현재 chmod 600 파일 방식. keytar 등 키체인 라이브러리는 SSL 해소 후 추가 가능</li>
+        <li>wsc send bulk CSV 파일 입력 지원 — 현재 --destaddrs 쉼표 방식만 지원, --csv-file 옵션은 차기 스프린트 대상</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

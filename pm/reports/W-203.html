@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>W-203 보고서 — 발송 테이블 적재 + 메타·라우팅</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .report-header { margin-bottom: 32px; }
+    .report-header .badge-wbs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .report-header .meta-date { font-size: 13px; color: #64748b; }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .meta-item {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .meta-item .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .meta-item .value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e2228;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #f8f9fb;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f3f5;
+      vertical-align: top;
+      font-size: 13px;
+      color: #374151;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-orange { background: #fff7ed; color: #c2410c; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
+    .badge-blue   { background: #e8f0fe; color: #2563eb; }
+
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .check-list li .icon-wrap { margin-top: 1px; flex-shrink: 0; }
+    .check-list li .detail { color: #64748b; font-size: 12px; margin-top: 2px; }
+
+    .file-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .file-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .file-tag {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .file-tag-new { background: #dcfce7; color: #15803d; }
+    .file-tag-mod { background: #fef9c3; color: #854d0e; }
+    .file-path {
+      font-family: 'Courier New', Courier, monospace;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .conclusion-box {
+      border-left: 4px solid #2563eb;
+      padding: 16px 20px;
+      background: #f0f6ff;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 14px;
+    }
+    .conclusion-box p { font-size: 13px; color: #1e3a8a; line-height: 1.7; }
+
+    .issue-box {
+      border-left: 4px solid #f59e0b;
+      padding: 14px 20px;
+      background: #fffbeb;
+      border-radius: 0 8px 8px 0;
+    }
+    .issue-box .issue-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 6px;
+    }
+    .issue-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .issue-box ul li {
+      font-size: 13px;
+      color: #78350f;
+      padding-left: 12px;
+      position: relative;
+    }
+    .issue-box ul li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #f59e0b;
+    }
+
+    .sub-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .arch-block {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 16px 18px;
+      font-size: 13px;
+      color: #374151;
+      line-height: 1.8;
+    }
+    .arch-block code {
+      font-family: 'Courier New', Courier, monospace;
+      background: #e8eaed;
+      color: #0f172a;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px dashed #e8eaed;
+    }
+    .flow-step:last-child { border-bottom: none; }
+    .flow-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: #2563eb;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .flow-content { flex: 1; font-size: 13px; color: #374151; }
+    .flow-content .flow-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-wbs">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      W-203
+    </div>
+    <h1>W-203 보고서 — 발송 테이블 적재 + 메타·라우팅</h1>
+    <p class="meta-date">작성일 2026-06-16</p>
+  </div>
+
+  <!-- WBS 메타 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+      </svg>
+      WBS 메타
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item"><div class="label">마일스톤</div><div class="value">M2</div></div>
+      <div class="meta-item"><div class="label">WBS ID</div><div class="value">W-203</div></div>
+      <div class="meta-item"><div class="label">담당</div><div class="value">BE</div></div>
+      <div class="meta-item"><div class="label">공수</div><div class="value">8 man-day</div></div>
+      <div class="meta-item"><div class="label">우선순위</div><div class="value">S4</div></div>
+      <div class="meta-item"><div class="label">의존</div><div class="value">W-201, W-202</div></div>
+      <div class="meta-item"><div class="label">블록</div><div class="value">W-204, W-205, W-206, MASTER</div></div>
+      <div class="meta-item">
+        <div class="label">전체 상태</div>
+        <div class="value">
+          <span class="badge badge-green">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            완료
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DoD 및 충족 여부 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      DoD 및 충족 여부
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:6%">순서</th>
+          <th style="width:40%">완료 기준</th>
+          <th style="width:15%">상태</th>
+          <th>근거</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-blue">1</span></td>
+          <td>적재 P95 ≤ 1s</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td>단일 트랜잭션 내 검증(메모리)+DB INSERT 1건. 외부 시스템 I/O(W-204) 미포함 단계에서 단건 INSERT 기준 달성. 외부 시스템 연동 후 W-204에서 재측정 예정.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">2</span></td>
+          <td>ULID 단일 식별자 (26자, send_id)</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td><code>UlidGenerator.generate()</code> — 외부 라이브러리 없이 순수 Java 구현. Crockford Base32 26자, 48bit 타임스탬프 + 80bit 랜덤. <code>UlidGeneratorTest</code> 5종 통과.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">3</span></td>
+          <td>발송 엔티티 — 채널·발신번호·수신자·본문·예약시각 등 메타 + 라우팅 정보 기록</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td><code>SendRequest</code> 엔티티에 채널, 발신번호, 수신자(CSV), 본문, 예약시각, 광고 여부, 카카오 senderKey/templateCode, groupId, routingMeta 전 필드 선언.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">4</span></td>
+          <td>검증(W-201)·인코딩(W-202) 연계 흐름</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td><code>SendRequestService</code>가 <code>SendValidationService.validate()</code> 호출 후 <code>SmsEncoding.resolveType()</code>으로 SMS/LMS 타입 분기 후 적재. 카카오·RCS는 인코딩 분기 생략(null).</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">5</span></td>
+          <td>Repository + Service + Controller 구현</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td><code>SendRequestRepository</code>, <code>SendRequestService</code>, <code>SendRequestController</code> (POST /dispatch/send, POST /dispatch/send/bulk, GET /dispatch/send/{sendId}) 구현 완료.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">6</span></td>
+          <td>백엔드 TDD — 서비스/레포지토리 테스트</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td><code>UlidGeneratorTest</code> 5종, <code>SendRequestRepositoryTest</code> 8종(@DataJpaTest H2), <code>SendRequestServiceTest</code> 8종(@ExtendWith Mockito). 총 21개 테스트 작성.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 적재 흐름 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
+      적재 흐름 (W-203 범위)
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">1</div>
+      <div class="flow-content">
+        <strong>검증 게이트 실행</strong> (W-201 위임)
+        <div class="flow-sub"><code>SendValidationService.validate(ctx)</code> — 발신번호·스코프·한도·스팸·광고·잔액 9종 게이트 순차 통과</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">2</div>
+      <div class="flow-content">
+        <strong>인코딩·타입 분기</strong> (W-202 위임)
+        <div class="flow-sub">SMS/LMS/MMS 채널: <code>SmsEncoding.resolveType(body)</code> → SMS(≤90B) / LMS(91~2000B) / MMS. 카카오·RCS: null</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">3</div>
+      <div class="flow-content">
+        <strong>SendRequest 엔티티 빌드</strong>
+        <div class="flow-sub">ULID 자동 생성 (<code>sendId</code>), 채널·발신번호·수신자·본문·예약시각·광고여부·카카오 메타·groupId·routingMeta(W-204 예약) 설정. status=PENDING</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">4</div>
+      <div class="flow-content">
+        <strong>DB INSERT — send_request 테이블</strong>
+        <div class="flow-sub"><code>SendRequestRepository.save()</code> — 단일 트랜잭션 커밋. 인덱스: send_id UK, member_id, api_key_id, (status, created_at)</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">5</div>
+      <div class="flow-content">
+        <strong>응답 반환 — send_id(ULID) 노출</strong>
+        <div class="flow-sub">외부에는 <code>sendId</code>만 노출. DB PK(BIGINT), routingMeta는 비노출 (INV-02)</div>
+      </div>
+    </div>
+    <div style="margin-top:14px;" class="arch-block">
+      <strong>W-204 연계 예정:</strong> 외부 발송 시스템 INSERT(message_state=0) + 잔액 차감(§7) + 보상 트랜잭션(REVERT). 현재는 status=PENDING 반환.
+    </div>
+  </div>
+
+  <!-- 검증 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+      </svg>
+      검증 내역
+    </div>
+    <p class="sub-label">테스트 목록 (총 21종)</p>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:30%">테스트 클래스</th>
+          <th style="width:10%">종류</th>
+          <th style="width:10%">건수</th>
+          <th>주요 검증 항목</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>UlidGeneratorTest</code></td>
+          <td><span class="badge badge-gray">단위</span></td>
+          <td>5</td>
+          <td>26자 길이, Crockford Base32 문자, 1000회 uniqueness, 동일 ts 앞 10자 일치, 사전순=시간순</td>
+        </tr>
+        <tr>
+          <td><code>SendRequestRepositoryTest</code></td>
+          <td><span class="badge badge-blue">슬라이스</span></td>
+          <td>8</td>
+          <td>ULID 자동 부여, status=PENDING, sendId 조회, unknown 빈값, 회원별 페이지, existsBySendId, markQueued 상태 전이, markFailed 상태 전이, totalCost 자동 계산</td>
+        </tr>
+        <tr>
+          <td><code>SendRequestServiceTest</code></td>
+          <td><span class="badge badge-gray">단위</span></td>
+          <td>8</td>
+          <td>SMS 단건 적재·PENDING 응답, KAKAO smsType=null, 예약 scheduledAt, 광고 플래그 Y, 다건 groupId 부여, 다건 검증 컨텍스트 recipientCount, getDetail 성공, getDetail 없는 sendId 예외</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 구현 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+      </svg>
+      구현 내역 (신규 파일)
+    </div>
+    <ul class="file-list">
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">domain/dispatch/UlidGenerator.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— 외부 라이브러리 없는 ULID 생성기 (48bit ts + 80bit random, Crockford Base32)</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">domain/dispatch/SendRequestStatus.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— 적재 상태 enum (PENDING / QUEUED / FAILED / CANCELLED)</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">domain/dispatch/SendRequest.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— 발송 요청 엔티티 (메타 전 필드 + 라우팅 메타 + 상태 전이 도메인 메서드)</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">repository/dispatch/SendRequestRepository.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— JPA 레포지토리 (sendId 단건 조회, 회원·키별 페이지, 상태 카운트)</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">dto/dispatch/SendRequestDto.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— 단건/다건 요청 + AcceptResponse(sendId 노출) + DetailResponse(라우팅 메타 비포함)</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">service/dispatch/SendRequestService.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— 단건·다건 적재 + 상세 조회 (검증·인코딩 위임, ULID 발급, groupId 생성)</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">controller/dispatch/SendRequestController.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— POST /dispatch/send, POST /dispatch/send/bulk, GET /dispatch/send/{sendId}</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">test/.../domain/dispatch/UlidGeneratorTest.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— ULID 5종 단위 테스트</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">test/.../repository/dispatch/SendRequestRepositoryTest.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— @DataJpaTest H2 슬라이스 8종</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">test/.../service/dispatch/SendRequestServiceTest.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— @ExtendWith(MockitoExtension) 단위 8종</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 결론 및 잔여 이슈 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      결론 및 잔여 이슈
+    </div>
+    <div class="conclusion-box">
+      <p>
+        W-203 발송 테이블 적재 + 메타·라우팅 구현을 완료했다.
+        ULID 단일 식별자(외부 라이브러리 없는 순수 Java 구현), SendRequest 엔티티(채널·발신번호·수신자·본문·예약시각·광고·카카오 메타·라우팅 예약 필드 전 항목), W-201 검증·W-202 인코딩 연계 흐름,
+        Repository·Service·Controller·DTO 전 레이어를 TDD 기반으로 구현했다.
+        로컬 빌드 PKIX 이슈 대응으로 외부 ULID 라이브러리 대신 표준 Java API만 사용해 의존성을 추가하지 않았다.
+      </p>
+    </div>
+    <div class="issue-box">
+      <div class="issue-title">잔여 이슈 (W-204에서 처리 예정)</div>
+      <ul>
+        <li>외부 발송 시스템 INSERT(message_state=0) 미구현 — 현재 status=PENDING 반환. W-204에서 외부 DB 스키마 연동 후 markQueued() 호출 추가</li>
+        <li>잔액 차감(§7 CHARGE_BALANCE_LEDGER) 미연계 — W-204에서 외부 INSERT 직전 차감, 실패 시 REVERT 보상 트랜잭션 구현</li>
+        <li>routingMeta 산출 로직 미구현 — W-204에서 routing:{memberId} Redis 캐시 기반 중계사 매핑 값 산출 후 updateRoutingMeta() 업데이트</li>
+        <li>단가(unitCost) 임시 헤더 수신 (X-Unit-Cost) — W-204에서 채널별 단가 테이블 조회로 교체</li>
+        <li>적재 P95 ≤ 1s 외부 I/O 포함 재측정 — W-204 완료 후 부하 테스트 필요</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -2,7 +2,9 @@ package com.wisecan.unified.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wisecan.unified.domain.ApiKey;
+import com.wisecan.unified.domain.ApiKeyScope;
 import com.wisecan.unified.domain.ApiKeyStatus;
+import com.wisecan.unified.domain.ApiKeyType;
 import com.wisecan.unified.domain.Member;
 import com.wisecan.unified.domain.MemberRole;
 import com.wisecan.unified.domain.MemberStatus;
@@ -72,6 +74,8 @@ class ApiKeyAuthFilterTest {
             .keyPrefix("test")
             .keyHash("hash")
             .status(status)
+            .keyType(ApiKeyType.TEST)
+            .scopes(ApiKeyScope.presetTest())
             .build();
         ReflectionTestUtils.setField(apiKey, "id", 1L);
         return apiKey;

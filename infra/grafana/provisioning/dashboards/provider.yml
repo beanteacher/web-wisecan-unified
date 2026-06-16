@@ -1,0 +1,15 @@
+# Grafana 대시보드 프로비저닝 — infra/grafana/dashboards/*.json 자동 로드
+# 대시보드 UID 는 pm/06_OBSERVABILITY.md §4 표와 1:1 매핑한다.
+apiVersion: 1
+
+providers:
+  - name: wisecan
+    orgId: 1
+    folder: WiseCan
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

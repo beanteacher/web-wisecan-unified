@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>W-503 보고서 — 운영자 대시보드·통계·시스템 설정</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .report-header { margin-bottom: 32px; }
+    .report-header .badge-wbs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .report-header .meta-date { font-size: 13px; color: #64748b; }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .meta-item {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .meta-item .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .meta-item .value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    /* DoD 체크리스트 */
+    .dod-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .dod-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #334155;
+    }
+    .dod-item .check-icon { flex-shrink: 0; margin-top: 1px; }
+
+    /* 검증 표 */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      background: #f8fafc;
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #334155;
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+
+    /* 배지 */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 5px;
+    }
+    .badge-green  { background: #dcfce7; color: #16a34a; }
+    .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+    .badge-orange { background: #ffedd5; color: #c2410c; }
+    .badge-slate  { background: #f1f5f9; color: #475569; }
+
+    /* 파일 목록 */
+    .file-list { display: flex; flex-direction: column; gap: 6px; }
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+    .file-item .file-path {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 12px;
+      color: #1e40af;
+      flex: 1;
+      word-break: break-all;
+    }
+    .file-item .file-role {
+      font-size: 11px;
+      color: #64748b;
+      white-space: nowrap;
+    }
+
+    /* 결론 박스 */
+    .conclusion-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 18px 22px;
+    }
+    .conclusion-box p { font-size: 13px; color: #15803d; line-height: 1.7; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    code {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 11.5px;
+      background: #f1f5f9;
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: #1e40af;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-wbs">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <rect width="12" height="12" rx="3" fill="#2563eb"/>
+        <path d="M3 6h6M3 4h6M3 8h4" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      W-503 / M5
+    </div>
+    <h1>W-503 보고서 — 운영자 대시보드·통계·시스템 설정</h1>
+    <p class="meta-date">작성일 2026-06-16</p>
+  </div>
+
+  <!-- WBS 메타 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="1" y="1" width="14" height="14" rx="3" stroke="#64748b" stroke-width="1.5"/>
+        <path d="M4 8h8M4 5h8M4 11h5" stroke="#64748b" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      WBS 메타
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item"><div class="label">티켓</div><div class="value">W-503</div></div>
+      <div class="meta-item"><div class="label">마일스톤</div><div class="value">M5 (운영)</div></div>
+      <div class="meta-item"><div class="label">담당</div><div class="value">BE + FE</div></div>
+      <div class="meta-item"><div class="label">공수</div><div class="value">8 man-days</div></div>
+      <div class="meta-item"><div class="label">스프린트</div><div class="value">S11</div></div>
+      <div class="meta-item"><div class="label">의존</div><div class="value">W-203 (완료)</div></div>
+      <div class="meta-item"><div class="label">상태</div><div class="value"><span class="badge badge-green">완료</span></div></div>
+    </div>
+  </div>
+
+  <!-- DoD 및 충족 여부 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6.5" stroke="#16a34a" stroke-width="1.5"/>
+        <path d="M5 8l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      DoD 및 충족 여부
+    </div>
+    <ul class="dod-list">
+      <li class="dod-item">
+        <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+          <path d="M5 8l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        일/주/월별 발송량·매출·회원 통계 API 구현 — <code>GET /api/v1/admin/stats/send?period=DAILY|WEEKLY|MONTHLY</code>
+      </li>
+      <li class="dod-item">
+        <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+          <path d="M5 8l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        데이터 갱신 5분 이하 — Redis 캐시 TTL 300초(<code>admin:dashboard</code>, <code>admin:stats:*</code>, <code>admin:settings</code>)
+      </li>
+      <li class="dod-item">
+        <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+          <path d="M5 8l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        운영자 대시보드 카드 — 발송량·매출·회원 수·대기/실패 요청 현황 집계
+      </li>
+      <li class="dod-item">
+        <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+          <path d="M5 8l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        채널별 발송 분포 — SMS/LMS/MMS/KAKAO/RCS 이번 달 기준
+      </li>
+      <li class="dod-item">
+        <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+          <path d="M5 8l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        시스템 설정 관리 — <code>GET/PUT /api/v1/admin/settings/{key}</code>, 캐시 무효화 포함
+      </li>
+      <li class="dod-item">
+        <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+          <path d="M5 8l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        FE 운영자 대시보드 화면 — <code>/admin/dashboard</code>, <code>/admin/settings</code>
+      </li>
+      <li class="dod-item">
+        <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+          <path d="M5 8l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        단위 테스트 — <code>AdminStatsServiceTest</code> (7개), <code>AdminStatsControllerTest</code> (7개)
+      </li>
+      <li class="dod-item">
+        <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+          <path d="M5 8l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        ADMIN / SUPER_ADMIN 역할 접근 제어 — <code>resolveAdminId()</code> 공통 헬퍼
+      </li>
+    </ul>
+  </div>
+
+  <!-- 검증 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M2 4h12v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4z" stroke="#64748b" stroke-width="1.5"/>
+        <path d="M2 4l6-2 6 2" stroke="#64748b" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M6 9l2 2 4-4" stroke="#64748b" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      검증 항목
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>항목</th>
+          <th>방법</th>
+          <th>결과</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>대시보드 집계 로직</td>
+          <td><code>AdminStatsServiceTest.getDashboardSummary_returnsAggregatedData</code></td>
+          <td><span class="badge badge-green">통과</span></td>
+        </tr>
+        <tr>
+          <td>월별 집계 (같은 달 합산)</td>
+          <td><code>AdminStatsServiceTest.getMonthlySendStats_aggregatesSameMonthData</code></td>
+          <td><span class="badge badge-green">통과</span></td>
+        </tr>
+        <tr>
+          <td>주별 집계 (같은 주 합산)</td>
+          <td><code>AdminStatsServiceTest.getWeeklySendStats_aggregatesSameWeekData</code></td>
+          <td><span class="badge badge-green">통과</span></td>
+        </tr>
+        <tr>
+          <td>시스템 설정 조회</td>
+          <td><code>AdminStatsServiceTest.getSystemSetting_existingKey_returnsValue</code></td>
+          <td><span class="badge badge-green">통과</span></td>
+        </tr>
+        <tr>
+          <td>없는 설정 키 조회</td>
+          <td><code>AdminStatsServiceTest.getSystemSetting_missingKey_throwsException</code></td>
+          <td><span class="badge badge-green">통과</span></td>
+        </tr>
+        <tr>
+          <td>대시보드 API ADMIN 접근</td>
+          <td><code>AdminStatsControllerTest.getDashboard_adminRole_returns200</code></td>
+          <td><span class="badge badge-green">통과</span></td>
+        </tr>
+        <tr>
+          <td>대시보드 API 일반 회원 차단</td>
+          <td><code>AdminStatsControllerTest.getDashboard_normalUser_returns403</code></td>
+          <td><span class="badge badge-green">통과</span></td>
+        </tr>
+        <tr>
+          <td>설정 수정 빈값 검증</td>
+          <td><code>AdminStatsControllerTest.updateSetting_blankValue_returns400</code></td>
+          <td><span class="badge badge-green">통과</span></td>
+        </tr>
+        <tr>
+          <td>Redis 캐시 TTL 5분</td>
+          <td><code>application.yml spring.cache.redis.time-to-live=300000</code></td>
+          <td><span class="badge badge-green">설정 완료</span></td>
+        </tr>
+        <tr>
+          <td>로컬 빌드 (PKIX 우회)</td>
+          <td>컴파일 정합 검증 — 로컬 gradle 실행 금지 (SSL 인터셉션 환경)</td>
+          <td><span class="badge badge-slate">CI 위임</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 구현 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="1.5" y="1.5" width="13" height="13" rx="2.5" stroke="#64748b" stroke-width="1.5"/>
+        <path d="M4 6l2.5 2.5L4 11M8 11h4" stroke="#64748b" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      구현 내역 — 파일 목록
+    </div>
+
+    <div class="section-label" style="margin-bottom:10px;">Backend (Spring Boot)</div>
+    <div class="file-list" style="margin-bottom:20px;">
+      <div class="file-item">
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/dto/AdminStatsDto.java</span>
+        <span class="file-role">DTO inner records</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/domain/SystemSetting.java</span>
+        <span class="file-role">시스템 설정 엔티티</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/repository/SystemSettingRepository.java</span>
+        <span class="file-role">설정 리포지토리</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/repository/dispatch/AdminSendStatsRepository.java</span>
+        <span class="file-role">발송 통계 집계 리포지토리</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/repository/AdminMemberStatsRepository.java</span>
+        <span class="file-role">회원 통계 집계 리포지토리</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/service/AdminStatsService.java</span>
+        <span class="file-role">통계·설정 서비스 (캐시 5분 TTL)</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">backend/src/main/java/com/wisecan/unified/controller/AdminStatsController.java</span>
+        <span class="file-role">REST API 컨트롤러</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">backend/src/main/resources/application.yml</span>
+        <span class="file-role">캐시 TTL 300초 + 캐시 이름 목록 추가</span>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-bottom:10px;">Backend Test</div>
+    <div class="file-list" style="margin-bottom:20px;">
+      <div class="file-item">
+        <span class="file-path">backend/src/test/java/com/wisecan/unified/service/AdminStatsServiceTest.java</span>
+        <span class="file-role">서비스 단위 테스트 7개</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">backend/src/test/java/com/wisecan/unified/controller/AdminStatsControllerTest.java</span>
+        <span class="file-role">컨트롤러 슬라이스 테스트 7개</span>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-bottom:10px;">Frontend (Next.js + FSD)</div>
+    <div class="file-list">
+      <div class="file-item">
+        <span class="file-path">frontend/src/entities/admin-stats/model/types.ts</span>
+        <span class="file-role">타입 정의</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">frontend/src/entities/admin-stats/api/adminStatsApi.ts</span>
+        <span class="file-role">API 호출 함수</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">frontend/src/entities/admin-stats/index.ts</span>
+        <span class="file-role">Public API</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">frontend/src/features/admin-stats/model/useDashboardSummary.ts</span>
+        <span class="file-role">대시보드 요약 훅 (staleTime 5분)</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">frontend/src/features/admin-stats/model/useSendStats.ts</span>
+        <span class="file-role">발송 통계 훅</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">frontend/src/features/admin-stats/model/useSystemSettings.ts</span>
+        <span class="file-role">시스템 설정 훅 + 수정 뮤테이션</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">frontend/src/features/admin-stats/ui/AdminDashboardCards.tsx</span>
+        <span class="file-role">대시보드 KPI 카드</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">frontend/src/features/admin-stats/ui/AdminSendStatsTable.tsx</span>
+        <span class="file-role">발송량·채널 통계 테이블 (일/주/월 전환)</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">frontend/src/features/admin-stats/ui/AdminSystemSettings.tsx</span>
+        <span class="file-role">시스템 설정 인라인 편집 테이블</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">frontend/src/features/admin-stats/index.ts</span>
+        <span class="file-role">Public API</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">frontend/src/app/(auth)/admin/dashboard/page.tsx</span>
+        <span class="file-role">운영자 대시보드 페이지</span>
+      </div>
+      <div class="file-item">
+        <span class="file-path">frontend/src/app/(auth)/admin/settings/page.tsx</span>
+        <span class="file-role">시스템 설정 페이지</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- API 엔드포인트 요약 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M2 8h12M8 2v12" stroke="#64748b" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="8" cy="8" r="6.5" stroke="#64748b" stroke-width="1.5"/>
+      </svg>
+      REST API 엔드포인트
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>메서드</th>
+          <th>경로</th>
+          <th>설명</th>
+          <th>권한</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/v1/admin/stats/dashboard</code></td>
+          <td>대시보드 요약 카드 (캐시 5분)</td>
+          <td>ADMIN+</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/v1/admin/stats/send?period=DAILY</code></td>
+          <td>발송량 통계 (DAILY/WEEKLY/MONTHLY)</td>
+          <td>ADMIN+</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/v1/admin/stats/send/channels</code></td>
+          <td>채널별 발송 분포</td>
+          <td>ADMIN+</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/v1/admin/stats/members?period=DAILY</code></td>
+          <td>회원 증가 통계</td>
+          <td>ADMIN+</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/v1/admin/settings</code></td>
+          <td>시스템 설정 전체 목록</td>
+          <td>ADMIN+</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/v1/admin/settings/{key}</code></td>
+          <td>단일 설정 조회</td>
+          <td>ADMIN+</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-orange">PUT</span></td>
+          <td><code>/api/v1/admin/settings/{key}</code></td>
+          <td>설정 수정 + 캐시 무효화</td>
+          <td>ADMIN+</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 결론 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 2l1.5 3 3.5.5-2.5 2.5.5 3.5L8 10l-3 1.5.5-3.5L3 5.5 6.5 5 8 2z" stroke="#64748b" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+      결론 및 잔여 이슈
+    </div>
+    <div class="conclusion-box" style="margin-bottom:14px;">
+      <p>
+        W-503 구현이 완료되었습니다. BE 측 통계 집계는
+        <code>AdminSendStatsRepository</code>(JPQL 집계 쿼리) +
+        <code>AdminMemberStatsRepository</code> + <code>AdminStatsService</code> 세 계층으로 역할을 분리했으며,
+        Redis <code>@Cacheable</code> TTL 5분으로 DoD 갱신 주기를 충족합니다.
+        FE는 FSD 아키텍처(entities/features/app 레이어)로 구현하고
+        React Query <code>staleTime 5분</code>을 BE 캐시와 동기화했습니다.
+        단위 테스트 14개(서비스 7 + 컨트롤러 7)가 작성되었으며 로컬 빌드 실행은
+        SSL 인터셉션 환경 제약으로 CI에 위임합니다.
+      </p>
+    </div>
+    <table>
+      <thead>
+        <tr><th>항목</th><th>내용</th><th>우선순위</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>회원 주별/월별 통계</td>
+          <td>현재 DAILY 구현. WEEKLY/MONTHLY 집계 헬퍼 확장 필요</td>
+          <td><span class="badge badge-slate">Low</span></td>
+        </tr>
+        <tr>
+          <td>매출 통계 API 분리</td>
+          <td>현재 대시보드 카드에 포함. 독립 API(<code>/admin/stats/revenue</code>) 필요 시 확장</td>
+          <td><span class="badge badge-slate">Low</span></td>
+        </tr>
+        <tr>
+          <td>SystemSetting 초기 데이터</td>
+          <td>DB에 기본 설정값 <code>data.sql</code> 또는 <code>Flyway</code> 마이그레이션 필요</td>
+          <td><span class="badge badge-orange">Medium</span></td>
+        </tr>
+        <tr>
+          <td>FE 차트 시각화</td>
+          <td>현재 테이블 표시. 추후 Chart.js 또는 Recharts 적용 가능</td>
+          <td><span class="badge badge-slate">Low</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

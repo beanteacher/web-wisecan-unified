@@ -1,0 +1,7 @@
+# Gradle wrapper 스크립트는 Linux 컨테이너/CI 에서 실행되므로 LF 고정
+gradlew text eol=lf
+# Windows 배치 스크립트는 CRLF 유지
+*.bat text eol=crlf
+*.cmd text eol=crlf
+# 바이너리 — 줄바꿈 정규화 금지
+*.jar binary

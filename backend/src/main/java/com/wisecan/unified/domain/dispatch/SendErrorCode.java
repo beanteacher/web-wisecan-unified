@@ -34,7 +34,11 @@ public enum SendErrorCode {
 
     // ── 망 분리 (W-205) ────────────────────────────────────────────
     TEST_KEY_PRODUCTION_ROUTE_DENIED("테스트 키로는 상용망 발송을 요청할 수 없습니다."),
-    PRODUCTION_KEY_TEST_ROUTE_DENIED("상용 키로는 테스트망 발송을 요청할 수 없습니다.");
+    PRODUCTION_KEY_TEST_ROUTE_DENIED("상용 키로는 테스트망 발송을 요청할 수 없습니다."),
+
+    // ── 카카오·RCS 템플릿 (W-305) ──────────────────────────────────
+    TEMPLATE_REQUIRED("카카오/RCS 채널 발송 시 템플릿 코드는 필수입니다."),
+    TEMPLATE_NOT_APPROVED("템플릿이 승인되지 않았거나 사용 불가 상태입니다.");
 
     private final String defaultMessage;
 

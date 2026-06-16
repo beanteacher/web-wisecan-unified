@@ -75,7 +75,7 @@ class SendValidationServiceTest {
 
     private SendValidationContext ctx() {
         return new SendValidationContext(1L, 10L, ApiKeyType.TEST, "01012345678",
-                SendChannel.SMS, "안녕하세요", false, 1, 10L, NetworkType.TEST);
+                SendChannel.SMS, "안녕하세요", false, 1, 10L, NetworkType.TEST, null);
     }
 
     @Test

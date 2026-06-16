@@ -37,7 +37,7 @@ class CallerWhitelistGateTest {
 
     private SendValidationContext ctx(String callbackNumber) {
         return new SendValidationContext(1L, 10L, ApiKeyType.TEST, callbackNumber,
-                SendChannel.SMS, "안녕하세요", false, 1, 10L, NetworkType.TEST);
+                SendChannel.SMS, "안녕하세요", false, 1, 10L, NetworkType.TEST, null);
     }
 
     private ApiKey keyWithWhitelist(String allowedRaw) {

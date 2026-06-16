@@ -22,7 +22,7 @@ class SpamKeywordGateTest {
 
     private SendValidationContext ctx(String body) {
         return new SendValidationContext(1L, 10L, ApiKeyType.TEST, "01012345678",
-                SendChannel.SMS, body, false, 1, 10L, NetworkType.TEST);
+                SendChannel.SMS, body, false, 1, 10L, NetworkType.TEST, null);
     }
 
     @Test

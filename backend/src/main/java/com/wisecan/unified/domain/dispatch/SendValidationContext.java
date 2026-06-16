@@ -16,6 +16,7 @@ import com.wisecan.unified.domain.ApiKeyType;
  * @param recipientCount 수신자 수 (잔액 사전 평가에 사용)
  * @param unitCost       건당 발송 단가 (원화, 잔액 사전 평가에 사용)
  * @param networkType    요청된 발송 망 유형 — TEST / PRODUCTION (W-205)
+ * @param templateCode  카카오/RCS 템플릿 코드 또는 messagebaseId (W-305, nullable)
  */
 public record SendValidationContext(
         Long memberId,
@@ -27,7 +28,8 @@ public record SendValidationContext(
         boolean isAdvertisement,
         int recipientCount,
         long unitCost,
-        NetworkType networkType
+        NetworkType networkType,
+        String templateCode
 ) {
     /** 총 예상 차감액 */
     public long totalCost() {

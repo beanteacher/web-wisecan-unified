@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>W-305 보고서 — 카카오·RCS 템플릿/브랜드</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* ── 헤더 ── */
+    .report-header { margin-bottom: 32px; }
+    .report-header .badge-wbs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .report-header .meta-date {
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    /* ── 카드 ── */
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title .icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+    }
+    .icon-blue  { background: #dbeafe; color: #1d4ed8; }
+    .icon-green { background: #dcfce7; color: #15803d; }
+    .icon-amber { background: #fef9c3; color: #92400e; }
+    .icon-purple{ background: #ede9fe; color: #6d28d9; }
+    .icon-rose  { background: #ffe4e6; color: #be123c; }
+
+    /* ── 섹션 헤더 ── */
+    .section-header {
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    /* ── DoD 체크리스트 ── */
+    .dod-list { list-style: none; }
+    .dod-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid #f8fafc;
+      font-size: 13px;
+      color: #334155;
+    }
+    .dod-list li:last-child { border-bottom: none; }
+    .check-icon {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      background: #dcfce7;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .check-icon svg { width: 10px; height: 10px; }
+
+    /* ── 파일 트리 ── */
+    .file-tree {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 12px;
+      line-height: 1.9;
+      color: #334155;
+    }
+    .file-tree .dir  { color: #2563eb; font-weight: 600; }
+    .file-tree .new  { color: #15803d; }
+    .file-tree .mod  { color: #d97706; }
+    .file-tree .test { color: #7c3aed; }
+
+    /* ── 테이블 ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e2e8f0;
+      white-space: nowrap;
+    }
+    td {
+      padding: 9px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #334155;
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafbfc; }
+    td code, th code {
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 11.5px;
+      background: #f1f5f9;
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: #0f172a;
+    }
+
+    /* ── 배지 ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+    .badge-amber  { background: #fef9c3; color: #92400e; }
+    .badge-purple { background: #ede9fe; color: #6d28d9; }
+    .badge-rose   { background: #ffe4e6; color: #be123c; }
+    .badge-slate  { background: #f1f5f9; color: #475569; }
+
+    /* ── 키포인트 박스 ── */
+    .keypoint {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid #16a34a;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #166534;
+      margin-bottom: 12px;
+    }
+    .warning-box {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #92400e;
+      margin-bottom: 12px;
+    }
+
+    /* ── 그리드 ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    .stat-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+    .stat-card .stat-label {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .stat-card .stat-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .stat-card .stat-sub {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    /* ── 구분선 ── */
+    .divider { border: none; border-top: 1px solid #e8eaed; margin: 20px 0; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── 헤더 ── -->
+  <div class="report-header">
+    <div class="badge-wbs">WBS W-305</div>
+    <h1>카카오·RCS 템플릿/브랜드</h1>
+    <div class="meta-date">2026-06-16</div>
+  </div>
+
+  <!-- ── 요약 지표 ── -->
+  <div class="grid-3" style="margin-bottom:20px;">
+    <div class="stat-card">
+      <div class="stat-label">상태</div>
+      <div class="stat-value"><span class="badge badge-green">완료</span></div>
+      <div class="stat-sub">DoD 전항목 충족</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">신규 파일</div>
+      <div class="stat-value">34</div>
+      <div class="stat-sub">BE 24 · FE 10</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">단위 테스트</div>
+      <div class="stat-value">5종</div>
+      <div class="stat-sub">TDD 방식</div>
+    </div>
+  </div>
+
+  <!-- ── DoD 체크리스트 ── -->
+  <div class="card">
+    <div class="card-title">
+      <span class="icon icon-green">✓</span>
+      완료 기준 (DoD)
+    </div>
+    <ul class="dod-list">
+      <li>
+        <span class="check-icon">
+          <svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
+        <span>중계사 인터페이스(Adapter) 정상 — <code>KakaoTemplateAdapter</code> · <code>RcsTemplateAdapter</code> 인터페이스 + Stub 구현체(<code>@ConditionalOnProperty</code>)</span>
+      </li>
+      <li>
+        <span class="check-icon">
+          <svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
+        <span>이관 처리 큐 — <code>TemplateTransferQueue</code> 엔티티 + 상태 머신(PENDING→IN_PROGRESS→COMPLETED/REJECTED/CANCELLED) + REST API</span>
+      </li>
+      <li>
+        <span class="check-icon">
+          <svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
+        <span>발송 검증 게이트 — <code>KakaoTemplateApprovalGate</code>(order=40) · <code>RcsTemplateApprovalGate</code>(order=41) <code>SendChannel</code> enum 직접 비교</span>
+      </li>
+      <li>
+        <span class="check-icon">
+          <svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
+        <span>Redis 승인 상태 캐시 — TTL 10분, 발송 hot path 가속 (<code>tmpl:approved:kakao:{memberId}:{templateCode}</code>)</span>
+      </li>
+      <li>
+        <span class="check-icon">
+          <svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
+        <span>BE API — <code>GET/POST/PUT/DELETE /api/v1/templates/kakao</code> · <code>GET /api/v1/templates/rcs/brands</code> · 이관 신청/운영자 처리 엔드포인트</span>
+      </li>
+      <li>
+        <span class="check-icon">
+          <svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
+        <span>FE 화면 — <code>KakaoTemplatePanel</code> · <code>RcsTemplatePanel</code> · <code>TemplateTransferPanel</code> + <code>/templates</code> 탭 페이지</span>
+      </li>
+      <li>
+        <span class="check-icon">
+          <svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
+        <span>단위 테스트 5종 — TDD 방식, <code>KakaoTemplateServiceTest</code> · <code>RcsTemplateServiceTest</code> · <code>TemplateTransferServiceTest</code> · Gate 테스트 2종</span>
+      </li>
+      <li>
+        <span class="check-icon">
+          <svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
+        <span>INV-02 준수 — 중계사 식별자(<code>kko_profile_no</code>, <code>agency_id</code>) 미노출, Adapter 인터페이스와 응답 DTO에서 제외</span>
+      </li>
+      <li>
+        <span class="check-icon">
+          <svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
+        <span>MCP 도구 연동 — <code>TemplateTool</code> W-305 서비스 실연동 완료(RQ-MCP-012, 013)</span>
+      </li>
+      <li>
+        <span class="check-icon">
+          <svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
+        <span><code>SendValidationContext</code>에 <code>templateCode</code> 필드 추가 — 기존 호출부(2개 서비스 + 11개 테스트) 전수 수정</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ── 아키텍처 설계 핵심 ── -->
+  <div class="card">
+    <div class="card-title">
+      <span class="icon icon-blue">A</span>
+      아키텍처 설계 핵심
+    </div>
+
+    <div class="keypoint">
+      외부 발송 시스템의 DB(kko_template, rcs_template)는 본 서비스가 직접 쓰지 않는다.
+      Adapter 인터페이스를 통한 SELECT(조회)만 수행하며, 로컬·테스트 환경에서는
+      Stub 구현체(<code>@ConditionalOnProperty</code>)가 자동 활성화된다.
+    </div>
+
+    <div class="section-header" style="margin-top:16px;">패키지 격리 원칙</div>
+    <table style="margin-bottom:16px;">
+      <thead>
+        <tr>
+          <th>패키지</th>
+          <th>역할</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>domain/template/</code></td>
+          <td>Adapter 인터페이스, 도메인 레코드(KakaoTemplateInfo, RcsTemplateInfo), 상태 enum, TemplateTransferQueue 엔티티</td>
+        </tr>
+        <tr>
+          <td><code>adapter/template/</code></td>
+          <td>Stub 구현체 (StubKakaoTemplateAdapter, StubRcsTemplateAdapter)</td>
+        </tr>
+        <tr>
+          <td><code>repository/template/</code></td>
+          <td>TemplateTransferQueueRepository (JPA)</td>
+        </tr>
+        <tr>
+          <td><code>service/template/</code></td>
+          <td>비즈니스 로직 + Redis 캐싱</td>
+        </tr>
+        <tr>
+          <td><code>controller/template/</code></td>
+          <td>REST 엔드포인트 3종</td>
+        </tr>
+        <tr>
+          <td><code>domain/dispatch/gate/</code></td>
+          <td>발송 검증 게이트 2종 (Kakao order=40, RCS order=41)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-header">Redis 승인 상태 캐시 전략</div>
+    <table>
+      <thead>
+        <tr><th>캐시 키</th><th>TTL</th><th>값</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>tmpl:approved:kakao:{memberId}:{templateCode}</code></td>
+          <td>10분</td>
+          <td><code>"1"</code>=승인, <code>"0"</code>=미승인</td>
+        </tr>
+        <tr>
+          <td><code>tmpl:approved:rcs:{memberId}:{messagebaseId}</code></td>
+          <td>10분</td>
+          <td><code>"1"</code>=승인, <code>"0"</code>=미승인</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:#64748b;margin-top:8px;">
+      Redis 미설정 시 <code>@Nullable StringRedisTemplate</code>로 null-safe 처리 — DB 직접 조회 fallback.
+      수정/삭제 시 해당 키 즉시 evict.
+    </p>
+  </div>
+
+  <!-- ── 이관 처리 큐 상태 머신 ── -->
+  <div class="card">
+    <div class="card-title">
+      <span class="icon icon-amber">Q</span>
+      SMS17 이관 처리 큐 — 상태 머신
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>상태</th>
+          <th>전이 조건</th>
+          <th>담당</th>
+          <th>terminal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-amber">PENDING</span></td>
+          <td>회원이 이관 신청 (<code>requestTransfer</code>)</td>
+          <td>회원</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">IN_PROGRESS</span></td>
+          <td>운영자가 처리 시작 (<code>startProcess</code>)</td>
+          <td>운영자</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">COMPLETED</span></td>
+          <td>운영자가 승인 처리 (<code>processTransfer approve</code>)</td>
+          <td>운영자</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-rose">REJECTED</span></td>
+          <td>운영자가 거부 + 사유 입력 (<code>processTransfer reject</code>)</td>
+          <td>운영자</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-slate">CANCELLED</span></td>
+          <td>PENDING 상태에서 회원이 취소 (<code>cancelTransfer</code>)</td>
+          <td>회원</td>
+          <td>Y</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:#64748b;margin-top:8px;">
+      동일 회원의 동일 템플릿 코드로 PENDING/IN_PROGRESS 중복 신청 불가.
+      IN_PROGRESS 상태에서는 회원 취소 불가.
+    </p>
+  </div>
+
+  <!-- ── 신규 생성 파일 목록 ── -->
+  <div class="card">
+    <div class="card-title">
+      <span class="icon icon-purple">F</span>
+      신규 생성 파일
+    </div>
+
+    <div class="section-header">백엔드 (BE)</div>
+    <div class="file-tree">
+      <span class="dir">backend/src/main/java/com/wisecan/unified/</span><br>
+      &nbsp;&nbsp;<span class="dir">domain/template/</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">KakaoInspectionStatus.java</span> — enum REG/REQ/APR/REJ<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">KakaoTemplateStatus.java</span> — enum A/S/N/D<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">RcsApprovalResult.java</span> — enum (외부값 매핑)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">RcsTemplateUsageStatus.java</span> — enum READY/PAUSE<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">TemplateTransferStatus.java</span> — enum 5종 + isTerminal()<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">TemplateTransferQueue.java</span> — @Entity, 상태 머신 메서드<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">KakaoTemplateInfo.java</span> — record, isSendable()<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">RcsTemplateInfo.java</span> — record, isSendable()<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">KakaoTemplateAdapter.java</span> — 인터페이스<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">KakaoTemplateRegisterRequest.java</span> — record<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">RcsTemplateAdapter.java</span> — 인터페이스<br>
+      &nbsp;&nbsp;<span class="dir">adapter/template/</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">StubKakaoTemplateAdapter.java</span> — Stub (matchIfMissing=true)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">StubRcsTemplateAdapter.java</span> — Stub (matchIfMissing=true)<br>
+      &nbsp;&nbsp;<span class="dir">repository/template/</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">TemplateTransferQueueRepository.java</span><br>
+      &nbsp;&nbsp;<span class="dir">dto/template/</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">TemplateDto.java</span> — inner record 7종<br>
+      &nbsp;&nbsp;<span class="dir">service/template/</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">KakaoTemplateService.java</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">RcsTemplateService.java</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">TemplateTransferService.java</span><br>
+      &nbsp;&nbsp;<span class="dir">controller/template/</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">KakaoTemplateController.java</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">RcsTemplateController.java</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">TemplateTransferController.java</span><br>
+      &nbsp;&nbsp;<span class="dir">domain/dispatch/gate/</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">KakaoTemplateApprovalGate.java</span> — order=40<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">RcsTemplateApprovalGate.java</span> — order=41
+    </div>
+
+    <div class="section-header" style="margin-top:20px;">백엔드 테스트</div>
+    <div class="file-tree">
+      <span class="dir">backend/src/test/java/com/wisecan/unified/</span><br>
+      &nbsp;&nbsp;<span class="test">service/template/KakaoTemplateServiceTest.java</span><br>
+      &nbsp;&nbsp;<span class="test">service/template/RcsTemplateServiceTest.java</span><br>
+      &nbsp;&nbsp;<span class="test">service/template/TemplateTransferServiceTest.java</span><br>
+      &nbsp;&nbsp;<span class="test">domain/dispatch/gate/KakaoTemplateApprovalGateTest.java</span><br>
+      &nbsp;&nbsp;<span class="test">domain/dispatch/gate/RcsTemplateApprovalGateTest.java</span>
+    </div>
+
+    <div class="section-header" style="margin-top:20px;">프론트엔드 (FE)</div>
+    <div class="file-tree">
+      <span class="dir">frontend/src/</span><br>
+      &nbsp;&nbsp;<span class="dir">entities/template/</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">model/types.ts</span> — Kakao/RCS/Transfer 타입 정의<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">api/templateApi.ts</span> — API 함수 12종<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">index.ts</span> — barrel export<br>
+      &nbsp;&nbsp;<span class="dir">features/template/</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">model/useKakaoTemplates.ts</span> — 훅 5종<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">model/useRcsTemplates.ts</span> — 훅 3종<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">model/useTemplateTransfer.ts</span> — 훅 3종<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">ui/KakaoTemplatePanel.tsx</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">ui/RcsTemplatePanel.tsx</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">ui/TemplateTransferPanel.tsx</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">index.ts</span> — barrel export<br>
+      &nbsp;&nbsp;<span class="dir">app/(auth)/templates/</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">page.tsx</span> — 탭 기반 통합 페이지
+    </div>
+  </div>
+
+  <!-- ── 수정 파일 ── -->
+  <div class="card">
+    <div class="card-title">
+      <span class="icon icon-amber">M</span>
+      기존 파일 수정
+    </div>
+    <table>
+      <thead>
+        <tr><th>파일</th><th>변경 내용</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>domain/dispatch/SendErrorCode.java</code></td>
+          <td><code>TEMPLATE_REQUIRED</code>, <code>TEMPLATE_NOT_APPROVED</code> enum 항목 추가</td>
+        </tr>
+        <tr>
+          <td><code>domain/dispatch/SendValidationContext.java</code></td>
+          <td><code>String templateCode</code> 필드 추가 (11번째 파라미터)</td>
+        </tr>
+        <tr>
+          <td><code>service/dispatch/WebSendService.java</code></td>
+          <td><code>SendValidationContext</code> 생성자 호출에 <code>null</code>(templateCode) 추가</td>
+        </tr>
+        <tr>
+          <td><code>service/dispatch/SendRequestService.java</code></td>
+          <td>동일</td>
+        </tr>
+        <tr>
+          <td>기존 테스트 11개 파일</td>
+          <td><code>SendValidationContext</code> 생성자 11번째 인자 <code>, null</code> 추가</td>
+        </tr>
+        <tr>
+          <td><code>domain/dispatch/gate/KakaoTemplateApprovalGate.java</code></td>
+          <td>채널 비교를 String → <code>SendChannel.KAKAO</code> enum 직접 비교로 수정 (버그 수정)</td>
+        </tr>
+        <tr>
+          <td><code>domain/dispatch/gate/RcsTemplateApprovalGate.java</code></td>
+          <td>채널 비교를 String → <code>SendChannel.RCS</code> enum 직접 비교로 수정 (버그 수정)</td>
+        </tr>
+        <tr>
+          <td><code>mcp/TemplateTool.java</code></td>
+          <td>Stub 응답 → W-305 서비스 실연동 완료 (templateKakaoList, templateRcsBrands, templateRcsList 3종)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── API 엔드포인트 ── -->
+  <div class="card">
+    <div class="card-title">
+      <span class="icon icon-rose">R</span>
+      REST API 엔드포인트
+    </div>
+    <table>
+      <thead>
+        <tr><th>메서드</th><th>경로</th><th>설명</th><th>권한</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/v1/templates/kakao</code></td>
+          <td>카카오 템플릿 목록</td>
+          <td>인증</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/v1/templates/kakao/{templateCode}</code></td>
+          <td>카카오 템플릿 단건</td>
+          <td>인증</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">POST</span></td>
+          <td><code>/api/v1/templates/kakao</code></td>
+          <td>카카오 템플릿 등록 신청</td>
+          <td>인증</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-amber">PUT</span></td>
+          <td><code>/api/v1/templates/kakao/{templateCode}</code></td>
+          <td>카카오 템플릿 수정</td>
+          <td>인증</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-rose">DELETE</span></td>
+          <td><code>/api/v1/templates/kakao/{templateCode}</code></td>
+          <td>카카오 템플릿 삭제</td>
+          <td>인증</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/v1/templates/rcs/brands</code></td>
+          <td>RCS 브랜드 목록</td>
+          <td>인증</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/v1/templates/rcs/brands/{brandId}</code></td>
+          <td>특정 브랜드 템플릿 목록</td>
+          <td>인증</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/v1/templates/rcs/{messagebaseId}</code></td>
+          <td>RCS 템플릿 단건</td>
+          <td>인증</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/v1/templates/transfer</code></td>
+          <td>내 이관 신청 목록</td>
+          <td>인증</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">POST</span></td>
+          <td><code>/api/v1/templates/transfer</code></td>
+          <td>이관 신청</td>
+          <td>인증</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-rose">DELETE</span></td>
+          <td><code>/api/v1/templates/transfer/{id}</code></td>
+          <td>이관 신청 취소</td>
+          <td>인증</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/v1/templates/admin/queue</code></td>
+          <td>PENDING 큐 목록 (운영자)</td>
+          <td>ADMIN</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">POST</span></td>
+          <td><code>/api/v1/templates/admin/{id}/start</code></td>
+          <td>처리 시작 (운영자)</td>
+          <td>ADMIN</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">POST</span></td>
+          <td><code>/api/v1/templates/admin/{id}/process</code></td>
+          <td>승인/거부 처리 (운영자)</td>
+          <td>ADMIN</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── 특이사항 ── -->
+  <div class="card">
+    <div class="card-title">
+      <span class="icon icon-amber">!</span>
+      특이사항 및 제약
+    </div>
+
+    <div class="warning-box">
+      로컬 환경은 SSL 인터셉션으로 외부 다운로드(PKIX) 실패 가능.
+      Stub Adapter(<code>wisecan.adapter.kakao.stub=true</code>)를 기본 활성화해
+      외부 DB 없이도 컴파일·테스트가 동작하도록 설계했다.
+      실제 카카오/RCS DB 연동 시 운영 Adapter 구현체를 별도 모듈로 추가한다.
+    </div>
+
+    <ul style="list-style:none;font-size:13px;color:#334155;line-height:2;">
+      <li>INV-02 — <code>kko_profile_no</code>, <code>agency_id</code> 등 중계사 식별자는 응답 DTO/Adapter 인터페이스에서 완전 제외</li>
+      <li>Gate 채널 비교 — 초기 <code>String.equalsIgnoreCase()</code>로 작성되어 <code>SendChannel</code> enum과 타입 불일치 버그 발생, <code>ctx.channel() != SendChannel.KAKAO</code> enum 직접 비교로 수정</li>
+      <li>MCP TemplateTool — <code>ApiKeyPrincipal.memberId()</code>로 <code>MemberRepository.findById()</code> 조회 후 email을 서비스에 전달 (기존 서비스 시그니처 유지)</li>
+      <li>FE 템플릿 등록 모달 — 카카오 비즈니스 채널 연동 이후 실제 폼으로 교체 예정</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

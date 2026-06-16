@@ -51,7 +51,7 @@ class DailyLimitGateTest {
 
     private SendValidationContext ctx(int recipientCount) {
         return new SendValidationContext(1L, 10L, ApiKeyType.TEST, "01012345678",
-                SendChannel.SMS, "안녕하세요", false, recipientCount, 10L, NetworkType.TEST);
+                SendChannel.SMS, "안녕하세요", false, recipientCount, 10L, NetworkType.TEST, null);
     }
 
     private ApiKey keyWithLimit(Integer dailyLimit) {

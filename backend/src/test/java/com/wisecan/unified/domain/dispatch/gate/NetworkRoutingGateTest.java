@@ -25,7 +25,7 @@ class NetworkRoutingGateTest {
 
     private SendValidationContext ctx(ApiKeyType keyType, NetworkType networkType) {
         return new SendValidationContext(1L, 10L, keyType, "01012345678",
-                SendChannel.SMS, "안녕하세요", false, 1, 10L, networkType);
+                SendChannel.SMS, "안녕하세요", false, 1, 10L, networkType, null);
     }
 
     // ── DoD 핵심: 테스트 키 → 상용망 차단 ─────────────────────────────
@@ -85,7 +85,7 @@ class NetworkRoutingGateTest {
     void testKey_productionNetwork_messageContainsApiKeyId() {
         SendValidationContext ctxWithKeyId = new SendValidationContext(
                 5L, 42L, ApiKeyType.TEST, "01012345678",
-                SendChannel.SMS, "메시지", false, 1, 10L, NetworkType.PRODUCTION);
+                SendChannel.SMS, "메시지", false, 1, 10L, NetworkType.PRODUCTION, null);
 
         assertThatThrownBy(() -> gate.validate(ctxWithKeyId))
                 .isInstanceOf(SendValidationException.class)
@@ -97,7 +97,7 @@ class NetworkRoutingGateTest {
     void productionKey_testNetwork_messageContainsApiKeyId() {
         SendValidationContext ctxWithKeyId = new SendValidationContext(
                 5L, 99L, ApiKeyType.PRODUCTION, "01012345678",
-                SendChannel.SMS, "메시지", false, 1, 10L, NetworkType.TEST);
+                SendChannel.SMS, "메시지", false, 1, 10L, NetworkType.TEST, null);
 
         assertThatThrownBy(() -> gate.validate(ctxWithKeyId))
                 .isInstanceOf(SendValidationException.class)

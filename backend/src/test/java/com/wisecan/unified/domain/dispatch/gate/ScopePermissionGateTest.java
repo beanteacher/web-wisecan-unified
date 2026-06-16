@@ -37,7 +37,7 @@ class ScopePermissionGateTest {
 
     private SendValidationContext ctx(SendChannel channel) {
         return new SendValidationContext(1L, 10L, ApiKeyType.TEST, "01012345678",
-                channel, "안녕하세요", false, 1, 10L, NetworkType.TEST);
+                channel, "안녕하세요", false, 1, 10L, NetworkType.TEST, null);
     }
 
     private ApiKey activeKey(Set<ApiKeyScope> scopes) {

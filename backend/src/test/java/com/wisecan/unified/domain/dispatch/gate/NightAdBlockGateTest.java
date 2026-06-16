@@ -25,7 +25,7 @@ class NightAdBlockGateTest {
 
     private SendValidationContext ctx(boolean isAd) {
         return new SendValidationContext(1L, 10L, ApiKeyType.TEST, "01012345678",
-                SendChannel.SMS, "(광고) 할인 안내. 수신거부 080-000-0000", isAd, 1, 10L, NetworkType.TEST);
+                SendChannel.SMS, "(광고) 할인 안내. 수신거부 080-000-0000", isAd, 1, 10L, NetworkType.TEST, null);
     }
 
     // ── isNightTime() 정적 메서드 단위 검증 ──────────────────────────

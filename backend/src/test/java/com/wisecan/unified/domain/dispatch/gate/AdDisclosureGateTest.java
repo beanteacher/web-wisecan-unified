@@ -20,7 +20,7 @@ class AdDisclosureGateTest {
 
     private SendValidationContext ctx(boolean isAd, String body) {
         return new SendValidationContext(1L, 10L, ApiKeyType.TEST, "01012345678",
-                SendChannel.SMS, body, isAd, 1, 10L, NetworkType.TEST);
+                SendChannel.SMS, body, isAd, 1, 10L, NetworkType.TEST, null);
     }
 
     @Test

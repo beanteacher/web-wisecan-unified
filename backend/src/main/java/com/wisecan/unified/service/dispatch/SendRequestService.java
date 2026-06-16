@@ -262,7 +262,8 @@ public class SendRequestService {
                 isAdvertisement,
                 recipientCount,
                 unitCost,
-                networkType
+                networkType,
+                null
         );
     }
 

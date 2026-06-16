@@ -45,7 +45,7 @@ class BalanceGateTest {
     /** recipientCount × unitCost 로 totalCost 계산 */
     private SendValidationContext ctx(int recipientCount, long unitCost) {
         return new SendValidationContext(1L, 10L, ApiKeyType.TEST, "01012345678",
-                SendChannel.SMS, "안녕하세요", false, recipientCount, unitCost, NetworkType.TEST);
+                SendChannel.SMS, "안녕하세요", false, recipientCount, unitCost, NetworkType.TEST, null);
     }
 
     @Test
@@ -53,7 +53,7 @@ class BalanceGateTest {
     void zeroCost_passes_withoutDbCall() {
         // recipientCount=1, unitCost=0 → totalCost=0
         SendValidationContext zeroCtx = new SendValidationContext(
-                1L, 10L, ApiKeyType.TEST, "01012345678", SendChannel.SMS, "안녕하세요", false, 1, 0L, NetworkType.TEST);
+                1L, 10L, ApiKeyType.TEST, "01012345678", SendChannel.SMS, "안녕하세요", false, 1, 0L, NetworkType.TEST, null);
 
         assertThatCode(() -> gate.validate(zeroCtx)).doesNotThrowAnyException();
         verify(redisTemplate, never()).opsForValue();

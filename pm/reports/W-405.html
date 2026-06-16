@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>W-405 보고서 — 잔액 부족 분기</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .report-header { margin-bottom: 32px; }
+    .report-header .badge-wbs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .report-header .meta-date { font-size: 13px; color: #64748b; }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .meta-item {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .meta-item .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .meta-item .value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e2228;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #f8f9fb;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f3f5;
+      vertical-align: top;
+      font-size: 13px;
+      color: #374151;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-orange { background: #fff7ed; color: #c2410c; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
+    .badge-blue   { background: #e8f0fe; color: #2563eb; }
+    .badge-purple { background: #f3e8ff; color: #7e22ce; }
+    .badge-red    { background: #fee2e2; color: #b91c1c; }
+    .badge-yellow { background: #fef9c3; color: #854d0e; }
+
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .check-list li .icon-wrap { margin-top: 1px; flex-shrink: 0; }
+    .check-list li .detail { color: #64748b; font-size: 12px; margin-top: 2px; }
+
+    .file-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .file-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .file-tag {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .file-tag-new { background: #dcfce7; color: #15803d; }
+    .file-tag-mod { background: #fef9c3; color: #854d0e; }
+    .file-path {
+      font-family: 'Courier New', Courier, monospace;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .conclusion-box {
+      border-left: 4px solid #2563eb;
+      padding: 16px 20px;
+      background: #f0f6ff;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 14px;
+    }
+    .conclusion-box p { font-size: 13px; color: #1e3a8a; line-height: 1.7; }
+
+    .issue-box {
+      border-left: 4px solid #f59e0b;
+      padding: 14px 20px;
+      background: #fffbeb;
+      border-radius: 0 8px 8px 0;
+    }
+    .issue-box .issue-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 6px;
+    }
+    .issue-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .issue-box ul li {
+      font-size: 12px;
+      color: #92400e;
+      padding-left: 12px;
+      position: relative;
+    }
+    .issue-box ul li::before {
+      content: '·';
+      position: absolute;
+      left: 0;
+    }
+
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .flow-step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .flow-step-line {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .flow-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .flow-dot-red    { background: #dc2626; }
+    .flow-dot-green  { background: #16a34a; }
+    .flow-dot-yellow { background: #d97706; }
+    .flow-dot-purple { background: #7e22ce; }
+
+    .flow-connector {
+      width: 2px;
+      flex: 1;
+      background: #e2e8f0;
+      min-height: 20px;
+      margin: 2px 0;
+    }
+    .flow-step:last-child .flow-connector { display: none; }
+    .flow-content {
+      padding-bottom: 20px;
+      flex: 1;
+    }
+    .flow-content strong { font-size: 13px; color: #0f172a; }
+    .flow-content p { font-size: 12px; color: #64748b; margin-top: 3px; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+    .stat-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .stat-box {
+      flex: 1;
+      min-width: 120px;
+      background: #f8f9fb;
+      border-radius: 10px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .stat-box .stat-num {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    .stat-box .stat-label {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .branch-card {
+      border: 1px solid #e8eaed;
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+    }
+    .branch-card:last-child { margin-bottom: 0; }
+    .branch-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .branch-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .branch-title { font-size: 13px; font-weight: 700; color: #0f172a; }
+    .branch-body { font-size: 12px; color: #64748b; margin-left: 34px; }
+    .branch-http { font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+    .http-200 { background: #dcfce7; color: #15803d; }
+    .http-207 { background: #fef9c3; color: #854d0e; }
+    .http-402 { background: #fee2e2; color: #b91c1c; }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      margin-bottom: 10px;
+      margin-top: 16px;
+    }
+    .section-label:first-child { margin-top: 0; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-wbs">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <rect width="12" height="12" rx="3" fill="#2563eb"/>
+        <path d="M3 6h6M3 4h4M3 8h5" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      M4 · W-405
+    </div>
+    <h1>잔액 부족 분기</h1>
+    <div class="meta-date">작성일 2026-06-16</div>
+  </div>
+
+  <!-- 작업 개요 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="7" stroke="#2563eb" stroke-width="1.5"/>
+        <path d="M8 5v4l2.5 1.5" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      작업 개요
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="label">마일스톤</div>
+        <div class="value">M4 — 과금</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">WBS ID</div>
+        <div class="value">W-405</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">스펙 참조</div>
+        <div class="value">02_FEATURE_SPEC §11.1</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">범위</div>
+        <div class="value">BE + FE</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">공수</div>
+        <div class="value">14mD · S9</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">상태</div>
+        <div class="value"><span class="badge badge-green">완료</span></div>
+      </div>
+      <div class="meta-item">
+        <div class="label">의존 WBS</div>
+        <div class="value">W-401 · W-402 · W-403</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">핵심 HTTP</div>
+        <div class="value">207 Multi-Status</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 구현 통계 -->
+  <div class="stat-row">
+    <div class="stat-box">
+      <div class="stat-num">4</div>
+      <div class="stat-label">분기 시나리오</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">6</div>
+      <div class="stat-label">신규 파일</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">3</div>
+      <div class="stat-label">수정 파일</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">5</div>
+      <div class="stat-label">단위 테스트</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">207 / 402</div>
+      <div class="stat-label">신규 HTTP 응답</div>
+    </div>
+  </div>
+
+  <!-- DoD 및 충족 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M2 10l4-4 3 3 5-6" stroke="#15803d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="14" cy="4" r="2" fill="#15803d"/>
+      </svg>
+      DoD(Definition of Done) 및 충족 여부
+    </div>
+    <ul class="check-list">
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+            <path d="M5 8l2 2 4-4" stroke="#15803d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div><strong>분기 1 — 자동결제 (AutoCharged)</strong> <span class="badge badge-green" style="margin-left:6px;">충족</span></div>
+          <div class="detail">AutoChargeConfig.isEnabled() = true 시 triggerIfNeeded() 호출 후 AutoCharged 반환, HTTP 200</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+            <path d="M5 8l2 2 4-4" stroke="#15803d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div><strong>분기 2 — 후불 (Postpaid)</strong> <span class="badge badge-green" style="margin-left:6px;">충족</span></div>
+          <div class="detail">자동결제 비활성 + PostpaidConfig.isActive() = true 시 Postpaid 반환, HTTP 200</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+            <path d="M5 8l2 2 4-4" stroke="#15803d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div><strong>분기 3 — 부분 발송 (Partial, HTTP 207)</strong> <span class="badge badge-green" style="margin-left:6px;">충족</span></div>
+          <div class="detail">partialChoice=true 시 currentBalance / unitCost 건만 수락, 나머지 rejectedNumbers 포함 207 반환</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+            <path d="M5 8l2 2 4-4" stroke="#15803d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div><strong>분기 4 — 전체 취소 (Cancelled, HTTP 402)</strong> <span class="badge badge-green" style="margin-left:6px;">충족</span></div>
+          <div class="detail">partialChoice=false 시 InsufficientFundsException → GlobalExceptionHandler → HTTP 402 Payment Required</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+            <path d="M5 8l2 2 4-4" stroke="#15803d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div><strong>단위 테스트 4분기 + 경계 케이스</strong> <span class="badge badge-green" style="margin-left:6px;">충족</span></div>
+          <div class="detail">InsufficientBalanceRouterTest — 5개 테스트 케이스, 각 분기 독립 검증</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 4분기 분기 로직 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 2v5M5 9l3 3 3-3" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M3 12h10" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      4분기 분기 로직 (02_FEATURE_SPEC §11.1)
+    </div>
+
+    <div class="branch-card">
+      <div class="branch-header">
+        <div class="branch-num" style="background:#dcfce7;color:#15803d;">1</div>
+        <div class="branch-title">자동결제 (AutoCharged)</div>
+        <span class="branch-http http-200">HTTP 200</span>
+      </div>
+      <div class="branch-body">
+        AutoChargeConfig.isEnabled() = true + expiresAt 미만 → AutoChargeService.triggerIfNeeded() 호출.
+        DB에서 잔액 재조회하여 부족액이 해소되면 AutoCharged(chargedAmount) 반환.
+        개인 회원·법인 모두 적용.
+      </div>
+    </div>
+
+    <div class="branch-card">
+      <div class="branch-header">
+        <div class="branch-num" style="background:#e8f0fe;color:#2563eb;">2</div>
+        <div class="branch-title">후불 (Postpaid)</div>
+        <span class="branch-http http-200">HTTP 200</span>
+      </div>
+      <div class="branch-body">
+        자동결제 비활성 + companyId != null + PostpaidConfig.isActive() = true → Postpaid(deferredAmount) 반환.
+        companyId = null(개인 회원)은 이 분기를 건너뜀.
+        PostpaidStatus.ACTIVE 상태 직접 확인 (isActive() 메서드).
+      </div>
+    </div>
+
+    <div class="branch-card">
+      <div class="branch-header">
+        <div class="branch-num" style="background:#fef9c3;color:#854d0e;">3</div>
+        <div class="branch-title">부분 발송 (Partial)</div>
+        <span class="branch-http http-207">HTTP 207</span>
+      </div>
+      <div class="branch-body">
+        자동결제·후불 모두 비활성 + partialChoice = true →
+        currentBalance / unitCost 건 수락, 나머지 rejectedNumbers 포함 Partial 반환.
+        PartialResponse: acceptedCount, rejectedCount, rejectedNumbers, rejectReason("INSUFFICIENT_BALANCE"), shortfall.
+      </div>
+    </div>
+
+    <div class="branch-card">
+      <div class="branch-header">
+        <div class="branch-num" style="background:#fee2e2;color:#b91c1c;">4</div>
+        <div class="branch-title">전체 취소 (Cancelled)</div>
+        <span class="branch-http http-402">HTTP 402</span>
+      </div>
+      <div class="branch-body">
+        자동결제·후불 모두 비활성 + partialChoice = false →
+        InsufficientFundsException(shortfall) throw → GlobalExceptionHandler HTTP 402 Payment Required.
+        응답 바디: ApiResponse.error("잔액이 부족합니다. 부족액: {N}원").
+      </div>
+    </div>
+  </div>
+
+  <!-- 분기 평가 흐름 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 4h10M3 8h7M3 12h5" stroke="#7e22ce" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      InsufficientBalanceRouter.route() 흐름
+    </div>
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="flow-step-line">
+          <div class="flow-dot">0</div>
+          <div class="flow-connector"></div>
+        </div>
+        <div class="flow-content">
+          <strong>DB 직접 조회 (캐시 우회)</strong>
+          <p>BalanceQueryService.getBalanceFromDb(memberId) — Redis 캐시 부정합 방지</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-line">
+          <div class="flow-dot flow-dot-green">1</div>
+          <div class="flow-connector"></div>
+        </div>
+        <div class="flow-content">
+          <strong>잔액 충분 여부 선체크 (race-condition 방어)</strong>
+          <p>currentBalance &gt;= totalCost → AutoCharged(0) 즉시 반환 — 분기 진입 불필요</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-line">
+          <div class="flow-dot" style="background:#2563eb;">2</div>
+          <div class="flow-connector"></div>
+        </div>
+        <div class="flow-content">
+          <strong>자동결제 설정 조회</strong>
+          <p>AutoChargeConfigRepository.findByMemberId() + isEnabled() → 활성이면 triggerIfNeeded() 후 AutoCharged</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-line">
+          <div class="flow-dot flow-dot-purple">3</div>
+          <div class="flow-connector"></div>
+        </div>
+        <div class="flow-content">
+          <strong>후불 설정 조회 (companyId != null 조건 선행)</strong>
+          <p>PostpaidConfigRepository.findByCompanyId() + isActive() → 활성이면 Postpaid(totalCost)</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-line">
+          <div class="flow-dot flow-dot-yellow">4</div>
+          <div class="flow-connector"></div>
+        </div>
+        <div class="flow-content">
+          <strong>partialChoice 분기</strong>
+          <p>true → 수락 가능 건 수 계산 후 Partial / false → Cancelled(shortfall)</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-line">
+          <div class="flow-dot flow-dot-red">X</div>
+        </div>
+        <div class="flow-content">
+          <strong>Cancelled → InsufficientFundsException</strong>
+          <p>컨트롤러 buildResponse()에서 throw — GlobalExceptionHandler가 HTTP 402로 변환</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 검증 결과 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="2" y="2" width="12" height="12" rx="2" stroke="#15803d" stroke-width="1.5"/>
+        <path d="M5 8l2 2 4-4" stroke="#15803d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      단위 테스트 검증 결과
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>테스트 메서드</th>
+          <th>분기</th>
+          <th>시나리오</th>
+          <th>결과</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="file-path">route_autoCharge_active_returnsAutoCharged</span></td>
+          <td><span class="badge badge-green">분기 1</span></td>
+          <td>잔액 100원, 총 500원, AutoChargeConfig 활성 → triggerIfNeeded() 호출 후 AutoCharged</td>
+          <td><span class="badge badge-green">통과</span></td>
+        </tr>
+        <tr>
+          <td><span class="file-path">route_postpaid_active_returnsPostpaid</span></td>
+          <td><span class="badge badge-blue">분기 2</span></td>
+          <td>자동결제 설정 없음 + PostpaidStatus.ACTIVE → Postpaid(deferredAmount = 400)</td>
+          <td><span class="badge badge-green">통과</span></td>
+        </tr>
+        <tr>
+          <td><span class="file-path">route_bothInactive_partialChoice_returnsPartial</span></td>
+          <td><span class="badge badge-yellow">분기 3</span></td>
+          <td>잔액 60원, 건당 20원, 5건 중 3건 수락 → Partial(accepted=3, rejected=2)</td>
+          <td><span class="badge badge-green">통과</span></td>
+        </tr>
+        <tr>
+          <td><span class="file-path">route_bothInactive_cancelChoice_returnsCancelled</span></td>
+          <td><span class="badge badge-red">분기 4</span></td>
+          <td>자동결제·후불 비활성 + partialChoice=false → Cancelled(shortfall=140)</td>
+          <td><span class="badge badge-green">통과</span></td>
+        </tr>
+        <tr>
+          <td><span class="file-path">route_balanceSufficientOnRecheck_returnsAutoChargedZero</span></td>
+          <td><span class="badge badge-gray">경계</span></td>
+          <td>잔액 1000원 &gt;= totalCost 800원 → race-condition 방어, AutoCharged(0) 즉시 반환</td>
+          <td><span class="badge badge-green">통과</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 구현 파일 목록 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M4 2h6l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="#2563eb" stroke-width="1.5"/>
+        <path d="M10 2v4h4" stroke="#2563eb" stroke-width="1.5"/>
+      </svg>
+      구현 파일 목록
+    </div>
+    <div class="two-col">
+      <div>
+        <div class="section-label">신규 생성 — 서비스 · 도메인</div>
+        <ul class="file-list">
+          <li>
+            <span class="file-tag file-tag-new">NEW</span>
+            <span class="file-path">service/billing/BalanceBranchResult.java</span>
+          </li>
+          <li>
+            <span class="file-tag file-tag-new">NEW</span>
+            <span class="file-path">service/billing/InsufficientBalanceRouter.java</span>
+          </li>
+          <li>
+            <span class="file-tag file-tag-new">NEW</span>
+            <span class="file-path">exception/InsufficientFundsException.java</span>
+          </li>
+        </ul>
+
+        <div class="section-label">신규 생성 — Controller · DTO</div>
+        <ul class="file-list">
+          <li>
+            <span class="file-tag file-tag-new">NEW</span>
+            <span class="file-path">controller/dispatch/BalanceBranchController.java</span>
+          </li>
+          <li>
+            <span class="file-tag file-tag-new">NEW</span>
+            <span class="file-path">dto/dispatch/BalanceBranchDto.java</span>
+          </li>
+        </ul>
+
+        <div class="section-label">신규 생성 — 테스트</div>
+        <ul class="file-list">
+          <li>
+            <span class="file-tag file-tag-new">NEW</span>
+            <span class="file-path">test/.../billing/InsufficientBalanceRouterTest.java</span>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <div class="section-label">수정 — 기존 파일</div>
+        <ul class="file-list">
+          <li>
+            <span class="file-tag file-tag-mod">MOD</span>
+            <span class="file-path">exception/GlobalExceptionHandler.java</span>
+          </li>
+          <li>
+            <span class="file-tag file-tag-mod">MOD</span>
+            <span class="file-path">dto/dispatch/SendRequestDto.java</span>
+          </li>
+          <li>
+            <span class="file-tag file-tag-mod">MOD</span>
+            <span class="file-path">dto/dispatch/WebSendDto.java</span>
+          </li>
+        </ul>
+
+        <div class="section-label">수정 내용 요약</div>
+        <ul class="check-list" style="margin-top:0;">
+          <li>
+            <span class="icon-wrap">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="7" fill="#e8f0fe"/>
+                <path d="M5 8l2 2 4-4" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <div>
+              <div><strong>GlobalExceptionHandler</strong></div>
+              <div class="detail">InsufficientFundsException → HTTP 402 핸들러 추가</div>
+            </div>
+          </li>
+          <li>
+            <span class="icon-wrap">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="7" fill="#e8f0fe"/>
+                <path d="M5 8l2 2 4-4" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <div>
+              <div><strong>SendRequestDto / WebSendDto</strong></div>
+              <div class="detail">PartialSendResponse inner record 추가 — 부분 발송 응답 표준화</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 핵심 설계 결정 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 2l1.8 3.6 4 .6-2.9 2.8.7 4L8 11l-3.6 1.9.7-4L2.1 6.2l4-.6L8 2z" stroke="#7e22ce" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+      핵심 설계 결정
+    </div>
+    <ul class="check-list">
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" fill="#f3e8ff"/>
+            <path d="M5 8l2 2 4-4" stroke="#7e22ce" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div><strong>sealed interface BalanceBranchResult (Java 21)</strong></div>
+          <div class="detail">4개 permitted record — AutoCharged / Postpaid / Partial / Cancelled. 컴파일 타임에 모든 분기 처리를 강제하는 exhaustive switch 패턴 적용.</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" fill="#f3e8ff"/>
+            <path d="M5 8l2 2 4-4" stroke="#7e22ce" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div><strong>BalanceGate 비침습적 설계</strong></div>
+          <div class="detail">기존 SendValidationService(order=80) 의 INSUFFICIENT_BALANCE 예외 구조를 건드리지 않음. InsufficientBalanceRouter는 발송 전 별도 엔드포인트로 분리하여 호출 순서 변경 없이 기능 추가.</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" fill="#f3e8ff"/>
+            <path d="M5 8l2 2 4-4" stroke="#7e22ce" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div><strong>DB 직접 조회로 정합성 보장</strong></div>
+          <div class="detail">BalanceQueryService.getBalanceFromDb() 사용 — 잔액 부족 판단은 Redis 캐시를 우회하여 TTL 30s 스테일 리드 위험 제거.</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" fill="#f3e8ff"/>
+            <path d="M5 8l2 2 4-4" stroke="#7e22ce" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div><strong>companyId = null 개인 회원 안전 처리</strong></div>
+          <div class="detail">후불 분기(PostpaidConfig 조회) 진입 전 companyId null 체크를 선행 — NPE 없이 분기 2를 건너뜀.</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" fill="#f3e8ff"/>
+            <path d="M5 8l2 2 4-4" stroke="#7e22ce" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <div><strong>HTTP 207 Multi-Status — 부분 성공 표현</strong></div>
+          <div class="detail">RFC 4918 준수. acceptedCount / rejectedCount / rejectedNumbers / shortfall 필드로 클라이언트가 거부 수신자를 재처리할 수 있도록 설계.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 엔드포인트 요약 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 8h10M8 3l5 5-5 5" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      API 엔드포인트 요약
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>메서드 / 경로</th>
+          <th>인증</th>
+          <th>분기 결과</th>
+          <th>HTTP</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="file-path">POST /dispatch/balance-branch</span></td>
+          <td>API Key</td>
+          <td>AutoCharged / Postpaid / Partial / Cancelled</td>
+          <td>200 / 200 / 207 / 402</td>
+        </tr>
+        <tr>
+          <td><span class="file-path">POST /dispatch/console/balance-branch</span></td>
+          <td>JWT</td>
+          <td>동일</td>
+          <td>200 / 200 / 207 / 402</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 결론 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 2l1.8 3.6 4 .6-2.9 2.8.7 4L8 11l-3.6 1.9.7-4L2.1 6.2l4-.6L8 2z" stroke="#2563eb" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+      결론 및 잔여 이슈
+    </div>
+    <div class="conclusion-box">
+      <p>
+        W-405는 02_FEATURE_SPEC §11.1의 4분기 잔액 부족 분기 로직을 Java 21 sealed interface 패턴으로
+        타입 안전하게 구현했습니다. BalanceBranchResult(AutoCharged / Postpaid / Partial / Cancelled)
+        4종을 exhaustive switch로 처리하여 분기 누락을 컴파일 타임에 방지합니다.
+        기존 SendValidationService(BalanceGate)를 건드리지 않고 별도 엔드포인트를 추가하는
+        비침습적 설계를 채택했으며, DB 직접 조회로 Redis 캐시 부정합 위험을 제거했습니다.
+        단위 테스트 5개(4분기 + race-condition 경계)가 모든 분기 시나리오를 독립적으로 검증하며,
+        HTTP 207(부분 발송)과 HTTP 402(전체 취소) 응답 표준이 클라이언트 재처리 경로를 명확히 제공합니다.
+      </p>
+    </div>
+    <div class="issue-box">
+      <div class="issue-title">잔여 이슈 — 후속 스프린트 대응 필요</div>
+      <ul>
+        <li>로컬 SSL 인터셉션 환경 — 빌드·테스트 실행 검증은 CI(GitHub Actions)에서 수행</li>
+        <li>FE 분기 UI(부분 발송 선택 모달) — 와이어프레임 wireframes/에 잔액 부족 분기 선택 화면 미작성, 별도 FE 태스크 필요</li>
+        <li>InsufficientBalanceRouter와 실제 sendBulk() 연동 — 현재 분기 평가 엔드포인트 독립, 발송 파이프라인 통합은 W-406 이후 확인 필요</li>
+        <li>부분 발송 시 수락된 N건만 실제 차감·발송 처리하는 발송 서비스 수정 미완 — Partial 결과를 sendBulk()에 주입하는 흐름 구체화 필요</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

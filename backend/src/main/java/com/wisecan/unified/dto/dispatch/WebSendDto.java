@@ -182,6 +182,36 @@ public class WebSendDto {
     }
 
     /**
+     * 부분 발송 응답 — HTTP 207 Multi-Status (W-405).
+     *
+     * 02_FEATURE_SPEC §11.1: 대량 발송 중 잔액 부족 시 일부만 적재 완료된 경우.
+     */
+    public record PartialSendResponse(
+            String acceptedSendId,
+            int acceptedCount,
+            int rejectedCount,
+            List<String> rejectedNumbers,
+            String rejectReason,
+            long shortfall
+    ) {
+        public static PartialSendResponse of(
+                String acceptedSendId,
+                int acceptedCount,
+                List<String> rejectedNumbers,
+                long shortfall
+        ) {
+            return new PartialSendResponse(
+                    acceptedSendId,
+                    acceptedCount,
+                    rejectedNumbers.size(),
+                    List.copyOf(rejectedNumbers),
+                    "INSUFFICIENT_BALANCE",
+                    shortfall
+            );
+        }
+    }
+
+    /**
      * 예약 발송 목록 응답.
      */
     public record ScheduledSummary(

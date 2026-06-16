@@ -120,6 +120,43 @@ public class SendRequestDto {
     }
 
     /**
+     * 부분 발송 응답 — HTTP 207 Multi-Status (W-405).
+     *
+     * 02_FEATURE_SPEC §11.1: 대량 발송 중 잔액 부족 시 일부만 적재 완료된 경우.
+     * acceptedSendId 건은 정상 발송 진행, rejectedNumbers 건은 INSUFFICIENT_BALANCE 사유.
+     */
+    public record PartialSendResponse(
+            /** 적재 성공한 발송 요청 ID */
+            String acceptedSendId,
+            /** 적재 승인된 수신자 수 */
+            int acceptedCount,
+            /** 잔액 부족으로 거부된 수신자 수 */
+            int rejectedCount,
+            /** 거부된 수신자 번호 목록 */
+            List<String> rejectedNumbers,
+            /** 거부 사유 코드 */
+            String rejectReason,
+            /** 부족 금액 (원) */
+            long shortfall
+    ) {
+        public static PartialSendResponse of(
+                String acceptedSendId,
+                int acceptedCount,
+                List<String> rejectedNumbers,
+                long shortfall
+        ) {
+            return new PartialSendResponse(
+                    acceptedSendId,
+                    acceptedCount,
+                    rejectedNumbers.size(),
+                    List.copyOf(rejectedNumbers),
+                    "INSUFFICIENT_BALANCE",
+                    shortfall
+            );
+        }
+    }
+
+    /**
      * 발송 요청 상세 조회 응답.
      * 라우팅 메타(routingMeta)는 포함하지 않는다 — 회원 UI 비노출 (INV-02).
      */

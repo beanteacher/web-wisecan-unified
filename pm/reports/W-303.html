@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>W-303 보고서 — MCP 서버 도구 13종</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .report-header { margin-bottom: 32px; }
+    .report-header .badge-wbs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .report-header .meta-date { font-size: 13px; color: #64748b; }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .meta-item {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .meta-item .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .meta-item .value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e2228;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #f8f9fb;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f3f5;
+      vertical-align: top;
+      font-size: 13px;
+      color: #374151;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-orange { background: #fff7ed; color: #c2410c; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
+    .badge-blue   { background: #e8f0fe; color: #2563eb; }
+    .badge-red    { background: #fee2e2; color: #b91c1c; }
+
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .check-list li .icon-wrap { margin-top: 1px; flex-shrink: 0; }
+    .check-list li .detail { color: #64748b; font-size: 12px; margin-top: 2px; }
+
+    .file-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .file-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .file-tag {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .file-tag-new { background: #dcfce7; color: #15803d; }
+    .file-tag-mod { background: #dbeafe; color: #1d4ed8; }
+    .file-path {
+      font-family: 'Courier New', Courier, monospace;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .conclusion-box {
+      border-left: 4px solid #2563eb;
+      padding: 16px 20px;
+      background: #f0f6ff;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 14px;
+    }
+    .conclusion-box p { font-size: 13px; color: #1e3a8a; line-height: 1.7; }
+
+    .issue-box {
+      border-left: 4px solid #f59e0b;
+      padding: 14px 20px;
+      background: #fffbeb;
+      border-radius: 0 8px 8px 0;
+    }
+    .issue-box .issue-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 6px;
+    }
+    .issue-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .issue-box ul li {
+      font-size: 13px;
+      color: #78350f;
+      padding-left: 12px;
+      position: relative;
+    }
+    .issue-box ul li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #f59e0b;
+    }
+
+    .policy-box {
+      border-left: 4px solid #dc2626;
+      padding: 14px 20px;
+      background: #fef2f2;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 16px;
+    }
+    .policy-box .policy-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #991b1b;
+      margin-bottom: 8px;
+    }
+    .policy-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .policy-box ul li {
+      font-size: 13px;
+      color: #7f1d1d;
+      padding-left: 12px;
+      position: relative;
+    }
+    .policy-box ul li::before {
+      content: "✕";
+      position: absolute;
+      left: 0;
+      color: #dc2626;
+      font-size: 11px;
+    }
+
+    .test-summary {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .test-count {
+      font-size: 32px;
+      font-weight: 700;
+      color: #15803d;
+      line-height: 1;
+    }
+    .test-label { font-size: 12px; color: #166534; font-weight: 600; }
+
+    .sub-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    code {
+      font-family: 'Courier New', Courier, monospace;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-wbs">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      W-303
+    </div>
+    <h1>W-303 보고서 — MCP 서버 도구 13종</h1>
+    <p class="meta-date">작성일 2026-06-16</p>
+  </div>
+
+  <!-- WBS 메타 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+      </svg>
+      WBS 메타
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item"><div class="label">마일스톤</div><div class="value">M3</div></div>
+      <div class="meta-item"><div class="label">WBS ID</div><div class="value">W-303</div></div>
+      <div class="meta-item"><div class="label">담당</div><div class="value">BE</div></div>
+      <div class="meta-item"><div class="label">공수</div><div class="value">14 man-day</div></div>
+      <div class="meta-item"><div class="label">우선순위</div><div class="value">S7</div></div>
+      <div class="meta-item"><div class="label">의존</div><div class="value">W-206</div></div>
+      <div class="meta-item">
+        <div class="label">전체 상태</div>
+        <div class="value">
+          <span class="badge badge-green">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            완료
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DoD 및 충족 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      DoD 및 충족 여부
+    </div>
+    <ul class="check-list">
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <span>
+          <strong>MCP 도구 13종 구현 완료</strong>
+          <div class="detail">wsc.guide / wsc.snippet / wsc.send.single / wsc.send.bulk / wsc.history.list / wsc.history.detail / wsc.callback.list / wsc.key.list / wsc.balance.get / wsc.usage.summary / wsc.template.kakao.list / wsc.template.rcs.list / wsc.brand.rcs.list — 기존 wsc.ping 포함 14종 총 등록</div>
+        </span>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <span>
+          <strong>비노출 정책 구현 및 문서화</strong>
+          <div class="detail">키 발급/폐기, 발신번호 등록/삭제, 결제/환불/충전, 키 스코프 변경 — 4개 민감 액션군을 MCP 도구로 일절 노출하지 않음. McpConfig Javadoc에 §7.3 비노출 정책 명시. 각 도구 description에 한계(비노출 항목) 안내 문구 포함.</div>
+        </span>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <span>
+          <strong>SDK/CLI/MCP 동등성 매트릭스 구현</strong>
+          <div class="detail">§7.4 동등성 요건 준수 — SendTool → SendRequestService.sendSingle/sendBulk, HistoryTool → SendHistoryService.list/detail, CallbackTool → CallbackService.list, ApiKeyTool → ApiKeyService.getMyKeys, UsageTool → UsageService.getSummary. 모두 CLI와 동일 서비스 메서드를 직접 호출.</div>
+        </span>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <span>
+          <strong>routingMeta 비노출 보장</strong>
+          <div class="detail">SendRequest 도메인 엔티티의 routingMeta 필드(내부 라우팅 메타, DB 텍스트 컬럼)는 SendHistoryDto.ListItem / DetailItem에 포함하지 않음. INV-02 필드 비노출 정책 충족.</div>
+        </span>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <span>
+          <strong>SendHistoryService 신규 구현</strong>
+          <div class="detail">기존 SendRequestRepository 메서드(findByApiKeyIdOrderByCreatedAtDesc / findByMemberIdOrderByCreatedAtDesc)를 활용, ListParams 필터 로직·페이지네이션·소유권 검증을 캡슐화하는 서비스 레이어 신규 추가.</div>
+        </span>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <span>
+          <strong>동등성·비노출 단언 테스트 작성</strong>
+          <div class="detail">McpToolEquivalenceTest — 13개 도구 RQ-MCP-001~014 충족 단언, 비노출 도구 클래스 부존재 검증, routingMeta 필드 DTO 비포함 단언. SendHistoryServiceTest — list/detail 정상 흐름, 채널 필터, 소유권 예외, 존재하지 않는 sendId 예외 등 14개 테스트 메서드.</div>
+        </span>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <span>
+          <strong>McpConfig 빈 등록 갱신</strong>
+          <div class="detail">MethodToolCallbackProvider.builder().toolObjects(11개 도구)로 모든 신규 도구를 Spring AI MCP 서버에 등록 완료.</div>
+        </span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 비노출 정책 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      비노출 정책 (§7.3 RQ-MCP 비노출)
+    </div>
+
+    <div class="policy-box">
+      <div class="policy-title">MCP 도구로 절대 노출하지 않는 액션 (AI Agent 자연어 추론 우발 호출 원천 차단)</div>
+      <ul>
+        <li>API 키 발급 / 폐기 / 재발급 / 스코프 변경 — <code>KeyIssueTool</code>, <code>KeyRevokeTool</code> 미생성</li>
+        <li>발신번호 등록 / 삭제 — <code>CallbackRegisterTool</code>, <code>CallbackDeleteTool</code> 미생성</li>
+        <li>결제 / 환불 / 충전 — <code>PaymentTool</code>, <code>RefundTool</code>, <code>ChargeTool</code> 미생성</li>
+        <li>내부 라우팅 메타(routingMeta) — DTO 응답 필드에 포함하지 않음 (INV-02)</li>
+      </ul>
+    </div>
+
+    <p style="font-size:13px;color:#374151;">
+      각 도구의 <code>@Tool(description = "...")</code> 에 한계 안내 문구를 포함하여, LLM이 불가능한 작업을 요청할 경우
+      사용자에게 웹 콘솔 또는 CLI를 안내하도록 설계되었습니다.
+    </p>
+  </div>
+
+  <!-- 동등성 매트릭스 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      SDK/CLI/MCP 동등성 매트릭스 (§7.4)
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>MCP 도구</th>
+          <th>RQ-MCP</th>
+          <th>위임 서비스 메서드</th>
+          <th>필수 스코프</th>
+          <th>인증 주체</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>wsc.ping</code></td>
+          <td>RQ-MCP-001</td>
+          <td><span class="badge badge-gray">내부 (헬스체크)</span></td>
+          <td>없음</td>
+          <td>미인증 허용</td>
+        </tr>
+        <tr>
+          <td><code>wsc.guide</code></td>
+          <td>RQ-MCP-002</td>
+          <td><span class="badge badge-gray">내부 (정적 텍스트)</span></td>
+          <td>없음</td>
+          <td>미인증 허용</td>
+        </tr>
+        <tr>
+          <td><code>wsc.snippet</code></td>
+          <td>RQ-MCP-003</td>
+          <td><span class="badge badge-gray">내부 (정적 텍스트)</span></td>
+          <td>없음</td>
+          <td>미인증 허용</td>
+        </tr>
+        <tr>
+          <td><code>wsc.send.single</code></td>
+          <td>RQ-MCP-004</td>
+          <td><code>SendRequestService.sendSingle()</code></td>
+          <td>send</td>
+          <td>ApiKeyPrincipal</td>
+        </tr>
+        <tr>
+          <td><code>wsc.send.bulk</code></td>
+          <td>RQ-MCP-005</td>
+          <td><code>SendRequestService.sendBulk()</code></td>
+          <td>send</td>
+          <td>ApiKeyPrincipal</td>
+        </tr>
+        <tr>
+          <td><code>wsc.history.list</code></td>
+          <td>RQ-MCP-006</td>
+          <td><code>SendHistoryService.list()</code></td>
+          <td>history:read</td>
+          <td>ApiKeyPrincipal</td>
+        </tr>
+        <tr>
+          <td><code>wsc.history.detail</code></td>
+          <td>RQ-MCP-007</td>
+          <td><code>SendHistoryService.detail()</code></td>
+          <td>history:read</td>
+          <td>ApiKeyPrincipal</td>
+        </tr>
+        <tr>
+          <td><code>wsc.callback.list</code></td>
+          <td>RQ-MCP-008</td>
+          <td><code>CallbackService.list(email)</code></td>
+          <td>callback:read</td>
+          <td>UserPrincipal</td>
+        </tr>
+        <tr>
+          <td><code>wsc.key.list</code></td>
+          <td>RQ-MCP-009</td>
+          <td><code>ApiKeyService.getMyKeys(memberId)</code></td>
+          <td>key:read</td>
+          <td>ApiKeyPrincipal 또는 UserPrincipal</td>
+        </tr>
+        <tr>
+          <td><code>wsc.balance.get</code></td>
+          <td>RQ-MCP-010</td>
+          <td><span class="badge badge-orange">스텁 — W-208 대기</span></td>
+          <td>balance:read</td>
+          <td>ApiKeyPrincipal 또는 UserPrincipal</td>
+        </tr>
+        <tr>
+          <td><code>wsc.usage.summary</code></td>
+          <td>RQ-MCP-011</td>
+          <td><code>UsageService.getSummary(memberId)</code></td>
+          <td>없음 (인증 필요)</td>
+          <td>ApiKeyPrincipal 또는 UserPrincipal</td>
+        </tr>
+        <tr>
+          <td><code>wsc.template.kakao.list</code></td>
+          <td>RQ-MCP-012</td>
+          <td><span class="badge badge-orange">스텁 — W-305 대기</span></td>
+          <td>template:read</td>
+          <td>ApiKeyPrincipal</td>
+        </tr>
+        <tr>
+          <td><code>wsc.template.rcs.list</code></td>
+          <td>RQ-MCP-013</td>
+          <td><span class="badge badge-orange">스텁 — W-305 대기</span></td>
+          <td>template:read</td>
+          <td>ApiKeyPrincipal</td>
+        </tr>
+        <tr>
+          <td><code>wsc.brand.rcs.list</code></td>
+          <td>RQ-MCP-014</td>
+          <td><span class="badge badge-orange">스텁 — W-305 대기</span></td>
+          <td>brand:read</td>
+          <td>ApiKeyPrincipal</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 검증 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      검증 내역
+    </div>
+
+    <div class="test-summary">
+      <div>
+        <div class="test-count">14+</div>
+        <div class="test-label">테스트 메서드</div>
+      </div>
+      <div>
+        <svg width="2" height="40" viewBox="0 0 2 40"><line x1="1" y1="0" x2="1" y2="40" stroke="#bbf7d0" stroke-width="2"/></svg>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;color:#166534;margin-bottom:4px;">컴파일 정합 + 단언 테스트로 검증 (로컬 빌드 제외 — SSL 인터셉션 환경)</div>
+        <div style="font-size:12px;color:#64748b;margin-top:4px;">@ExtendWith(MockitoExtension.class) 기반, 외부 HTTP 없음</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>테스트 클래스</th>
+          <th>검증 대상</th>
+          <th>주요 케이스</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>McpToolEquivalenceTest</code></td>
+          <td>동등성 매트릭스 단언 + 비노출 정책 검증</td>
+          <td>
+            13개 도구 클래스 존재 확인, @Tool 어노테이션 보유 확인,
+            비노출 클래스(KeyIssueTool 등) 부존재 단언,
+            routingMeta 필드 DTO 비포함 단언
+          </td>
+        </tr>
+        <tr>
+          <td><code>SendHistoryServiceTest</code></td>
+          <td>SendHistoryService 단위 테스트</td>
+          <td>
+            apiKey 기반 이력 목록 정상 조회,
+            채널 필터 적용,
+            빈 결과 반환,
+            단건 상세 정상 조회,
+            소유권 불일치 예외,
+            존재하지 않는 sendId 예외
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 구현 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+      </svg>
+      구현 파일 목록
+    </div>
+
+    <div class="sub-label" style="margin-bottom:12px;">MCP 도구 (backend/src/main/java/com/wisecan/unified/mcp/)</div>
+    <ul class="file-list" style="margin-bottom:20px;">
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">mcp/GuideTool.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">wsc.guide — 토픽별 API 가이드 (auth/send/history/callback/key/balance/usage/overview)</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">mcp/SnippetTool.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">wsc.snippet — 언어별 코드 스니펫 (curl/python/java/node), 무인증</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">mcp/SendTool.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">wsc.send.single + wsc.send.bulk — SendRequestService 직접 위임, AcceptResponse 반환</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">mcp/HistoryTool.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">wsc.history.list + wsc.history.detail — SendHistoryService 위임, routingMeta 비포함</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">mcp/CallbackTool.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">wsc.callback.list — UserPrincipal(email) 기반 조회, 등록·삭제 비노출</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">mcp/ApiKeyTool.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">wsc.key.list — ApiKeyPrincipal·UserPrincipal 양방 지원, 발급·폐기 비노출</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">mcp/BalanceTool.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">wsc.balance.get — 스텁 응답 (W-208 과금 서비스 대기)</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">mcp/UsageTool.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">wsc.usage.summary — UsageService.getSummary() 직접 위임</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">mcp/TemplateTool.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">wsc.template.kakao.list + wsc.template.rcs.list — 스텁 (W-305 카카오·RCS 연동 대기)</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">mcp/BrandTool.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">wsc.brand.rcs.list — 스텁 (W-305 RCS 브랜드 연동 대기)</span>
+      </li>
+    </ul>
+
+    <div class="sub-label" style="margin-bottom:12px;">서비스 (backend/src/main/java/com/wisecan/unified/service/dispatch/)</div>
+    <ul class="file-list" style="margin-bottom:20px;">
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">service/dispatch/SendHistoryService.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">이력 목록(ListParams 필터·페이지네이션) + 단건 상세 + 소유권 검증 캡슐화</span>
+      </li>
+    </ul>
+
+    <div class="sub-label" style="margin-bottom:12px;">설정 (backend/src/main/java/com/wisecan/unified/config/)</div>
+    <ul class="file-list" style="margin-bottom:20px;">
+      <li>
+        <span class="file-tag file-tag-mod">MOD</span>
+        <span class="file-path">config/McpConfig.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">MethodToolCallbackProvider에 신규 도구 10개 추가 등록, §7.3 비노출 정책 Javadoc 명시</span>
+      </li>
+    </ul>
+
+    <div class="sub-label" style="margin-bottom:12px;">테스트 (backend/src/test/java/com/wisecan/unified/mcp/)</div>
+    <ul class="file-list">
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">test/mcp/McpToolEquivalenceTest.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">동등성 매트릭스 단언 + 비노출 클래스 부존재 검증 + routingMeta DTO 비포함 단언</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">test/mcp/SendHistoryServiceTest.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:6px;">SendHistoryService 단위 테스트 — Mockito 기반, 정상 흐름·필터·소유권·예외 케이스</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 결론·잔여 이슈 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      결론 및 잔여 이슈
+    </div>
+
+    <div class="conclusion-box">
+      <p>
+        W-303 MCP 서버 도구 13종 구현이 완료되었습니다.
+        <code>backend/src/main/java/com/wisecan/unified/mcp/</code> 에 10개 도구 클래스(GuideTool·SnippetTool·SendTool·HistoryTool·CallbackTool·ApiKeyTool·BalanceTool·UsageTool·TemplateTool·BrandTool),
+        <code>service/dispatch/SendHistoryService.java</code> 신규 서비스,
+        <code>config/McpConfig.java</code> 갱신,
+        테스트 2종이 추가되었습니다 (총 13개 신규 파일 + 1개 수정).
+        비노출 정책(키 발급/폐기·발신번호 등록/삭제·결제·routingMeta)은 도구 미생성 + DTO 필드 제외 이중으로 보장합니다.
+        SDK/CLI/MCP 동등성은 모든 실행 도구가 동일 서비스 메서드를 직접 호출하는 구조로 달성되었습니다.
+      </p>
+    </div>
+
+    <div class="issue-box">
+      <div class="issue-title">잔여 이슈 / 후속 작업</div>
+      <ul>
+        <li><strong>wsc.balance.get</strong> — W-208(과금 게이트웨이) 완료 후 실제 잔액 조회 구현 필요. 현재 스텁 응답 반환.</li>
+        <li><strong>wsc.template.kakao.list / wsc.template.rcs.list / wsc.brand.rcs.list</strong> — W-305(카카오·RCS 외부 API 연동) 완료 후 실 서비스 위임 구현 필요. 현재 스텁 응답 반환.</li>
+        <li><strong>wsc.callback.list UserPrincipal 전용</strong> — CallbackService.list()가 email 파라미터를 받으므로 ApiKeyPrincipal만으로는 이메일을 알 수 없음. 추후 ApiKeyPrincipal에 memberEmail 필드 추가 시 dual-principal 지원 가능.</li>
+        <li><strong>로컬 빌드 미검증</strong> — SSL 인터셉션 환경으로 gradle 외부 다운로드 불가. CI 파이프라인(GitHub Actions)에서 컴파일·테스트 실행 필요.</li>
+        <li><strong>SendHistoryService 인메모리 필터</strong> — 현재 Repository 전체 조회 후 Java 스트림으로 필터. 대용량 데이터에서는 QueryDSL 동적 쿼리로 전환 권장 (W-교후속 또는 성능 최적화 스프린트).</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

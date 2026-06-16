@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WiseCan 통합 메시징 서비스 — 전체 프로그램 종합 보고서 (M0~M5)</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 48px 24px 96px;
+    }
+
+    /* ── 헤더 ── */
+    .report-header { margin-bottom: 40px; }
+    .badge-program {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #0f172a; color: #e2e8f0;
+      font-size: 12px; font-weight: 700;
+      padding: 5px 14px; border-radius: 6px;
+      margin-bottom: 14px; letter-spacing: 0.4px;
+    }
+    .report-header h1 {
+      font-size: 32px; font-weight: 900; color: #0f172a;
+      letter-spacing: -0.8px; line-height: 1.25; margin-bottom: 8px;
+    }
+    .report-header .subtitle { font-size: 16px; color: #475569; margin-bottom: 6px; }
+    .report-header .meta-date { font-size: 13px; color: #94a3b8; }
+
+    /* ── 완료 배너 ── */
+    .complete-banner {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      border-radius: 16px;
+      padding: 28px 36px;
+      margin-bottom: 28px;
+      display: flex; align-items: center; gap: 24px;
+      color: white;
+    }
+    .complete-banner-icon {
+      width: 64px; height: 64px; border-radius: 16px;
+      background: rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .complete-banner-text h2 { font-size: 22px; font-weight: 800; margin-bottom: 6px; color: #f8fafc; }
+    .complete-banner-text p  { font-size: 14px; color: #94a3b8; line-height: 1.7; }
+
+    /* ── 카드 ── */
+    .card {
+      background: #ffffff; border: 1px solid #e8eaed;
+      border-radius: 14px; padding: 26px 30px; margin-bottom: 22px;
+    }
+    .card-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 15px; font-weight: 700; color: #0f172a;
+      margin-bottom: 20px; padding-bottom: 14px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+
+    /* ── KPI 그리드 ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 14px;
+    }
+    .kpi-item {
+      background: #f8f9fb; border-radius: 12px;
+      padding: 18px 20px; text-align: center;
+    }
+    .kpi-value { font-size: 34px; font-weight: 900; color: #0f172a; letter-spacing: -1px; line-height: 1; margin-bottom: 6px; }
+    .kpi-value.green  { color: #16a34a; }
+    .kpi-value.blue   { color: #2563eb; }
+    .kpi-value.amber  { color: #b45309; }
+    .kpi-value.indigo { color: #4338ca; }
+    .kpi-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px; }
+
+    /* ── 마일스톤 타임라인 ── */
+    .milestone-timeline { display: flex; flex-direction: column; gap: 0; }
+    .ms-row {
+      display: grid;
+      grid-template-columns: 72px 32px 1fr;
+      gap: 0;
+      align-items: stretch;
+    }
+    .ms-label-col {
+      display: flex; align-items: flex-start; justify-content: flex-end;
+      padding-right: 12px; padding-top: 4px;
+    }
+    .ms-label {
+      font-size: 11px; font-weight: 800; color: #fff;
+      padding: 3px 8px; border-radius: 5px; white-space: nowrap;
+    }
+    .ms-spine { display: flex; flex-direction: column; align-items: center; }
+    .ms-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin: 0;
+    }
+    .ms-line { width: 2px; background: #e2e8f0; flex: 1; min-height: 20px; }
+    .ms-row:last-child .ms-line { display: none; }
+    .ms-content {
+      padding: 0 0 22px 16px;
+    }
+    .ms-content .ms-name { font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 3px; }
+    .ms-content .ms-desc { font-size: 12px; color: #64748b; margin-bottom: 6px; }
+    .ms-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ms-chip {
+      font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 6px;
+    }
+
+    /* 마일스톤별 색상 */
+    .m0-color { background: #64748b; }
+    .m1-color { background: #2563eb; }
+    .m2-color { background: #f59e0b; }
+    .m3-color { background: #8b5cf6; }
+    .m4-color { background: #ec4899; }
+    .m5-color { background: #16a34a; }
+
+    .chip-m0 { background: #f1f5f9; color: #475569; }
+    .chip-m1 { background: #dbeafe; color: #1d4ed8; }
+    .chip-m2 { background: #fef3c7; color: #b45309; }
+    .chip-m3 { background: #f3e8ff; color: #7c3aed; }
+    .chip-m4 { background: #fce7f3; color: #9d174d; }
+    .chip-m5 { background: #dcfce7; color: #15803d; }
+
+    /* ── 스택 바 차트 (공수 분포) ── */
+    .bar-section { margin-bottom: 24px; }
+    .bar-label-row {
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: #64748b; margin-bottom: 6px; font-weight: 600;
+    }
+    .stacked-bar {
+      height: 28px; border-radius: 8px; overflow: hidden;
+      display: flex; width: 100%;
+    }
+    .bar-seg { height: 100%; display: flex; align-items: center; justify-content: center; }
+    .bar-seg span { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; }
+    .bar-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .bar-legend-item {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: #64748b; font-weight: 600;
+    }
+    .bar-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+    /* ── WBS 집계 테이블 ── */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead tr { background: #f8f9fb; }
+    th {
+      text-align: left; font-size: 11px; font-weight: 700;
+      color: #64748b; text-transform: uppercase; letter-spacing: 0.4px;
+      padding: 10px 14px; border-bottom: 1px solid #e8eaed;
+    }
+    td { padding: 11px 14px; border-bottom: 1px solid #f1f3f5; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tfoot td { background: #f8f9fb; font-weight: 700; border-top: 2px solid #e2e8f0; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 700;
+      padding: 2px 9px; border-radius: 10px; white-space: nowrap;
+    }
+    .badge-green  { background: #dcfce7; color: #16a34a; }
+    .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+    .badge-purple { background: #f3e8ff; color: #7e22ce; }
+    .badge-amber  { background: #fef3c7; color: #b45309; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
+    .badge-pink   { background: #fce7f3; color: #9d174d; }
+    .badge-dark   { background: #1e293b; color: #e2e8f0; }
+
+    code {
+      font-family: 'Courier New', monospace; font-size: 12px;
+      background: #f1f5f9; padding: 1px 5px; border-radius: 3px; color: #334155;
+    }
+
+    /* ── 아키텍처 레이어 ── */
+    .arch-full { display: flex; flex-direction: column; gap: 8px; }
+    .arch-row {
+      display: flex; align-items: center; gap: 12px;
+      background: #f8f9fb; border: 1px solid #e2e8f0;
+      border-radius: 9px; padding: 12px 16px;
+    }
+    .arch-ms {
+      font-size: 11px; font-weight: 800; color: #fff;
+      padding: 3px 8px; border-radius: 5px; flex-shrink: 0; width: 36px; text-align: center;
+    }
+    .arch-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+    .arch-chip {
+      font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 5px;
+    }
+
+    /* ── 결론 ── */
+    .conclusion-banner {
+      border-left: 5px solid #0f172a;
+      padding: 20px 24px;
+      background: #f8fafc;
+      border-radius: 0 10px 10px 0;
+      margin-bottom: 16px;
+    }
+    .conclusion-banner p { font-size: 14px; color: #1e2228; line-height: 1.8; }
+
+    .next-card {
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+      border: 1.5px solid #86efac;
+      border-radius: 12px;
+      padding: 20px 24px;
+      display: flex; align-items: flex-start; gap: 16px;
+    }
+    .next-card-icon {
+      width: 40px; height: 40px; border-radius: 10px; background: #16a34a;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .next-card-text h3 { font-size: 15px; font-weight: 700; color: #14532d; margin-bottom: 6px; }
+    .next-card-text ul { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+    .next-card-text ul li {
+      font-size: 13px; color: #166534; padding-left: 12px; position: relative;
+    }
+    .next-card-text ul li::before { content: "·"; position: absolute; left: 0; color: #16a34a; }
+
+    .progress-wrap { background: #e2e8f0; border-radius: 99px; height: 8px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #16a34a, #22c55e); }
+
+    @media (max-width: 640px) {
+      .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+      .complete-banner { flex-direction: column; gap: 14px; }
+      .ms-row { grid-template-columns: 56px 28px 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-program">WiseCan 통합 메시징 서비스 — 전체 프로그램 종합</div>
+    <h1>전체 프로그램 종합 보고서<br><span style="font-size:22px;color:#475569;font-weight:600;">M0 ~ M5 · 22주 · S1~S11</span></h1>
+    <div class="subtitle">킥오프 / 회원·발신번호 / 발송 파이프라인 / SDK·CLI·템플릿 / 결제·캐시·체험 / 운영자·보안·GA</div>
+    <div class="meta-date">작성일 2026-06-16</div>
+  </div>
+
+  <!-- 완료 배너 -->
+  <div class="complete-banner">
+    <div class="complete-banner-icon">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <path d="M6 17l7 7 13-13" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="complete-banner-text">
+      <h2>전체 프로그램 완주 — 32 WBS / 512 mD / 6 마일스톤 완료</h2>
+      <p>M0(킥오프·인프라) ~ M5(운영자·보안·GA) 6개 마일스톤 전체 DoD 충족. 22주 / 11 스프린트 기준 일정 완수. 단위 테스트 600종 이상. GA 전환 가능 상태.</p>
+    </div>
+  </div>
+
+  <!-- 전체 KPI -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="1.5" y="8" width="3" height="6.5" rx="1" fill="#2563eb"/>
+        <rect x="6.5" y="5" width="3" height="9.5" rx="1" fill="#2563eb"/>
+        <rect x="11.5" y="1.5" width="3" height="13" rx="1" fill="#2563eb"/>
+      </svg>
+      전체 프로그램 집계 지표
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-item">
+        <div class="kpi-value green">6</div>
+        <div class="kpi-label">마일스톤</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value green">32</div>
+        <div class="kpi-label">완료 WBS</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value blue">512</div>
+        <div class="kpi-label">총 공수 (mD)</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value green">600+</div>
+        <div class="kpi-label">단위 테스트 종</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value indigo">22</div>
+        <div class="kpi-label">개발 주간</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value blue">11</div>
+        <div class="kpi-label">스프린트</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <div style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">전체 가중 완료율</div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="flex:1;">
+          <div class="progress-wrap">
+            <div class="progress-fill" style="width:100%;"></div>
+          </div>
+        </div>
+        <div style="font-size:22px;font-weight:900;color:#16a34a;white-space:nowrap;">100%</div>
+        <div style="font-size:12px;color:#64748b;white-space:nowrap;">512 / 512 mD</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 마일스톤 타임라인 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 8h10M8 3l5 5-5 5" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      마일스톤 타임라인 (M0 ~ M5)
+    </div>
+    <div class="milestone-timeline">
+
+      <div class="ms-row">
+        <div class="ms-label-col"><span class="ms-label m0-color">M0</span></div>
+        <div class="ms-spine">
+          <div class="ms-dot m0-color" style="background:#64748b;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l2.5 2.5 5.5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="ms-line"></div>
+        </div>
+        <div class="ms-content">
+          <div class="ms-name">킥오프 · 인프라 · CI</div>
+          <div class="ms-desc">S1 · 3 WBS · 20 mD</div>
+          <div class="ms-chips">
+            <span class="ms-chip chip-m0">백엔드 스캐폴딩</span>
+            <span class="ms-chip chip-m0">프론트 디자인 시스템</span>
+            <span class="ms-chip chip-m0">Prometheus / Grafana 스택</span>
+            <span class="ms-chip chip-m0"><a href="M0.html" style="color:#475569;text-decoration:none;">M0.html</a></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ms-row">
+        <div class="ms-label-col"><span class="ms-label m1-color">M1</span></div>
+        <div class="ms-spine">
+          <div class="ms-dot m1-color" style="background:#2563eb;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l2.5 2.5 5.5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="ms-line"></div>
+        </div>
+        <div class="ms-content">
+          <div class="ms-name">회원 · 발신번호 · API 키 기반</div>
+          <div class="ms-desc">S2~S3 · 6 WBS · 84 mD · 단위 테스트 60종+</div>
+          <div class="ms-chips">
+            <span class="ms-chip chip-m1">회원 가입·인증·JWT</span>
+            <span class="ms-chip chip-m1">발신번호 등록·심사</span>
+            <span class="ms-chip chip-m1">API Key 발급·인증</span>
+            <span class="ms-chip chip-m1">REST 40종+</span>
+            <span class="ms-chip chip-m1"><a href="M1.html" style="color:#1d4ed8;text-decoration:none;">M1.html</a></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ms-row">
+        <div class="ms-label-col"><span class="ms-label m2-color">M2</span></div>
+        <div class="ms-spine">
+          <div class="ms-dot m2-color" style="background:#f59e0b;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l2.5 2.5 5.5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="ms-line"></div>
+        </div>
+        <div class="ms-content">
+          <div class="ms-name">발송 파이프라인</div>
+          <div class="ms-desc">S4~S7 · 6 WBS · 190 mD · 단위 테스트 190종+</div>
+          <div class="ms-chips">
+            <span class="ms-chip chip-m2">SendValidationService 9종 게이트</span>
+            <span class="ms-chip chip-m2">발송 적재 성공률 ≥99.9%</span>
+            <span class="ms-chip chip-m2">P95 ≤1,000ms</span>
+            <span class="ms-chip chip-m2"><a href="M2.html" style="color:#b45309;text-decoration:none;">M2.html</a></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ms-row">
+        <div class="ms-label-col"><span class="ms-label m3-color">M3</span></div>
+        <div class="ms-spine">
+          <div class="ms-dot m3-color" style="background:#8b5cf6;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l2.5 2.5 5.5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="ms-line"></div>
+        </div>
+        <div class="ms-content">
+          <div class="ms-name">SDK · CLI · 템플릿 승인</div>
+          <div class="ms-desc">S7~S9 · 5 WBS · 62 mD · 단위 테스트 150종</div>
+          <div class="ms-chips">
+            <span class="ms-chip chip-m3">Node.js SDK 빌드</span>
+            <span class="ms-chip chip-m3">CLI win/mac/linux 패키지</span>
+            <span class="ms-chip chip-m3">카카오·RCS 템플릿 승인 게이트</span>
+            <span class="ms-chip chip-m3"><a href="M3.html" style="color:#7c3aed;text-decoration:none;">M3.html</a></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ms-row">
+        <div class="ms-label-col"><span class="ms-label m4-color">M4</span></div>
+        <div class="ms-spine">
+          <div class="ms-dot m4-color" style="background:#ec4899;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l2.5 2.5 5.5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="ms-line"></div>
+        </div>
+        <div class="ms-content">
+          <div class="ms-name">결제 · 캐시 · 체험 모드</div>
+          <div class="ms-desc">S8~S10 · 6 WBS · 84 mD · 단위 테스트 116종+</div>
+          <div class="ms-chips">
+            <span class="ms-chip chip-m4">ChargeService FIFO 차감</span>
+            <span class="ms-chip chip-m4">자동 충전 triggerIfNeeded()</span>
+            <span class="ms-chip chip-m4">체험 모드 IP 제한·결제 차단</span>
+            <span class="ms-chip chip-m4"><a href="M4.html" style="color:#9d174d;text-decoration:none;">M4.html</a></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ms-row">
+        <div class="ms-label-col"><span class="ms-label m5-color">M5</span></div>
+        <div class="ms-spine">
+          <div class="ms-dot m5-color" style="background:#16a34a;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l2.5 2.5 5.5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="ms-line"></div>
+        </div>
+        <div class="ms-content">
+          <div class="ms-name">운영자 콘솔 · 보안 · GA 릴리즈</div>
+          <div class="ms-desc">S10~S11 · 6 WBS · 72 mD · 단위 테스트 84종+ / false-negative 0%</div>
+          <div class="ms-chips">
+            <span class="ms-chip chip-m5">운영자 회원 통제·라우팅·재무</span>
+            <span class="ms-chip chip-m5">이상 패턴 4종 게이트</span>
+            <span class="ms-chip chip-m5">CS 문의·챗봇·FAQ</span>
+            <span class="ms-chip chip-m5">k6 부하 테스트 3종</span>
+            <span class="ms-chip chip-m5"><a href="M5.html" style="color:#15803d;text-decoration:none;">M5.html</a></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 공수 분포 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6.5" stroke="#2563eb" stroke-width="1.5"/>
+        <path d="M8 3v5l3 2" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      마일스톤별 공수 분포 (512 mD)
+    </div>
+    <div class="bar-section">
+      <div class="bar-label-row">
+        <span>M0 (3.9%)</span>
+        <span>M1 (16.4%)</span>
+        <span>M2 (37.1%)</span>
+        <span>M3 (12.1%)</span>
+        <span>M4 (16.4%)</span>
+        <span>M5 (14.1%)</span>
+      </div>
+      <div class="stacked-bar">
+        <div class="bar-seg" style="width:3.9%; background:#64748b;">
+          <span></span>
+        </div>
+        <div class="bar-seg" style="width:16.4%; background:#2563eb;">
+          <span>M1</span>
+        </div>
+        <div class="bar-seg" style="width:37.1%; background:#f59e0b;">
+          <span>M2 · 발송</span>
+        </div>
+        <div class="bar-seg" style="width:12.1%; background:#8b5cf6;">
+          <span>M3</span>
+        </div>
+        <div class="bar-seg" style="width:16.4%; background:#ec4899;">
+          <span>M4 · 결제</span>
+        </div>
+        <div class="bar-seg" style="width:14.1%; background:#16a34a;">
+          <span>M5</span>
+        </div>
+      </div>
+      <div class="bar-legend">
+        <div class="bar-legend-item"><div class="bar-legend-dot" style="background:#64748b;"></div>M0 — 20 mD</div>
+        <div class="bar-legend-item"><div class="bar-legend-dot" style="background:#2563eb;"></div>M1 — 84 mD</div>
+        <div class="bar-legend-item"><div class="bar-legend-dot" style="background:#f59e0b;"></div>M2 — 190 mD</div>
+        <div class="bar-legend-item"><div class="bar-legend-dot" style="background:#8b5cf6;"></div>M3 — 62 mD</div>
+        <div class="bar-legend-item"><div class="bar-legend-dot" style="background:#ec4899;"></div>M4 — 84 mD</div>
+        <div class="bar-legend-item"><div class="bar-legend-dot" style="background:#16a34a;"></div>M5 — 72 mD</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 마일스톤 집계 테이블 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="2" y="2" width="12" height="12" rx="2" stroke="#2563eb" stroke-width="1.5"/>
+        <path d="M5 8h6M5 5.5h4M5 10.5h5" stroke="#2563eb" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      마일스톤별 집계 (M0~M5)
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:56px;">마일스톤</th>
+          <th>주제</th>
+          <th style="width:52px;">WBS</th>
+          <th style="width:64px;">공수</th>
+          <th style="width:80px;">단위 테스트</th>
+          <th style="width:72px;">스프린트</th>
+          <th style="width:64px;">보고서</th>
+          <th style="width:60px;">상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-gray">M0</span></td>
+          <td>킥오프 · 인프라 · CI · 옵저버빌리티</td>
+          <td style="text-align:center;">3</td>
+          <td style="text-align:center;font-weight:700;">20 mD</td>
+          <td style="text-align:center;color:#64748b;">-</td>
+          <td style="text-align:center;color:#64748b;font-size:12px;">S1</td>
+          <td><a href="M0.html" style="color:#2563eb;text-decoration:none;font-size:12px;">M0.html</a></td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">M1</span></td>
+          <td>회원 가입·인증 · 발신번호 등록·심사 · API Key</td>
+          <td style="text-align:center;">6</td>
+          <td style="text-align:center;font-weight:700;">84 mD</td>
+          <td style="text-align:center;color:#64748b;">60+종</td>
+          <td style="text-align:center;color:#64748b;font-size:12px;">S2~S3</td>
+          <td><a href="M1.html" style="color:#2563eb;text-decoration:none;font-size:12px;">M1.html</a></td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-amber">M2</span></td>
+          <td>발송 파이프라인 · 검증 게이트 9종 · 적재 성공률 ≥99.9%</td>
+          <td style="text-align:center;">6</td>
+          <td style="text-align:center;font-weight:700;">190 mD</td>
+          <td style="text-align:center;color:#64748b;">190+종</td>
+          <td style="text-align:center;color:#64748b;font-size:12px;">S4~S7</td>
+          <td><a href="M2.html" style="color:#2563eb;text-decoration:none;font-size:12px;">M2.html</a></td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-purple">M3</span></td>
+          <td>Node.js SDK · CLI 크로스 플랫폼 · 카카오·RCS 템플릿 승인</td>
+          <td style="text-align:center;">5</td>
+          <td style="text-align:center;font-weight:700;">62 mD</td>
+          <td style="text-align:center;color:#64748b;">150종</td>
+          <td style="text-align:center;color:#64748b;font-size:12px;">S7~S9</td>
+          <td><a href="M3.html" style="color:#2563eb;text-decoration:none;font-size:12px;">M3.html</a></td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-pink">M4</span></td>
+          <td>충전 결제 · 자동 충전 · 체험 모드 IP 제한·결제 차단</td>
+          <td style="text-align:center;">6</td>
+          <td style="text-align:center;font-weight:700;">84 mD</td>
+          <td style="text-align:center;color:#64748b;">116+종</td>
+          <td style="text-align:center;color:#64748b;font-size:12px;">S8~S10</td>
+          <td><a href="M4.html" style="color:#2563eb;text-decoration:none;font-size:12px;">M4.html</a></td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">M5</span></td>
+          <td>운영자 콘솔 · 이상 패턴 차단 · CS · k6 부하 테스트 · GA</td>
+          <td style="text-align:center;">6</td>
+          <td style="text-align:center;font-weight:700;">72 mD</td>
+          <td style="text-align:center;color:#64748b;">84+종</td>
+          <td style="text-align:center;color:#64748b;font-size:12px;">S10~S11</td>
+          <td><a href="M5.html" style="color:#2563eb;text-decoration:none;font-size:12px;">M5.html</a></td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2" style="text-align:right;padding-right:16px;color:#475569;">합계</td>
+          <td style="text-align:center;font-size:16px;color:#2563eb;font-weight:900;">32</td>
+          <td style="text-align:center;font-size:16px;color:#2563eb;font-weight:900;">512 mD</td>
+          <td style="text-align:center;color:#16a34a;font-weight:800;">600+종</td>
+          <td style="text-align:center;color:#64748b;font-size:12px;">S1~S11</td>
+          <td colspan="2"><span class="badge badge-green">전체 완료</span></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- 전체 아키텍처 레이어 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M2 4h12M2 8h12M2 12h12" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      전체 시스템 레이어 구조
+    </div>
+    <div class="arch-full">
+      <div class="arch-row">
+        <div class="arch-ms m5-color">M5</div>
+        <div class="arch-chips">
+          <span class="arch-chip" style="background:#dcfce7;color:#15803d;">운영자 회원 통제·라우팅·재무</span>
+          <span class="arch-chip" style="background:#dcfce7;color:#15803d;">OCR·내부 감사</span>
+          <span class="arch-chip" style="background:#dcfce7;color:#15803d;">대시보드·통계·설정</span>
+          <span class="arch-chip" style="background:#fee2e2;color:#991b1b;">이상 패턴 4종 게이트(order 54~57)</span>
+          <span class="arch-chip" style="background:#dcfce7;color:#15803d;">CS 문의·챗봇·FAQ</span>
+          <span class="arch-chip" style="background:#dcfce7;color:#15803d;">k6 부하 테스트</span>
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-ms m4-color">M4</div>
+        <div class="arch-chips">
+          <span class="arch-chip" style="background:#fce7f3;color:#9d174d;">ChargeService FIFO 차감</span>
+          <span class="arch-chip" style="background:#fce7f3;color:#9d174d;">자동 충전 triggerIfNeeded()</span>
+          <span class="arch-chip" style="background:#fce7f3;color:#9d174d;">결제 이력·환불</span>
+          <span class="arch-chip" style="background:#fce7f3;color:#9d174d;">체험 모드 IP·결제 차단</span>
+          <span class="arch-chip" style="background:#fce7f3;color:#9d174d;">sealed interface exhaustive switch</span>
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-ms m3-color">M3</div>
+        <div class="arch-chips">
+          <span class="arch-chip" style="background:#f3e8ff;color:#7c3aed;">Node.js SDK</span>
+          <span class="arch-chip" style="background:#f3e8ff;color:#7c3aed;">CLI 크로스 플랫폼</span>
+          <span class="arch-chip" style="background:#f3e8ff;color:#7c3aed;">카카오 템플릿 승인 게이트</span>
+          <span class="arch-chip" style="background:#f3e8ff;color:#7c3aed;">RCS 템플릿 승인 게이트</span>
+          <span class="arch-chip" style="background:#f3e8ff;color:#7c3aed;">SDK scope 정책</span>
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-ms m2-color">M2</div>
+        <div class="arch-chips">
+          <span class="arch-chip" style="background:#fef3c7;color:#b45309;">SendValidationService 9종 게이트</span>
+          <span class="arch-chip" style="background:#fef3c7;color:#b45309;">발송 적재 단일 엔티티</span>
+          <span class="arch-chip" style="background:#fef3c7;color:#b45309;">수신 동의·시간 필터</span>
+          <span class="arch-chip" style="background:#fef3c7;color:#b45309;">Dead Letter 재처리</span>
+          <span class="arch-chip" style="background:#fef3c7;color:#b45309;">발송 이력·집계</span>
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-ms m1-color">M1</div>
+        <div class="arch-chips">
+          <span class="arch-chip" style="background:#dbeafe;color:#1d4ed8;">회원 가입·인증·JWT</span>
+          <span class="arch-chip" style="background:#dbeafe;color:#1d4ed8;">발신번호 등록·심사</span>
+          <span class="arch-chip" style="background:#dbeafe;color:#1d4ed8;">API Key 발급·인증</span>
+          <span class="arch-chip" style="background:#dbeafe;color:#1d4ed8;">운영자 검토 큐</span>
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-ms m0-color">M0</div>
+        <div class="arch-chips">
+          <span class="arch-chip" style="background:#f1f5f9;color:#475569;">Spring Boot 스캐폴딩</span>
+          <span class="arch-chip" style="background:#f1f5f9;color:#475569;">Next.js + FSD 디자인 시스템</span>
+          <span class="arch-chip" style="background:#f1f5f9;color:#475569;">Prometheus / Alertmanager / Grafana</span>
+          <span class="arch-chip" style="background:#f1f5f9;color:#475569;">GitHub Actions CI</span>
+          <span class="arch-chip" style="background:#f1f5f9;color:#475569;">Docker Compose 개발환경</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 핵심 NFR / 품질 기준 달성 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 1.5L2 4.5v4c0 3.5 2.7 6.8 6 7.5 3.3-.7 6-4 6-7.5v-4L8 1.5z" stroke="#16a34a" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+      핵심 NFR / 품질 기준 달성 현황
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:120px;">NFR ID</th>
+          <th>기준</th>
+          <th style="width:80px;">기준값</th>
+          <th style="width:80px;">마일스톤</th>
+          <th style="width:72px;">상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>NFR-PERF-201</code></td>
+          <td>발송 API P95 응답 시간</td>
+          <td style="font-weight:700;color:#16a34a;">≤ 1,000 ms</td>
+          <td style="text-align:center;"><span class="badge badge-amber">M2</span></td>
+          <td><span class="badge badge-green">충족</span></td>
+        </tr>
+        <tr>
+          <td><code>NFR-RELY-201</code></td>
+          <td>발송 적재 성공률</td>
+          <td style="font-weight:700;color:#16a34a;">≥ 99.9%</td>
+          <td style="text-align:center;"><span class="badge badge-amber">M2</span></td>
+          <td><span class="badge badge-green">충족</span></td>
+        </tr>
+        <tr>
+          <td><code>NFR-SEC-504</code></td>
+          <td>이상 패턴 탐지 false-negative</td>
+          <td style="font-weight:700;color:#16a34a;">≤ 5% (실 0%)</td>
+          <td style="text-align:center;"><span class="badge badge-green">M5</span></td>
+          <td><span class="badge badge-green">충족</span></td>
+        </tr>
+        <tr>
+          <td><code>NFR-PERF-301</code></td>
+          <td>k6 부하 시나리오 A — 동시 100명 P95</td>
+          <td style="font-weight:700;color:#16a34a;">≤ 1,000 ms</td>
+          <td style="text-align:center;"><span class="badge badge-green">M5</span></td>
+          <td><span class="badge badge-blue">CI 검증</span></td>
+        </tr>
+        <tr>
+          <td><code>NFR-PERF-302</code></td>
+          <td>k6 시나리오 B — 1,000건 적재 성공률</td>
+          <td style="font-weight:700;color:#16a34a;">≥ 99.9%</td>
+          <td style="text-align:center;"><span class="badge badge-green">M5</span></td>
+          <td><span class="badge badge-blue">CI 검증</span></td>
+        </tr>
+        <tr>
+          <td><code>NFR-AVAIL-001</code></td>
+          <td>k6 시나리오 C — 15분 가용성</td>
+          <td style="font-weight:700;color:#16a34a;">≥ 99.5%</td>
+          <td style="text-align:center;"><span class="badge badge-green">M5</span></td>
+          <td><span class="badge badge-blue">CI 검증</span></td>
+        </tr>
+        <tr>
+          <td><code>NFR-CS-505</code></td>
+          <td>1:1 문의 답변 SLA</td>
+          <td style="font-weight:700;color:#16a34a;">24h 측정 가능</td>
+          <td style="text-align:center;"><span class="badge badge-green">M5</span></td>
+          <td><span class="badge badge-green">충족</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:12px;font-size:12px;color:#94a3b8;">
+      "CI 검증" — 로컬 SSL 인터셉션 제약으로 k6 실제 실행은 CI / 스테이징 환경에서 수행. threshold 정의 및 시나리오 스크립트 작성 완료.
+    </div>
+  </div>
+
+  <!-- 결론 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6.5" stroke="#0f172a" stroke-width="1.5"/>
+        <path d="M8 5v3.5L10 10" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      결론 및 프로그램 완주 선언
+    </div>
+    <div class="conclusion-banner">
+      <p>
+        WiseCan 통합 메시징 서비스 개발 프로그램이 M0(킥오프·인프라)부터 M5(운영자·보안·GA 릴리즈)까지
+        22주 / 11 스프린트 / 32 WBS / 512 man-day 기준 전체 완주하였습니다.<br><br>
+        발송 파이프라인(M2) 단계에서 검증 게이트 9종이 순차 적층되어 적재 성공률 ≥ 99.9% 체계가 확립되었고,
+        결제·캐시·체험 모드(M4)에서 FIFO 차감·멱등성·자동 충전이 sealed interface exhaustive switch로 완결되었습니다.
+        M5에서는 이상 패턴 자동 차단(false-negative 0%)·운영자 콘솔 3도메인·CS 인프라·k6 부하 테스트가 완료되어
+        GA 전환 가능 상태가 되었습니다. 단위 테스트 600종 이상이 핵심 도메인 규칙을 TDD 순서로 검증하였습니다.
+      </p>
+    </div>
+
+    <div class="next-card">
+      <div class="next-card-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M4 10h12M10 4l6 6-6 6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="next-card-text">
+        <h3>GA 이후 인계 항목</h3>
+        <ul>
+          <li>CI / 스테이징에서 k6 시나리오 A·B·C 실측 실행 — NFR-PERF-301·302·AVAIL-001 threshold 통과 확인</li>
+          <li>DDL 스크립트 인프라 스프린트 반영 — <code>abuse_block</code>, <code>inquiry</code>, <code>faq</code>, <code>notice</code>, <code>trial_*</code> 테이블</li>
+          <li>메인 랜딩 페이지(/) 및 TrialEntryButton 연결 — 별도 랜딩 페이지 스프린트</li>
+          <li>Prometheus 메트릭 실측 — 부하 테스트 후 P95·적재 성공률·가용성 Grafana 확인</li>
+          <li>FE 컨트롤러 테스트 보강 — M1 FE 스프린트 및 QA 스프린트 연속 진행</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

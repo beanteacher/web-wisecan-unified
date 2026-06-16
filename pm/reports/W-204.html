@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>W-204 보고서 — 외부 발송 시스템 인터페이스 합의·테스트</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .report-header { margin-bottom: 32px; }
+    .report-header .badge-wbs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .report-header .meta-date { font-size: 13px; color: #64748b; }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .meta-item {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .meta-item .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .meta-item .value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e2228;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #f8f9fb;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f3f5;
+      vertical-align: top;
+      font-size: 13px;
+      color: #374151;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-orange { background: #fff7ed; color: #c2410c; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
+    .badge-blue   { background: #e8f0fe; color: #2563eb; }
+
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .check-list li .icon-wrap { margin-top: 1px; flex-shrink: 0; }
+    .check-list li .detail { color: #64748b; font-size: 12px; margin-top: 2px; }
+
+    .file-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .file-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .file-tag {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .file-tag-new { background: #dcfce7; color: #15803d; }
+    .file-tag-mod { background: #fef9c3; color: #854d0e; }
+    .file-path {
+      font-family: 'Courier New', Courier, monospace;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .conclusion-box {
+      border-left: 4px solid #2563eb;
+      padding: 16px 20px;
+      background: #f0f6ff;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 14px;
+    }
+    .conclusion-box p { font-size: 13px; color: #1e3a8a; line-height: 1.7; }
+
+    .issue-box {
+      border-left: 4px solid #f59e0b;
+      padding: 14px 20px;
+      background: #fffbeb;
+      border-radius: 0 8px 8px 0;
+    }
+    .issue-box .issue-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 6px;
+    }
+    .issue-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .issue-box ul li {
+      font-size: 13px;
+      color: #78350f;
+      padding-left: 12px;
+      position: relative;
+    }
+    .issue-box ul li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #f59e0b;
+    }
+
+    .sub-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .arch-block {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 16px 18px;
+      font-size: 13px;
+      color: #374151;
+      line-height: 1.8;
+    }
+    .arch-block code {
+      font-family: 'Courier New', Courier, monospace;
+      background: #e8eaed;
+      color: #0f172a;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px dashed #e8eaed;
+    }
+    .flow-step:last-child { border-bottom: none; }
+    .flow-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: #2563eb;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .flow-content { flex: 1; font-size: 13px; color: #374151; }
+    .flow-content .flow-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+    .spec-table th { width: auto; }
+    .spec-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-right: 4px;
+    }
+    .spec-tag-inv { background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-wbs">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      W-204
+    </div>
+    <h1>W-204 보고서 — 외부 발송 시스템 인터페이스 합의·테스트</h1>
+    <p class="meta-date">작성일 2026-06-16</p>
+  </div>
+
+  <!-- WBS 메타 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+      </svg>
+      WBS 메타
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item"><div class="label">마일스톤</div><div class="value">M2</div></div>
+      <div class="meta-item"><div class="label">WBS ID</div><div class="value">W-204</div></div>
+      <div class="meta-item"><div class="label">담당</div><div class="value">BE</div></div>
+      <div class="meta-item"><div class="label">공수</div><div class="value">6 man-day</div></div>
+      <div class="meta-item"><div class="label">우선순위</div><div class="value">S4</div></div>
+      <div class="meta-item"><div class="label">의존</div><div class="value">W-203</div></div>
+      <div class="meta-item"><div class="label">블록</div><div class="value">W-206, MASTER</div></div>
+      <div class="meta-item">
+        <div class="label">전체 상태</div>
+        <div class="value">
+          <span class="badge badge-green">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            완료
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DoD 및 충족 여부 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      DoD 및 충족 여부
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:6%">순서</th>
+          <th style="width:42%">완료 기준</th>
+          <th style="width:14%">상태</th>
+          <th>근거</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-blue">1</span></td>
+          <td>외부 발송 테이블 컬럼 스펙 합의 문서화</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td><code>ExternalSendRecord</code> record 에 전 컬럼(msgType, msgSubType, callback, recipientNumbers, subject, messageBody, senderKey, templateCode, fbMsg, fbFileCount, requestDate, groupId, unitCost, userId, messageState, etcChar1, etcChar2) 명세·JavaDoc 기술. 05_DATA_MODEL §5.1·§5.2 기준.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">2</span></td>
+          <td>polling 방식·주기·종료 조건 합의 문서화</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td><code>ExternalDispatchPollingResult</code> JavaDoc 에 합의 규약 명시: 테스트망 10초 / 상용망 최초 30초 후 60초 간격. messageState 3(finished) 또는 4(logfail) 도달 시 종료. <code>isTerminal()</code>·<code>isDelivered()</code> 헬퍼 메서드 제공.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">3</span></td>
+          <td>상태 회신 규약(message_state 카탈로그) 문서화</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td><code>ExternalDispatchPollingResult</code> JavaDoc 에 §5.3 카탈로그 전재: 0=init / 1=fetched / 2=submitted / 3=finished / 4=logfail. resultCode "0000" 성공 기준 명시.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">4</span></td>
+          <td>Adapter 패턴으로 외부 연동 격리 (ExternalDispatchAdapter 인터페이스)</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td><code>ExternalDispatchAdapter</code> 인터페이스 — <code>insert(record)</code>·<code>poll(msgId)</code> 2개 메서드. 서비스·컨트롤러는 인터페이스에만 의존. 실제 중계사 구현체 교체 시 서비스 코드 변경 없음.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">5</span></td>
+          <td>스텁 구현체 (StubExternalDispatchAdapter)</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td><code>StubExternalDispatchAdapter</code> — insert: 항상 성공·순번 msg_id 반환. poll: messageState=3·resultCode="0000" 즉시 반환. 로컬·CI·테스트 환경에서 외부 DB 없이 동작.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">6</span></td>
+          <td>SendRequest.markQueued() 연계 — 외부 INSERT 성공 시 QUEUED 상태 전이</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td><code>ExternalDispatchService.dispatch()</code> 에서 <code>externalDispatchAdapter.insert()</code> 성공 응답 수신 후 <code>req.markQueued(msgId)</code> 호출. 실패 시 <code>req.markFailed(reason)</code> 호출.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">7</span></td>
+          <td>테스트 — 어댑터·서비스·페이로드 단위 테스트</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td><code>ExternalSendRecordTest</code> 8종, <code>StubExternalDispatchAdapterTest</code> 6종, <code>ExternalDispatchServiceTest</code> 5종. 총 19개 테스트 작성.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 합의 스펙 요약 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+      합의 스펙 요약 (05_DATA_MODEL §5 기준)
+    </div>
+
+    <p class="sub-label" style="margin-bottom:12px">1. 발송 테이블 컬럼 스펙 (send_*_tran INSERT 시 본 서비스 책임 컬럼)</p>
+    <table class="spec-table" style="margin-bottom:20px">
+      <thead>
+        <tr>
+          <th style="width:20%">컬럼</th>
+          <th style="width:12%">타입</th>
+          <th style="width:10%">NULL</th>
+          <th>합의 내용</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>msg_type</code></td>
+          <td>VARCHAR(4)</td>
+          <td>NOT NULL</td>
+          <td>채널 매핑: SMS="SMS" / LMS="LMS" / MMS="MMS" / KAKAO="AT" / RCS="RCS"</td>
+        </tr>
+        <tr>
+          <td><code>msg_sub_type</code></td>
+          <td>VARCHAR(5)</td>
+          <td>NOT NULL</td>
+          <td>SMS/LMS/MMS: 광고="AD" / 일반="NORM". KAKAO="AT". RCS: 템플릿="TMPL" / 일반텍스트="TEXT"</td>
+        </tr>
+        <tr>
+          <td><code>callback</code></td>
+          <td>VARCHAR(20)</td>
+          <td>NOT NULL</td>
+          <td>정규화된 발신번호 (E.164 또는 국내 형식). W-201 등록 검증 통과 값</td>
+        </tr>
+        <tr>
+          <td><code>message_state</code></td>
+          <td>TINYINT</td>
+          <td>NOT NULL</td>
+          <td>본 서비스 INSERT 시점에 항상 <strong>0(init)</strong>. 이후 전이는 외부 시스템 책임</td>
+        </tr>
+        <tr>
+          <td><code>request_date</code></td>
+          <td>DATETIME</td>
+          <td>NOT NULL</td>
+          <td>즉시 발송: 현재 시각. 예약 발송: 회원 지정 미래 시각. 외부 시스템이 도래 시점에 자동 송출</td>
+        </tr>
+        <tr>
+          <td><code>group_id</code></td>
+          <td>INT</td>
+          <td>NULL</td>
+          <td>일괄 발송 묶음 식별자. 단건은 NULL. W-203에서 UUID 기반 생성</td>
+        </tr>
+        <tr>
+          <td><code>user_id</code></td>
+          <td>BIGINT</td>
+          <td>NOT NULL</td>
+          <td>내부 memberId → 외부 user_id 1:1 매핑</td>
+        </tr>
+        <tr>
+          <td><code>etc_char_1</code></td>
+          <td>VARCHAR(26)</td>
+          <td>NULL</td>
+          <td>내부 send_id(ULID 26자) 보관. msg_id ↔ sendId 역추적용. <strong>회원 비노출</strong></td>
+        </tr>
+        <tr>
+          <td><code>etc_char_2</code></td>
+          <td>VARCHAR(500)</td>
+          <td>NULL</td>
+          <td>
+            <span class="spec-tag spec-tag-inv">INV-02</span>
+            라우팅 메타(중계사 매핑). 회원·API 응답·CLI·MCP 어디에도 절대 비노출
+          </td>
+        </tr>
+        <tr>
+          <td><code>fb_msg</code></td>
+          <td>TEXT</td>
+          <td>NULL</td>
+          <td>카카오·RCS 1차 실패 시 외부 시스템 자동 폴백용 SMS/LMS 본문. 그 외 채널 NULL</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="sub-label" style="margin-bottom:12px">2. message_state 카탈로그 (§5.3)</p>
+    <table style="margin-bottom:20px">
+      <thead>
+        <tr>
+          <th style="width:8%">값</th>
+          <th style="width:15%">코드</th>
+          <th style="width:15%">보유 테이블</th>
+          <th>설명 및 책임</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>0</strong></td>
+          <td>init</td>
+          <td><code>_tran</code></td>
+          <td>본 서비스 INSERT 직후 초기값. 외부 시스템이 아직 처리하지 않은 상태</td>
+        </tr>
+        <tr>
+          <td><strong>1</strong></td>
+          <td>fetched</td>
+          <td><code>_tran</code></td>
+          <td>외부 시스템이 송출 큐로 가져감. 전이 책임: 외부 시스템</td>
+        </tr>
+        <tr>
+          <td><strong>2</strong></td>
+          <td>submitted</td>
+          <td><code>_tran</code></td>
+          <td>외부 시스템 통신사 제출 성공. 전이 책임: 외부 시스템</td>
+        </tr>
+        <tr>
+          <td><strong>3</strong></td>
+          <td>finished</td>
+          <td><code>_tran</code> → <code>_log_YYYYMM</code></td>
+          <td>처리 완료. 로그 테이블 이관 대상. <strong>polling 종료 조건</strong></td>
+        </tr>
+        <tr>
+          <td><strong>4</strong></td>
+          <td>logfail</td>
+          <td><code>_tran</code></td>
+          <td>로그 이관 실패. 외부 운영자 점검 대상. <strong>polling 종료 조건</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="sub-label" style="margin-bottom:12px">3. polling 규약</p>
+    <div class="arch-block">
+      <strong>조회 대상:</strong> <code>send_*_tran</code> 우선 → 없으면 당월 <code>send_*_log_YYYYMM</code> → 이전 월 순 탐색<br>
+      <strong>조회 키:</strong> <code>msg_id</code> (외부 시스템 발급, ExternalSendResult.msgId 로 수신)<br>
+      <strong>주기 — 테스트망:</strong> 10초 간격<br>
+      <strong>주기 — 상용망:</strong> 최초 30초 후 → 이후 60초 간격<br>
+      <strong>종료 조건:</strong> <code>message_state</code> 3(finished) 또는 4(logfail) 도달<br>
+      <strong>성공 판정:</strong> <code>message_state=3</code> + <code>result_code="0000"</code><br>
+      <strong>결과 캐시 (옵션):</strong> Redis <code>send:result:{msg_id}</code> TTL 5분 (§5.6 검토 사항)
+    </div>
+  </div>
+
+  <!-- 연동 흐름 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
+      외부 발송 연동 흐름 (W-204 범위)
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">1</div>
+      <div class="flow-content">
+        <strong>W-203 SendRequest 적재 완료 (status=PENDING)</strong>
+        <div class="flow-sub">sendId(ULID) 발급 완료. externalMsgId=NULL, routingMeta=NULL 상태</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">2</div>
+      <div class="flow-content">
+        <strong>ExternalSendRecord 생성</strong>
+        <div class="flow-sub"><code>ExternalSendRecord.from(req, routingMeta, fbMsg)</code> — SendRequest 엔티티를 외부 테이블 INSERT 페이로드로 변환. msgType/msgSubType 채널·광고여부 기반 산출. etcChar1=sendId, etcChar2=routingMeta(회원 비노출)</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">3</div>
+      <div class="flow-content">
+        <strong>ExternalDispatchAdapter.insert(record) 호출</strong>
+        <div class="flow-sub">스텁: 순번 msg_id 즉시 반환. 실 환경: 외부 DB JDBC INSERT 또는 HTTP API 호출로 교체</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">4</div>
+      <div class="flow-content">
+        <strong>INSERT 결과에 따른 상태 전이</strong>
+        <div class="flow-sub">성공: <code>req.markQueued(msgId)</code> → status=QUEUED, externalMsgId 업데이트<br>실패: <code>req.markFailed(reason)</code> → status=FAILED (보상 트랜잭션은 W-205 이후 처리)</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">5</div>
+      <div class="flow-content">
+        <strong>ExternalDispatchAdapter.poll(msgId) — 결과 polling</strong>
+        <div class="flow-sub">messageState 3/4 도달까지 주기적 조회. <code>ExternalDispatchPollingResult.isTerminal()</code>로 종료 판정. 호출 주기는 호출자가 관리(테스트망 10s / 상용망 60s)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 검증 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      검증 내역
+    </div>
+    <p class="sub-label">테스트 목록 (총 19종)</p>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:32%">테스트 클래스</th>
+          <th style="width:10%">종류</th>
+          <th style="width:8%">건수</th>
+          <th>주요 검증 항목</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>ExternalSendRecordTest</code></td>
+          <td><span class="badge badge-gray">단위</span></td>
+          <td>8</td>
+          <td>SMS NORM, SMS AD, LMS NORM, MMS AD, KAKAO(AT/AT), RCS TMPL, RCS TEXT — msgType/msgSubType 산출. etcChar1=sendId(ULID 26자), etcChar2=routingMeta, messageState=0, userId=memberId</td>
+        </tr>
+        <tr>
+          <td><code>StubExternalDispatchAdapterTest</code></td>
+          <td><span class="badge badge-gray">단위</span></td>
+          <td>6</td>
+          <td>insert 항상 성공·msgId non-null, 연속 호출 msgId 순번 증가, 카카오 채널 성공, poll messageState=3·resultCode=0000, isTerminal()=true, isDelivered()=true</td>
+        </tr>
+        <tr>
+          <td><code>ExternalDispatchServiceTest</code></td>
+          <td><span class="badge badge-gray">단위</span></td>
+          <td>5</td>
+          <td>INSERT 성공 시 status=QUEUED + externalMsgId 업데이트, 어댑터에 전달된 record(msgType·messageState·etcChar1·etcChar2) 검증, INSERT 실패 시 status=FAILED, sendId 미존재 시 EntityNotFoundException, poll 어댑터 위임 검증</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 구현 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+      </svg>
+      구현 내역
+    </div>
+    <ul class="file-list">
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">domain/dispatch/external/ExternalSendRecord.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— 외부 INSERT 페이로드 record. 채널별 msgType/msgSubType 산출 정적 팩토리 포함 (합의 스펙 문서)</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">domain/dispatch/external/ExternalSendResult.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— 외부 INSERT 결과 record (success, msgId, errorMessage). success()/failure() 정적 팩토리</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">domain/dispatch/external/ExternalDispatchPollingResult.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— polling 조회 결과 record. messageState 카탈로그·polling 규약 JavaDoc. isTerminal()·isDelivered() 헬퍼</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">adapter/dispatch/ExternalDispatchAdapter.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— 외부 발송 시스템 연동 어댑터 인터페이스. insert(record)·poll(msgId) 2개 메서드. 채널 분기·합의 규약 JavaDoc</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">adapter/dispatch/StubExternalDispatchAdapter.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— 테스트·개발용 스텁. insert: 순번 msg_id 반환. poll: finished(3) 즉시 반환. @Component Bean 등록</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">service/dispatch/ExternalDispatchService.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— 어댑터 호출 + markQueued/markFailed 연계 서비스. dispatch(sendId, routingMeta)·poll(externalMsgId)</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">test/.../domain/dispatch/external/ExternalSendRecordTest.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— 채널별 msgType·msgSubType·필드 매핑 8종 단위 테스트</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">test/.../adapter/dispatch/StubExternalDispatchAdapterTest.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— 스텁 동작(insert 성공·순번·poll finished) 6종 단위 테스트</span>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <span class="file-path">test/.../service/dispatch/ExternalDispatchServiceTest.java</span>
+        <span style="color:#64748b;font-size:12px;margin-left:4px">— 서비스 위임 흐름·상태 전이 5종 단위 테스트 (Mock 기반)</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 결론 및 잔여 이슈 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      결론 및 잔여 이슈
+    </div>
+    <div class="conclusion-box">
+      <p>
+        W-204 외부 발송 시스템 인터페이스 합의·테스트를 완료했다.
+        발송 테이블 컬럼 스펙(send_*_tran INSERT 책임 컬럼 전체), polling 방식·주기·종료 조건, message_state 카탈로그(0~4), 상태 회신 규약을 코드 주석·JavaDoc 형태로 문서화했다.
+        Adapter 패턴으로 외부 시스템 연동 경계를 <code>ExternalDispatchAdapter</code> 인터페이스로 격리했으며,
+        테스트·개발 환경용 스텁(<code>StubExternalDispatchAdapter</code>)과 서비스(<code>ExternalDispatchService</code>)를 구현해
+        W-203 <code>SendRequest.markQueued()</code> 연계 흐름을 단위 테스트로 검증했다.
+        로컬 SSL 인터셉션 환경 제약으로 빌드 실행 대신 컴파일 정합·Mockito 단위 테스트로 동작을 검증했다.
+      </p>
+    </div>
+    <div class="issue-box">
+      <div class="issue-title">잔여 이슈 (후속 스프린트에서 처리 예정)</div>
+      <ul>
+        <li>실제 중계사 JDBC/HTTP 구현체 미구현 — StubExternalDispatchAdapter 를 실 구현체로 교체 시 인터페이스 계약만 유지하면 서비스 코드 변경 없음</li>
+        <li>잔액 차감(§7 CHARGE_BALANCE_LEDGER) 미연계 — 외부 INSERT 직전 차감·실패 시 REVERT 보상 트랜잭션은 W-205 이후 처리</li>
+        <li>routingMeta 산출 로직 미구현 — Redis routing:{memberId} 캐시 기반 중계사 매핑 값 조회 후 ExternalSendRecord.etcChar2 에 주입하는 로직 필요</li>
+        <li>폴백(fb_msg) 페이로드 생성 미구현 — 카카오·RCS 채널의 대체발송 SMS/LMS 본문 산출 로직(§5.5 대체발송)</li>
+        <li>polling 스케줄러 미구현 — 현재는 poll() 단발 호출만 가능. 주기적 polling 스케줄러(@Scheduled 또는 비동기 큐) 구현 필요</li>
+        <li>result_code 카탈로그 — 통신사별 에러 코드 전체 목록은 외부 시스템 합의(R-01) 후 §5에 추가 표기 예정</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

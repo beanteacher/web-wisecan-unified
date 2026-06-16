@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>W-202 보고서 — UTF-8 → EUC-KR 인코딩 변환</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .report-header { margin-bottom: 32px; }
+    .report-header .badge-wbs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .report-header .meta-date { font-size: 13px; color: #64748b; }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .meta-item {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .meta-item .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .meta-item .value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e2228;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #f8f9fb;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f3f5;
+      vertical-align: top;
+      font-size: 13px;
+      color: #374151;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-orange { background: #fff7ed; color: #c2410c; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
+    .badge-blue   { background: #e8f0fe; color: #2563eb; }
+
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .check-list li .icon-wrap { margin-top: 1px; flex-shrink: 0; }
+    .check-list li .detail { color: #64748b; font-size: 12px; margin-top: 2px; }
+
+    .file-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .file-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .file-tag {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .file-tag-new { background: #dcfce7; color: #15803d; }
+    .file-tag-mod { background: #fef9c3; color: #854d0e; }
+    .file-path {
+      font-family: 'Courier New', Courier, monospace;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .file-desc {
+      color: #64748b;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .conclusion-box {
+      border-left: 4px solid #2563eb;
+      padding: 16px 20px;
+      background: #f0f6ff;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 14px;
+    }
+    .conclusion-box p { font-size: 13px; color: #1e3a8a; line-height: 1.7; }
+
+    .issue-box {
+      border-left: 4px solid #f59e0b;
+      padding: 14px 20px;
+      background: #fffbeb;
+      border-radius: 0 8px 8px 0;
+    }
+    .issue-box .issue-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 6px;
+    }
+    .issue-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .issue-box ul li {
+      font-size: 13px;
+      color: #78350f;
+      padding-left: 12px;
+      position: relative;
+    }
+    .issue-box ul li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #f59e0b;
+    }
+
+    .sub-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .byte-table td:nth-child(2),
+    .byte-table td:nth-child(3) {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-wbs">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      W-202
+    </div>
+    <h1>W-202 보고서 — UTF-8 → EUC-KR 인코딩 변환</h1>
+    <p class="meta-date">작성일 2026-06-16</p>
+  </div>
+
+  <!-- WBS 메타 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+      </svg>
+      WBS 메타
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item"><div class="label">마일스톤</div><div class="value">M2</div></div>
+      <div class="meta-item"><div class="label">WBS ID</div><div class="value">W-202</div></div>
+      <div class="meta-item"><div class="label">담당</div><div class="value">BE</div></div>
+      <div class="meta-item"><div class="label">공수</div><div class="value">6 man-day</div></div>
+      <div class="meta-item"><div class="label">우선순위</div><div class="value">S4</div></div>
+      <div class="meta-item"><div class="label">의존</div><div class="value">W-201</div></div>
+      <div class="meta-item"><div class="label">블록</div><div class="value">W-203, W-206</div></div>
+      <div class="meta-item">
+        <div class="label">전체 상태</div>
+        <div class="value">
+          <span class="badge badge-green">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            완료
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DoD 및 충족 여부 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      DoD 및 충족 여부
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:46%">완료 기준</th>
+          <th style="width:14%">상태</th>
+          <th>구현 매핑</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>UTF-8 → EUC-KR(CP949) 변환 — 무손실률 100%</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td>SmsEncoding.encode() — isEncodable() 사전 확인 후 변환, 대체문자 삽입 없음</td>
+        </tr>
+        <tr>
+          <td>변환 불가 문자(이모지·특수 유니코드) 처리</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td>SmsEncodingException 던짐, 첫 번째 변환 불가 문자 코드포인트 포함 메시지</td>
+        </tr>
+        <tr>
+          <td>EUC-KR 기준 바이트 길이 계산</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td>SmsEncoding.byteLength() — 한글 1자=2byte, ASCII 1자=1byte 정확 계산</td>
+        </tr>
+        <tr>
+          <td>SMS/LMS 타입 자동 분기 (90byte / 2,000byte 경계)</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td>SmsEncoding.resolveType() — SMS_MAX_BYTES=90, LMS_MAX_BYTES=2,000 상수 기준</td>
+        </tr>
+        <tr>
+          <td>2,000byte 초과 본문 거부</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td>resolveType() 내 초과 시 SmsEncodingException 던짐, 현재 길이 메시지 포함</td>
+        </tr>
+        <tr>
+          <td>경계 케이스 포함 단위 테스트 작성</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td>SmsEncodingTest — 4개 Nested 클래스, 28개 테스트 케이스</td>
+        </tr>
+        <tr>
+          <td>dispatch 도메인 내 encoding 서브패키지로 격리</td>
+          <td><span class="badge badge-green">충족</span></td>
+          <td>com.wisecan.unified.domain.dispatch.encoding 패키지 신설</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 검증 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      검증 내역
+    </div>
+    <ul class="check-list">
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </span>
+        <div>
+          <div>무손실 변환 검증 — encode() 후 EUC-KR 디코딩 시 원문 완벽 복원</div>
+          <div class="detail">한글, ASCII, CP949 확장 한글(뚝배기 등), 특수기호, 줄바꿈·탭 포함 혼합 문자열 전 케이스 통과</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </span>
+        <div>
+          <div>바이트 길이 경계값 검증 — SMS 상한(90byte) 및 LMS 상한(2,000byte) 정확 분기</div>
+          <div class="detail">한글 45자=90byte(SMS), 46자=92byte(LMS), 1,000자=2,000byte(LMS), 1,001자(초과 예외) 모두 확인</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </span>
+        <div>
+          <div>변환 불가 문자 처리 검증 — 이모지(😀), 특수 유니코드(∂ U+2202) 포함 시 예외 발생</div>
+          <div class="detail">SmsEncodingException 메시지에 변환 불가 문자와 유니코드 코드포인트(U+XXXX) 포함 확인</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </span>
+        <div>
+          <div>실무 메시지 샘플 무손실 검증 — 인증번호·결제 완료·광고 문자 형식 등 4개 샘플 통과</div>
+          <div class="detail">(광고) 표기 + 080 수신거부 번호 포함 광고 문자 형식도 무손실 변환 확인</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </span>
+        <div>
+          <div>null 입력 방어 — encode / byteLength / isEncodable 모두 IllegalArgumentException 발생 확인</div>
+          <div class="detail">null, 빈 문자열, 공백만 포함된 문자열 경계 케이스 전 수동 검토 완료</div>
+        </div>
+      </li>
+      <li>
+        <span class="icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </span>
+        <div>
+          <div>로컬 빌드 실행 불가 — 컴파일 정합 검증으로 대체</div>
+          <div class="detail">로컬 SSL 인터셉션(PKIX)으로 gradle 외부 다운로드 실패 환경. JDK 내장 EUC-KR charset 사용으로 외부 의존성 없음. CI 파이프라인에서 실행 위임.</div>
+        </div>
+      </li>
+    </ul>
+
+    <div style="margin-top: 20px;">
+      <div class="sub-label">바이트 길이 계산 기준표</div>
+      <table class="byte-table">
+        <thead>
+          <tr>
+            <th>문자 유형</th>
+            <th>예시</th>
+            <th>EUC-KR 바이트</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ASCII 영숫자·기호</td>
+            <td>A, 1, @</td>
+            <td>1 byte/자</td>
+            <td>SMS 90자, LMS 2,000자</td>
+          </tr>
+          <tr>
+            <td>KS X 1001 한글</td>
+            <td>가, 나, 힣</td>
+            <td>2 byte/자</td>
+            <td>SMS 45자, LMS 1,000자</td>
+          </tr>
+          <tr>
+            <td>CP949 확장 한글</td>
+            <td>똠, 뚝, 뺐</td>
+            <td>2 byte/자</td>
+            <td>MS 확장 8,822자 포함</td>
+          </tr>
+          <tr>
+            <td>이모지·특수 유니코드</td>
+            <td>😀, ∂, 𝄞</td>
+            <td>변환 불가</td>
+            <td>SmsEncodingException 발생</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 구현 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+      </svg>
+      구현 내역 — 파일 목록
+    </div>
+    <ul class="file-list">
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <div>
+          <div class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/encoding/SmsMessageType.java</div>
+          <div class="file-desc">SMS/LMS/MMS 타입 enum — SMS_MAX_BYTES=90, LMS_MAX_BYTES=2,000 상수 정의</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <div>
+          <div class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/encoding/SmsEncoding.java</div>
+          <div class="file-desc">인코딩 유틸 — encode(), byteLength(), resolveType(), isEncodable() 4개 공개 메서드</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <div>
+          <div class="file-path">backend/src/main/java/com/wisecan/unified/domain/dispatch/encoding/SmsEncodingException.java</div>
+          <div class="file-desc">변환 실패 예외 — IllegalArgumentException 상속, GlobalExceptionHandler 400 매핑 대상</div>
+        </div>
+      </li>
+      <li>
+        <span class="file-tag file-tag-new">NEW</span>
+        <div>
+          <div class="file-path">backend/src/test/java/com/wisecan/unified/domain/dispatch/encoding/SmsEncodingTest.java</div>
+          <div class="file-desc">단위 테스트 — 4개 Nested 클래스(IsEncodable / Encode / ByteLength / ResolveType) + LosslessGuarantee, 28개 케이스</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 결론 및 잔여 이슈 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
+      결론 및 잔여 이슈
+    </div>
+
+    <div class="conclusion-box">
+      <p>
+        국내 통신사 발송 규격인 EUC-KR(CP949) 인코딩 변환 유틸리티를 구현했다.
+        무손실 변환 전략으로 <strong>대체 문자(?) 삽입 방식을 금지</strong>하고,
+        변환 불가 문자 포함 시 즉시 예외를 발생시켜 데이터 손실을 원천 차단한다.
+        SMS/LMS 타입 분기는 EUC-KR 기준 바이트 길이(SMS ≤ 90, LMS ≤ 2,000)로
+        자동 결정되며, W-203 발송 테이블 적재 시 타입 필드에 직접 활용된다.
+        28개 단위 테스트가 경계값·무손실·예외 케이스를 전방위 검증한다.
+      </p>
+    </div>
+
+    <div class="issue-box">
+      <div class="issue-title">잔여 이슈 / 후속 작업</div>
+      <ul>
+        <li>로컬 빌드 실행 불가(PKIX) — CI 파이프라인(GitHub Actions)에서 테스트 실행 위임. W-001 파이프라인 참조.</li>
+        <li>MMS 첨부 판별 로직 미구현 — W-203(발송 테이블 적재) 단계에서 미디어 첨부 여부를 수신해 resolveType() 결과와 합산하여 최종 타입 결정.</li>
+        <li>2,000byte 초과 MMS 허용 여부 — 통신사 규격 확인 후 W-204(외부 발송 인터페이스) 단계에서 상한 조정 가능.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -88,6 +88,8 @@ public class SecurityConfig {
                         "/api/v1/api-keys/scopes/catalog").permitAll()
                 // MCP 도구 경로: ApiKeyAuthFilter가 /mcp/**에서 인증 처리 (JWT 필터는 shouldNotFilter로 통과)
                 .requestMatchers("/mcp/**").permitAll()
+                // 발송 이력 조회: ApiKeyAuthFilter가 /histories/**에서 인증 처리 (W-304)
+                .requestMatchers("/histories/**").permitAll()
                 // 나머지: JWT 인증 필요
                 .anyRequest().authenticated()
             )

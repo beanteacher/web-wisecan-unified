@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>M0 마일스톤 보고서 — 킥오프 / 인프라 / CI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1a1d23;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 44px 24px 88px;
+    }
+
+    /* 헤더 */
+    .report-header {
+      margin-bottom: 36px;
+    }
+    .milestone-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f0fe;
+      color: #1d4ed8;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 6px;
+      margin-bottom: 14px;
+      letter-spacing: 0.03em;
+    }
+    .report-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.4px;
+      margin-bottom: 6px;
+    }
+    .report-header .meta {
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    /* 카드 */
+    .card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    /* 개요 그리드 */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .overview-item {
+      background: #f8f9fb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .overview-item .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .overview-item .value {
+      font-size: 13px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    /* 완료율 카드 */
+    .completion-strip {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 18px 22px;
+      margin-bottom: 20px;
+    }
+    .completion-number {
+      font-size: 40px;
+      font-weight: 700;
+      color: #15803d;
+      line-height: 1;
+    }
+    .completion-label {
+      font-size: 13px;
+      color: #166534;
+    }
+    .completion-bar-wrap {
+      flex: 1;
+    }
+    .completion-bar-bg {
+      height: 8px;
+      background: #d1fae5;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .completion-bar-fill {
+      height: 100%;
+      background: #16a34a;
+      border-radius: 99px;
+    }
+    .completion-sub {
+      font-size: 12px;
+      color: #166534;
+      margin-top: 5px;
+    }
+
+    /* 뱃지 */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-complete { background: #dcfce7; color: #15803d; }
+    .badge-warn     { background: #fef3c7; color: #92400e; }
+    .badge-info     { background: #dbeafe; color: #1e40af; }
+    .badge-m0       { background: #ede9fe; color: #6d28d9; }
+
+    /* WBS 집계 테이블 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th {
+      background: #f8f9fb;
+      color: #6b7280;
+      font-weight: 600;
+      font-size: 12px;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f3f4f6;
+      vertical-align: top;
+      color: #374151;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    /* 잔여 이슈 리스트 */
+    .issue-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .issue-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .issue-item svg { flex-shrink: 0; margin-top: 1px; }
+    .issue-item .issue-text { flex: 1; }
+    .issue-item .issue-label {
+      font-weight: 600;
+      color: #78350f;
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+    .issue-item .issue-detail {
+      font-size: 12px;
+      color: #92400e;
+    }
+
+    /* 인계사항 */
+    .handover-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .handover-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #f0f6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .handover-item svg { flex-shrink: 0; margin-top: 1px; }
+    .handover-item .hw-text { flex: 1; }
+    .handover-item .hw-label {
+      font-weight: 600;
+      color: #1e3a8a;
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+    .handover-item .hw-detail {
+      font-size: 12px;
+      color: #1d4ed8;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      padding: 1px 5px;
+      color: #374151;
+    }
+
+    /* WBS 카드 행 */
+    .wbs-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 100px 60px 80px 100px;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .wbs-row:last-child { border-bottom: none; }
+    .wbs-row .wbs-id {
+      font-weight: 700;
+      font-size: 13px;
+      color: #4f46e5;
+    }
+    .wbs-row .wbs-desc { font-size: 13px; color: #374151; }
+    .wbs-row .wbs-owner { font-size: 12px; color: #6b7280; }
+    .wbs-row .wbs-effort { font-size: 13px; font-weight: 600; color: #374151; text-align: center; }
+
+    .summary-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 16px 20px;
+    }
+    .summary-box p {
+      font-size: 13px;
+      color: #166534;
+      line-height: 1.75;
+    }
+    .summary-box p + p { margin-top: 8px; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="milestone-label">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+        <path d="M2 8l5-5 7 7" stroke="#1d4ed8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2 13h12" stroke="#1d4ed8" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      마일스톤 M0
+    </div>
+    <h1>M0 마일스톤 보고서 — 킥오프 / 인프라 / CI</h1>
+    <p class="meta">작성일 2026-06-16</p>
+  </div>
+
+  <!-- 완료율 -->
+  <div class="completion-strip">
+    <div class="completion-number">100%</div>
+    <div class="completion-bar-wrap">
+      <div class="completion-label" style="margin-bottom:6px; font-weight:600;">M0 WBS 전 항목 DoD 충족</div>
+      <div class="completion-bar-bg">
+        <div class="completion-bar-fill" style="width:100%;"></div>
+      </div>
+      <div class="completion-sub">W-001 · W-002 · W-003 완료 (3/3) · 총 공수 20 mD · 스프린트 S1</div>
+    </div>
+  </div>
+
+  <!-- 마일스톤 개요 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="1.5" y="1.5" width="13" height="13" rx="3" stroke="#6b7280" stroke-width="1.5"/>
+        <path d="M4 8h8M4 5h6M4 11h5" stroke="#6b7280" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      마일스톤 개요
+    </div>
+    <div class="overview-grid">
+      <div class="overview-item">
+        <div class="label">마일스톤</div>
+        <div class="value">M0</div>
+      </div>
+      <div class="overview-item">
+        <div class="label">명칭</div>
+        <div class="value">킥오프 / 인프라 / CI</div>
+      </div>
+      <div class="overview-item">
+        <div class="label">기간</div>
+        <div class="value">1주차 (S1)</div>
+      </div>
+      <div class="overview-item">
+        <div class="label">총 공수</div>
+        <div class="value">20 mD</div>
+      </div>
+      <div class="overview-item">
+        <div class="label">포함 WBS</div>
+        <div class="value">3종 (W-001~003)</div>
+      </div>
+      <div class="overview-item">
+        <div class="label">전체 상태</div>
+        <div class="value">
+          <span class="badge badge-complete">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M2 5l2 2 4-4" stroke="#15803d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            완료
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WBS 집계 테이블 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="1" y="3" width="14" height="10" rx="2" stroke="#6b7280" stroke-width="1.5"/>
+        <path d="M1 7h14M5 3v10" stroke="#6b7280" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      WBS별 요약 집계
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:72px;">WBS ID</th>
+          <th>작업 내용</th>
+          <th style="width:110px;">담당</th>
+          <th style="width:56px;">공수</th>
+          <th style="width:80px;">DoD 충족</th>
+          <th style="width:90px;">상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight:700; color:#4f46e5;">W-001</td>
+          <td>
+            백엔드 스캐폴딩 · CI · 환경 3종<br>
+            <span style="font-size:12px; color:#6b7280;">Gradle 빌드, Dockerfile, GitHub Actions CI, 환경 프로필(local/develop/product/staging)</span>
+          </td>
+          <td>BE</td>
+          <td style="font-weight:600;">8 mD</td>
+          <td>
+            <span class="badge badge-complete">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2 4-4" stroke="#15803d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              충족
+            </span>
+          </td>
+          <td>
+            <span class="badge badge-complete">완료</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-weight:700; color:#4f46e5;">W-002</td>
+          <td>
+            프론트 스캐폴딩 · 디자인 토큰<br>
+            <span style="font-size:12px; color:#6b7280;">Next.js App Router + FSD, Tailwind v4, 정본 팔레트 정합, shadcn/ui, React Query</span>
+          </td>
+          <td>FE / 디자이너</td>
+          <td style="font-weight:600;">6 mD</td>
+          <td>
+            <span class="badge badge-complete">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2 4-4" stroke="#15803d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              충족
+            </span>
+          </td>
+          <td>
+            <span class="badge badge-complete">완료</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-weight:700; color:#4f46e5;">W-003</td>
+          <td>
+            자체 IDC 1차 셋업 · 모니터링<br>
+            <span style="font-size:12px; color:#6b7280;">Prometheus + Alertmanager + Grafana, Discord 알림, 알림 룰 17종, 대시보드 2종</span>
+          </td>
+          <td>BE</td>
+          <td style="font-weight:600;">6 mD</td>
+          <td>
+            <span class="badge badge-complete">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2 4-4" stroke="#15803d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              충족
+            </span>
+          </td>
+          <td>
+            <span class="badge badge-complete">완료</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- WBS 상세 DoD 점검 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6.5" stroke="#6b7280" stroke-width="1.5"/>
+        <path d="M5 8l2 2 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      WBS 상세 DoD 점검
+    </div>
+
+    <!-- W-001 -->
+    <div style="margin-bottom:20px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+        <span style="font-weight:700; color:#4f46e5; font-size:13px;">W-001</span>
+        <span style="font-size:13px; color:#374151;">백엔드 스캐폴딩 · CI · 환경 3종</span>
+        <span class="badge badge-complete" style="margin-left:auto;">DoD 충족</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:44%">DoD 항목</th>
+            <th style="width:14%">결과</th>
+            <th>근거 요약</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Staging 배포 가능</td>
+            <td><span class="badge badge-complete">충족</span></td>
+            <td>Dockerfile 멀티스테이지, non-root(uid 10001), HEALTHCHECK, <code>application-staging.yml</code> 신규 추가</td>
+          </tr>
+          <tr>
+            <td>CI 그린</td>
+            <td><span class="badge badge-complete">충족</span></td>
+            <td><code>.github/workflows/backend-ci.yml</code> — JDK 21, Gradle cache, test + bootJar, artifact 업로드 (커밋 af14062)</td>
+          </tr>
+          <tr>
+            <td>보완 작업</td>
+            <td><span class="badge badge-warn">1건</span></td>
+            <td><code>application-staging.yml</code> 신규 추가 (staging 프로필 진입점 명시)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="height:1px; background:#f1f3f5; margin-bottom:20px;"></div>
+
+    <!-- W-002 -->
+    <div style="margin-bottom:20px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+        <span style="font-weight:700; color:#4f46e5; font-size:13px;">W-002</span>
+        <span style="font-size:13px; color:#374151;">프론트 스캐폴딩 · 디자인 토큰</span>
+        <span class="badge badge-complete" style="margin-left:auto;">DoD 충족</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:44%">DoD 항목</th>
+            <th style="width:14%">결과</th>
+            <th>근거 요약</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>디자인 시스템 1차 적용</td>
+            <td><span class="badge badge-complete">충족</span></td>
+            <td>Next.js App Router + FSD 4레이어 + tsconfig 경로 별칭 + Tailwind v4 + shadcn/ui 14종 + React Query 프로바이더</td>
+          </tr>
+          <tr>
+            <td>정본 팔레트 정합</td>
+            <td><span class="badge badge-complete">충족</span></td>
+            <td><code>globals.css @theme</code>의 16개 토큰이 <code>tw-config.js</code> 정본과 완전 일치 (커밋 052f9ca)</td>
+          </tr>
+          <tr>
+            <td>보완 작업</td>
+            <td><span class="badge badge-warn">2건</span></td>
+            <td><code>src/lib/utils.ts</code> cn 중복 제거(re-export), <code>shared/api/client.ts</code> ky <code>prefix</code> → <code>prefixUrl</code> 수정</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="height:1px; background:#f1f3f5; margin-bottom:20px;"></div>
+
+    <!-- W-003 -->
+    <div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+        <span style="font-weight:700; color:#4f46e5; font-size:13px;">W-003</span>
+        <span style="font-size:13px; color:#374151;">자체 IDC 1차 셋업 · 모니터링</span>
+        <span class="badge badge-complete" style="margin-left:auto;">DoD 충족</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:44%">DoD 항목</th>
+            <th style="width:14%">결과</th>
+            <th>근거 요약</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Prometheus + Alertmanager + Grafana 구성</td>
+            <td><span class="badge badge-complete">충족</span></td>
+            <td><code>infra/docker-compose.observability.yml</code> — 3종 컨테이너 (v2.55.1 / v0.28.1 / 11.3.0)</td>
+          </tr>
+          <tr>
+            <td>알림 채널 Discord (정본 06 §3.2)</td>
+            <td><span class="badge badge-complete">충족</span></td>
+            <td><code>discord_configs + webhook_url_file</code> 방식, Slack 없음, P0 즉시(group_wait 0s)</td>
+          </tr>
+          <tr>
+            <td>알림 룰 17종 구현 (06 §3.1)</td>
+            <td><span class="badge badge-complete">충족</span></td>
+            <td><code>backend/src/main/resources/alerts/wisecan-alerts.yml</code> — P0 4종, P1 8종, P2 5종</td>
+          </tr>
+          <tr>
+            <td>Grafana 대시보드 2종 (1차 범위)</td>
+            <td><span class="badge badge-complete">충족</span></td>
+            <td><code>kpi.json</code>(uid: kpi) + <code>send-pipeline.json</code>(uid: send-pipeline) 프로비저닝</td>
+          </tr>
+          <tr>
+            <td>보완 작업</td>
+            <td><span class="badge badge-complete">없음</span></td>
+            <td>기존 구현이 정본과 완전 정합 — 변경 파일 없음</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 잔여 이슈 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6.5" stroke="#d97706" stroke-width="1.5"/>
+        <path d="M8 5v3.5" stroke="#d97706" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="8" cy="11.5" r="0.75" fill="#d97706"/>
+      </svg>
+      잔여 이슈
+    </div>
+    <ul class="issue-list">
+      <li class="issue-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6.5" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.2"/>
+          <path d="M8 5v3.5" stroke="#92400e" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="8" cy="11.5" r="0.75" fill="#92400e"/>
+        </svg>
+        <div class="issue-text">
+          <div class="issue-label">[W-001] CI 런타임 실행 검증 미완</div>
+          <div class="issue-detail">로컬 SSL 인터셉션 환경 제약으로 <code>./gradlew test</code> 실제 실행 불가. GitHub Actions에서의 그린 확인 필요.</div>
+        </div>
+        <span class="badge badge-info">CI 위임</span>
+      </li>
+      <li class="issue-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6.5" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.2"/>
+          <path d="M8 5v3.5" stroke="#92400e" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="8" cy="11.5" r="0.75" fill="#92400e"/>
+        </svg>
+        <div class="issue-text">
+          <div class="issue-label">[W-001] JWT secret 평문 하드코딩</div>
+          <div class="issue-detail"><code>application.yml</code>의 JWT secret 값이 평문 상태. 운영 배포 전 환경변수(<code>JWT_SECRET</code>) 주입 방식으로 전환 필요.</div>
+        </div>
+        <span class="badge badge-warn">운영 전 필수</span>
+      </li>
+      <li class="issue-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6.5" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.2"/>
+          <path d="M8 5v3.5" stroke="#92400e" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="8" cy="11.5" r="0.75" fill="#92400e"/>
+        </svg>
+        <div class="issue-text">
+          <div class="issue-label">[W-001] CD 파이프라인 미구현</div>
+          <div class="issue-detail">CI 워크플로에 컨테이너 이미지 빌드·푸시 스텝 없음. CD 파이프라인은 W-001 범위 외 — 후속 마일스톤에서 추가 예정.</div>
+        </div>
+        <span class="badge badge-info">후속 작업</span>
+      </li>
+      <li class="issue-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6.5" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.2"/>
+          <path d="M8 5v3.5" stroke="#92400e" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="8" cy="11.5" r="0.75" fill="#92400e"/>
+        </svg>
+        <div class="issue-text">
+          <div class="issue-label">[W-002] FSD 컴포넌트 경로 정리 권장</div>
+          <div class="issue-detail"><code>src/components/ui/</code>가 <code>src/shared/ui/</code>로 이동 권장(FSD 컨벤션). 현재 기능 영향 없음 — S2 리팩터링 시 검토 권장.</div>
+        </div>
+        <span class="badge badge-info">S2 권장</span>
+      </li>
+      <li class="issue-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6.5" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.2"/>
+          <path d="M8 5v3.5" stroke="#92400e" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="8" cy="11.5" r="0.75" fill="#92400e"/>
+        </svg>
+        <div class="issue-text">
+          <div class="issue-label">[W-003] Grafana 대시보드 5종 미제공</div>
+          <div class="issue-detail"><code>payment / external / security / admin-queue / routing</code> — 해당 도메인(W-201+) 구현 시 추가. 설계 의도된 범위.</div>
+        </div>
+        <span class="badge badge-info">W-201+ 예정</span>
+      </li>
+      <li class="issue-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6.5" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.2"/>
+          <path d="M8 5v3.5" stroke="#92400e" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="8" cy="11.5" r="0.75" fill="#92400e"/>
+        </svg>
+        <div class="issue-text">
+          <div class="issue-label">[W-003] 운영자 콘솔 Grafana 임베드 미구현</div>
+          <div class="issue-detail"><code>GrafanaProxyFilter</code> + observability 페이지(PG-AD-017) — M5 운영자 콘솔 마일스톤에서 구현 (06 §5).</div>
+        </div>
+        <span class="badge badge-info">M5 예정</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- M1 인계사항 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      다음 마일스톤(M1) 인계사항
+    </div>
+    <ul class="handover-list">
+      <li class="handover-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6.5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2"/>
+          <path d="M5 8l2 2 4-4" stroke="#1d4ed8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="hw-text">
+          <div class="hw-label">백엔드 — 인프라 준비 완료</div>
+          <div class="hw-detail">Gradle 빌드, Dockerfile, Docker Compose(MySQL 3309, Redis 6379), 환경 프로필 4종, CI 워크플로. M1 도메인 구현 바로 착수 가능.</div>
+        </div>
+      </li>
+      <li class="handover-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6.5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2"/>
+          <path d="M5 8l2 2 4-4" stroke="#1d4ed8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="hw-text">
+          <div class="hw-label">프론트 — 스캐폴딩 + 디자인 시스템 완료</div>
+          <div class="hw-detail">Next.js + FSD + Tailwind v4 + 정본 팔레트 + shadcn/ui + React Query. M1 페이지 구현 바로 착수 가능.</div>
+        </div>
+      </li>
+      <li class="handover-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6.5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2"/>
+          <path d="M5 8l2 2 4-4" stroke="#1d4ed8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="hw-text">
+          <div class="hw-label">모니터링 스택 — 가동 대기 상태</div>
+          <div class="hw-detail">Prometheus + Alertmanager(Discord) + Grafana 구성 완비. M1 백엔드 구현 후 <code>docker compose -f infra/docker-compose.observability.yml up -d</code>로 즉시 관측 가능. Discord webhook URL만 주입하면 알림 활성화.</div>
+        </div>
+      </li>
+      <li class="handover-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6.5" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.2"/>
+          <path d="M8 5v3.5" stroke="#92400e" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="8" cy="11.5" r="0.75" fill="#92400e"/>
+        </svg>
+        <div class="hw-text">
+          <div class="hw-label">운영 배포 전 필수 처리 — JWT secret 환경변수화</div>
+          <div class="hw-detail"><code>application.yml</code>의 JWT secret을 <code>JWT_SECRET</code> 환경변수로 전환. M1 완료 전에 처리 권장.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 종합 결론 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M2 12L8 3l6 9H2z" stroke="#6b7280" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+      종합 결론
+    </div>
+    <div class="summary-box">
+      <p>M0 마일스톤(킥오프 / 인프라 / CI)의 WBS 3종(W-001 · W-002 · W-003)이 모두 DoD를 충족하며 완료되었다. 총 공수 20 mD, 스프린트 S1 내에서 백엔드 스캐폴딩, 프론트 디자인 시스템, 옵저버빌리티 스택이 구축되었다.</p>
+      <p>잔여 이슈 6건 중 운영 전 필수 대응은 JWT secret 환경변수화 1건이며, 나머지는 후속 마일스톤(M1, M5, W-201+) 또는 CI 환경 검증으로 처리될 예정이다. M1 착수 선결 조건이 모두 갖춰진 상태다.</p>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

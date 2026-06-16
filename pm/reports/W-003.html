@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>W-003 보고서 — IDC 셋업 + 모니터링</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1a1d23;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* 헤더 */
+    .report-header {
+      margin-bottom: 32px;
+    }
+    .report-header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #111318;
+      margin-bottom: 6px;
+    }
+    .report-header .meta {
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    /* 카드 */
+    .card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #111318;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title svg {
+      flex-shrink: 0;
+    }
+
+    /* WBS 메타 그리드 */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .meta-item {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .meta-item .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .meta-item .value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    /* 뱃지 */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-pass {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .badge-warn {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .badge-p0 {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .badge-p1 {
+      background: #ffedd5;
+      color: #9a3412;
+    }
+    .badge-p2 {
+      background: #ede9fe;
+      color: #5b21b6;
+    }
+    .badge-info {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    /* DoD 테이블 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th {
+      background: #f9fafb;
+      color: #6b7280;
+      font-weight: 600;
+      font-size: 12px;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f3f4f6;
+      vertical-align: top;
+      color: #374151;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    tr:hover td {
+      background: #fafafa;
+    }
+
+    /* 검증 항목 */
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+    }
+    .check-item svg {
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .check-item .check-text {
+      flex: 1;
+    }
+    .check-item .check-label {
+      font-weight: 600;
+      color: #111318;
+      margin-bottom: 2px;
+    }
+    .check-item .check-detail {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    /* 결론 박스 */
+    .conclusion-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+    .conclusion-box.warn {
+      background: #fffbeb;
+      border-color: #fde68a;
+    }
+    .conclusion-box p {
+      font-size: 13px;
+      color: #374151;
+      line-height: 1.7;
+    }
+    .conclusion-box p + p {
+      margin-top: 8px;
+    }
+
+    /* 섹션 구분선 */
+    .section-divider {
+      height: 1px;
+      background: #e5e7eb;
+      margin: 8px 0 16px;
+    }
+
+    /* 코드 블록 */
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      padding: 1px 5px;
+      color: #374151;
+    }
+
+    .no-change {
+      font-style: italic;
+      color: #9ca3af;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <h1>W-003 보고서 — IDC 셋업 + 모니터링</h1>
+    <p class="meta">작성일 2026-06-16</p>
+  </div>
+
+  <!-- WBS 메타 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="14" height="14" rx="3" stroke="#6b7280" stroke-width="1.5"/>
+        <path d="M4 8h8M4 5h5M4 11h6" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      WBS 메타
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="label">마일스톤</div>
+        <div class="value">M0</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">WBS ID</div>
+        <div class="value">W-003</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">담당</div>
+        <div class="value">BE</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">공수</div>
+        <div class="value">6mD</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">스프린트</div>
+        <div class="value">S1</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">선행 의존</div>
+        <div class="value">없음</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">구현 커밋</div>
+        <div class="value">b1c0bfa · 6071cef</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">전체 상태</div>
+        <div class="value">
+          <span class="badge badge-pass">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2 4-4" stroke="#065f46" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            DoD 충족
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DoD 충족 여부 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="8" cy="8" r="6.5" stroke="#6b7280" stroke-width="1.5"/>
+        <path d="M5 8l2 2 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      DoD 및 충족 여부
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:36%">DoD 항목</th>
+          <th style="width:14%">결과</th>
+          <th>근거</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Prometheus 컨테이너 구성 존재</td>
+          <td><span class="badge badge-pass">충족</span></td>
+          <td><code>infra/docker-compose.observability.yml</code> — <code>prom/prometheus:v2.55.1</code>, 포트 9090</td>
+        </tr>
+        <tr>
+          <td>Grafana 컨테이너 구성 존재</td>
+          <td><span class="badge badge-pass">충족</span></td>
+          <td><code>grafana/grafana:11.3.0</code>, 호스트 포트 3001 (프론트 3000 충돌 회피)</td>
+        </tr>
+        <tr>
+          <td>Alertmanager 컨테이너 구성 존재</td>
+          <td><span class="badge badge-pass">충족</span></td>
+          <td><code>prom/alertmanager:v0.28.1</code>, 포트 9093</td>
+        </tr>
+        <tr>
+          <td>알림 채널이 Discord (정본 06 §3.2)</td>
+          <td><span class="badge badge-pass">충족</span></td>
+          <td><code>alertmanager.yml</code> — <code>discord_configs</code> + <code>webhook_url_file</code> 방식 (v0.28+ 네이티브 지원)</td>
+        </tr>
+        <tr>
+          <td>webhook URL 평문 커밋 금지 (파일 주입)</td>
+          <td><span class="badge badge-pass">충족</span></td>
+          <td><code>secrets/discord_webhook_url</code> gitignore, example 파일만 커밋, <code>webhook_url_file</code>로 마운트</td>
+        </tr>
+        <tr>
+          <td>심각도 분기 유지 (P0 즉시 / P1 / P2)</td>
+          <td><span class="badge badge-pass">충족</span></td>
+          <td>P0: <code>group_wait 0s, repeat_interval 1h</code> / 기본: 30s 그룹 대기, 4h 반복</td>
+        </tr>
+        <tr>
+          <td>Prometheus scrape 설정 존재</td>
+          <td><span class="badge badge-pass">충족</span></td>
+          <td><code>backend/src/main/resources/prometheus/prometheus.yml</code> — <code>wisecan-backend</code> job, <code>backend:8080</code> target</td>
+        </tr>
+        <tr>
+          <td>알림 룰 파일 존재 (§3.1 기준)</td>
+          <td><span class="badge badge-pass">충족</span></td>
+          <td><code>backend/src/main/resources/alerts/wisecan-alerts.yml</code> — 17종 구현 (§3.1 표 전체 커버)</td>
+        </tr>
+        <tr>
+          <td>Grafana 데이터소스 프로비저닝</td>
+          <td><span class="badge badge-pass">충족</span></td>
+          <td><code>grafana/provisioning/datasources/datasource.yml</code> — Prometheus uid <code>prometheus</code>, 15s 인터벌</td>
+        </tr>
+        <tr>
+          <td>Grafana 대시보드 프로비저닝</td>
+          <td><span class="badge badge-pass">충족</span></td>
+          <td><code>grafana/provisioning/dashboards/provider.yml</code> — <code>dashboards/*.json</code> 자동 로드</td>
+        </tr>
+        <tr>
+          <td>대시보드 kpi · send-pipeline 존재 (1차 범위)</td>
+          <td><span class="badge badge-pass">충족</span></td>
+          <td><code>kpi.json</code> (uid: kpi) + <code>send-pipeline.json</code> (uid: send-pipeline) — §4 표 1:1 매핑</td>
+        </tr>
+        <tr>
+          <td>README 기동 가이드 존재</td>
+          <td><span class="badge badge-pass">충족</span></td>
+          <td><code>infra/README.md</code> — 기동 3단계, 서비스 URL 표, Discord 알림 정책 기술</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 검증 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 3h12M2 8h8M2 13h10" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="13" cy="13" r="2.5" stroke="#6b7280" stroke-width="1.5"/>
+        <path d="M13 11.5v1l.7.7" stroke="#6b7280" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      검증 내역
+    </div>
+
+    <div class="card-title" style="font-size:13px; color:#6b7280; margin-top:0; margin-bottom:10px; font-weight:500;">
+      1. 컨테이너 구성 (docker-compose.observability.yml)
+    </div>
+    <ul class="check-list" style="margin-bottom:20px;">
+      <li class="check-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#d1fae5"/><path d="M5 8l2 2 4-4" stroke="#065f46" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="check-text">
+          <div class="check-label">Prometheus v2.55.1</div>
+          <div class="check-detail">포트 9090, <code>extra_hosts: backend:host-gateway</code>로 호스트 백엔드 연결, <code>--web.enable-lifecycle</code> 설정</div>
+        </div>
+      </li>
+      <li class="check-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#d1fae5"/><path d="M5 8l2 2 4-4" stroke="#065f46" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="check-text">
+          <div class="check-label">Alertmanager v0.28.1</div>
+          <div class="check-detail">포트 9093, <code>alertmanager.yml</code> + <code>secrets/</code> 볼륨 마운트(읽기 전용)</div>
+        </div>
+      </li>
+      <li class="check-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#d1fae5"/><path d="M5 8l2 2 4-4" stroke="#065f46" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="check-text">
+          <div class="check-label">Grafana 11.3.0</div>
+          <div class="check-detail">호스트 포트 3001 (프론트 3000 회피), provisioning + dashboards 볼륨, <code>GF_USERS_ALLOW_SIGN_UP=false</code></div>
+        </div>
+      </li>
+    </ul>
+
+    <div class="section-divider"></div>
+
+    <div class="card-title" style="font-size:13px; color:#6b7280; margin-bottom:10px; font-weight:500;">
+      2. 알림 채널 검증 (alertmanager.yml)
+    </div>
+    <ul class="check-list" style="margin-bottom:20px;">
+      <li class="check-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#d1fae5"/><path d="M5 8l2 2 4-4" stroke="#065f46" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="check-text">
+          <div class="check-label">Discord 단일 채널 — 정본 06 §3.2 일치</div>
+          <div class="check-detail"><code>discord_configs</code> 사용 (Alertmanager v0.28+ 네이티브), Slack/기타 채널 없음</div>
+        </div>
+      </li>
+      <li class="check-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#d1fae5"/><path d="M5 8l2 2 4-4" stroke="#065f46" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="check-text">
+          <div class="check-label">webhook_url_file 시크릿 주입 방식</div>
+          <div class="check-detail"><code>webhook_url_file: /etc/alertmanager/secrets/discord_webhook_url</code> — URL 평문 커밋 방지</div>
+        </div>
+      </li>
+      <li class="check-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#d1fae5"/><path d="M5 8l2 2 4-4" stroke="#065f46" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="check-text">
+          <div class="check-label">P0 즉시 라우팅</div>
+          <div class="check-detail"><code>matchers: [severity="P0"]</code> → <code>group_wait: 0s, repeat_interval: 1h</code> — 정본 §3.2 P0 정책 일치</div>
+        </div>
+      </li>
+      <li class="check-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#d1fae5"/><path d="M5 8l2 2 4-4" stroke="#065f46" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="check-text">
+          <div class="check-label">알림 메시지 형식</div>
+          <div class="check-detail">title에 심각도·alertname 포함, message에 summary + ref(정본 링크) 포함</div>
+        </div>
+      </li>
+    </ul>
+
+    <div class="section-divider"></div>
+
+    <div class="card-title" style="font-size:13px; color:#6b7280; margin-bottom:10px; font-weight:500;">
+      3. 알림 룰 검증 (wisecan-alerts.yml vs 06 §3.1 표)
+    </div>
+    <table style="margin-bottom:16px;">
+      <thead>
+        <tr>
+          <th>알림 이름</th>
+          <th style="width:70px;">심각도</th>
+          <th style="width:70px;">구현</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>SendApiAvailabilityBelow995</td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-pass">O</span></td></tr>
+        <tr><td>SendTableInsertSuccessBelow999</td><td><span class="badge badge-p0">P0</span></td><td><span class="badge badge-pass">O</span></td></tr>
+        <tr><td>SendApiP95Over1s</td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-pass">O</span></td></tr>
+        <tr><td>EncodingLossDetected</td><td><span class="badge badge-p0">P0</span></td><td><span class="badge badge-pass">O</span></td></tr>
+        <tr><td>InsufficientBalanceCancelSpike</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-pass">O</span></td></tr>
+        <tr><td>AutochargeFailureRateOver1Percent</td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-pass">O</span></td></tr>
+        <tr><td>PgRequestErrorSpike</td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-pass">O</span></td></tr>
+        <tr><td>RefundQueueBacklog</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-pass">O</span></td></tr>
+        <tr><td>KisaRegisterSuccessBelow99Percent</td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-pass">O</span></td></tr>
+        <tr><td>RelayVendorErrorSpike</td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-pass">O</span></td></tr>
+        <tr><td>CircuitBreakerOpen</td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-pass">O</span></td></tr>
+        <tr><td>LoginBruteForceSpike</td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-pass">O</span></td></tr>
+        <tr><td>ApiKeyCacheInvalidationOver1s</td><td><span class="badge badge-p0">P0</span></td><td><span class="badge badge-pass">O</span></td></tr>
+        <tr><td>McpBlockedActionAttempted</td><td><span class="badge badge-p0">P0</span></td><td><span class="badge badge-pass">O</span></td></tr>
+        <tr><td>AbnormalSendBurst</td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-pass">O</span></td></tr>
+        <tr><td>BusinessReviewSla24hBreach</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-pass">O</span></td></tr>
+        <tr><td>CsTicket24hBreach</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-pass">O</span></td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px; color:#6b7280;">06 §3.1 표 17종 전량 구현. P0 4종 · P1 8종 · P2 5종.</p>
+
+    <div class="section-divider" style="margin-top:16px;"></div>
+
+    <div class="card-title" style="font-size:13px; color:#6b7280; margin-bottom:10px; font-weight:500;">
+      4. Grafana 프로비저닝 및 대시보드 검증
+    </div>
+    <ul class="check-list">
+      <li class="check-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#d1fae5"/><path d="M5 8l2 2 4-4" stroke="#065f46" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="check-text">
+          <div class="check-label">데이터소스 프로비저닝 — Prometheus 단일 소스</div>
+          <div class="check-detail">uid <code>prometheus</code>, <code>http://prometheus:9090</code>, <code>timeInterval: 15s</code>, isDefault</div>
+        </div>
+      </li>
+      <li class="check-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#d1fae5"/><path d="M5 8l2 2 4-4" stroke="#065f46" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="check-text">
+          <div class="check-label">대시보드 provider — WiseCan 폴더 자동 로드</div>
+          <div class="check-detail"><code>updateIntervalSeconds: 30</code>, <code>allowUiUpdates: true</code></div>
+        </div>
+      </li>
+      <li class="check-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#d1fae5"/><path d="M5 8l2 2 4-4" stroke="#065f46" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="check-text">
+          <div class="check-label">kpi.json — KPI (K2·K3) 대시보드</div>
+          <div class="check-detail">uid <code>kpi</code>, 4개 stat 패널: 적재 성공률 / API 가용성 / 전환율 / CLI 위임 비율 — §4 표 일치</div>
+        </div>
+      </li>
+      <li class="check-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#d1fae5"/><path d="M5 8l2 2 4-4" stroke="#065f46" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="check-text">
+          <div class="check-label">send-pipeline.json — 발송 적재 파이프라인 대시보드</div>
+          <div class="check-detail">uid <code>send-pipeline</code>, 5개 패널: 적재 성공률 / API 가용성 / P95 / 검증 거부 사유 분포 / 잔액 분기 분포 — §4 핵심 패널 일치</div>
+        </div>
+      </li>
+      <li class="check-item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#fef3c7"/><path d="M8 5v3M8 10.5v.5" stroke="#92400e" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <div class="check-text">
+          <div class="check-label">나머지 5종 대시보드 미제공 (설계 의도)</div>
+          <div class="check-detail"><code>payment / external / security / admin-queue / routing</code> — 해당 도메인(W-201+) 구현 시 추가 예정. infra/README.md §현재 범위에 명시됨</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 보완 작업 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 2v4l2.5 1.5" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="8" cy="9" r="6" stroke="#6b7280" stroke-width="1.5"/>
+      </svg>
+      보완 작업 내역
+    </div>
+    <p class="no-change">보완 불필요 — 구성 파일 전체가 pm/06_OBSERVABILITY.md 정본과 정합하며 DoD 항목을 모두 충족함. 변경 파일 없음.</p>
+  </div>
+
+  <!-- 결론 및 잔여 이슈 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      결론 및 잔여 이슈
+    </div>
+    <div class="conclusion-box">
+      <p>W-003 IDC 셋업 + 모니터링의 DoD 항목 12종이 모두 충족되었다. Prometheus(v2.55.1) · Alertmanager(v0.28.1) · Grafana(v11.3.0) 3종 컨테이너 구성이 존재하며, 알림 채널은 정본 06 §3.2 기준대로 Discord 단일 채널로 통일되어 있다.</p>
+      <p>알림 룰은 §3.1 표 17종을 전량 구현했고, Grafana 대시보드는 1차 범위인 kpi · send-pipeline 2종이 uid 기준으로 정확히 프로비저닝된다.</p>
+    </div>
+    <div style="margin-top:16px;">
+      <div class="card-title" style="font-size:13px; font-weight:600; color:#374151; margin-bottom:10px;">잔여 이슈 (설계 의도된 범위 밖)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>항목</th>
+            <th>분류</th>
+            <th>처리 방향</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>대시보드 5종 미제공 (<code>payment / external / security / admin-queue / routing</code>)</td>
+            <td><span class="badge badge-info">설계 의도</span></td>
+            <td>도메인 구현(W-201+) 시 추가. README에 명시됨</td>
+          </tr>
+          <tr>
+            <td>알림 룰 일부 임계값이 1차 추정치 (3σ 기반 등)</td>
+            <td><span class="badge badge-info">설계 의도</span></td>
+            <td>도메인 메트릭 수집 후 운영 데이터 기반으로 조정 예정</td>
+          </tr>
+          <tr>
+            <td>운영자 콘솔 Grafana 임베드 (<code>GrafanaProxyFilter</code>)</td>
+            <td><span class="badge badge-info">설계 의도</span></td>
+            <td>M5 운영자 콘솔 마일스톤에서 구현 (06 §5)</td>
+          </tr>
+          <tr>
+            <td>인프라 메트릭 (JVM/Redis/Oracle/IDC)</td>
+            <td><span class="badge badge-info">범위 외</span></td>
+            <td>인프라팀 별도 스택 담당 (06 §1.3)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

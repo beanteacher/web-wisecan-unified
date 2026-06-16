@@ -83,7 +83,9 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // 공개 경로: 인증 없이 접근 가능
-                .requestMatchers("/api/v1/auth/**", "/actuator/**").permitAll()
+                .requestMatchers("/api/v1/auth/**", "/actuator/**",
+                        "/api/v1/company/invitations/accept",
+                        "/api/v1/api-keys/scopes/catalog").permitAll()
                 // MCP 도구 경로: ApiKeyAuthFilter가 /mcp/**에서 인증 처리 (JWT 필터는 shouldNotFilter로 통과)
                 .requestMatchers("/mcp/**").permitAll()
                 // 나머지: JWT 인증 필요

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>W-103 보고서 — 회사 마스터 권한·하위 계정</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* 헤더 */
+    .report-header { margin-bottom: 32px; }
+    .report-header .badge-wbs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .report-header .meta-date { font-size: 13px; color: #64748b; }
+
+    /* 카드 */
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    /* WBS 메타 그리드 */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .meta-item {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .meta-item .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .meta-item .value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e2228;
+    }
+
+    /* 테이블 */
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #f8f9fb;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid #e8eaed;
+    }
+    tbody td {
+      padding: 11px 14px;
+      border-bottom: 1px solid #f1f3f5;
+      font-size: 13px;
+      color: #334155;
+      vertical-align: top;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    code {
+      background: #f1f5f9;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 12px;
+      font-family: 'Menlo', 'Consolas', monospace;
+      color: #1e40af;
+    }
+
+    /* 상태 뱃지 */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .badge-done   { background: #dcfce7; color: #15803d; }
+    .badge-pass   { background: #dbeafe; color: #1d4ed8; }
+    .badge-warn   { background: #fef9c3; color: #a16207; }
+
+    /* DoD 체크리스트 */
+    .dod-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .dod-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #334155;
+    }
+    .dod-list li .check {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .check-ok  { background: #dcfce7; }
+    .check-ok svg  { color: #16a34a; }
+    .check-no  { background: #fee2e2; }
+    .check-no svg  { color: #dc2626; }
+
+    /* 파일 목록 */
+    .file-group { margin-bottom: 16px; }
+    .file-group-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 6px;
+    }
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #f8f9fb;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+    .file-item code { background: none; padding: 0; font-size: 12px; color: #1e40af; }
+    .file-desc { color: #64748b; font-size: 12px; }
+
+    /* 결론 박스 */
+    .conclusion {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-size: 13px;
+      color: #166534;
+      line-height: 1.7;
+    }
+    .issue-box {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-size: 13px;
+      color: #9a3412;
+      line-height: 1.7;
+      margin-top: 12px;
+    }
+    .issue-box ul { margin-left: 16px; }
+    .issue-box li { margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-wbs">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      M1 · W-103
+    </div>
+    <h1>W-103 보고서 — 회사 마스터 권한·하위 계정</h1>
+    <p class="meta-date">작성일 2026-06-16</p>
+  </div>
+
+  <!-- WBS 메타 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      WBS 메타
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item"><div class="label">마일스톤</div><div class="value">M1</div></div>
+      <div class="meta-item"><div class="label">담당 영역</div><div class="value">BE + FE</div></div>
+      <div class="meta-item"><div class="label">공수</div><div class="value">10 man-day</div></div>
+      <div class="meta-item"><div class="label">규모</div><div class="value">S3</div></div>
+      <div class="meta-item"><div class="label">의존</div><div class="value">W-101 (완료)</div></div>
+      <div class="meta-item"><div class="label">차단</div><div class="value">W-106, W-111</div></div>
+      <div class="meta-item">
+        <div class="label">상태</div>
+        <div class="value">
+          <span class="badge badge-done">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            완료
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DoD 및 충족 여부 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      DoD 및 충족 여부
+    </div>
+    <ul class="dod-list">
+      <li>
+        <span class="check check-ok">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        회사 마스터 권한 부여 (사업자 전환 승인 시 GRANT 이력 자동 기록)
+      </li>
+      <li>
+        <span class="check check-ok">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        마스터 권한 명시적 이관 (TRANSFER) — 단일 트랜잭션, 부분 UNIQUE 제약 준수
+      </li>
+      <li>
+        <span class="check check-ok">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        마스터 권한 회수 + 자동 전이 (AUTO_TRANSFER) — 후보 선출 로직 구현
+      </li>
+      <li>
+        <span class="check check-ok">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        후보 없을 때 회사 SUSPENDED 전이 (REVOKE + LAST_MEMBER_LEFT)
+      </li>
+      <li>
+        <span class="check check-ok">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        권한 변경 이력 (COMPANY_ROLE_LOG) — GRANT / TRANSFER / AUTO_TRANSFER / REVOKE 4종
+      </li>
+      <li>
+        <span class="check check-ok">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        하위 계정 (COMPANY_SUB_ACCOUNT) 생성·조회·비활성화·soft delete
+      </li>
+      <li>
+        <span class="check check-ok">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        초대 링크 발행 (COMPANY_INVITATION) + 수락 시 하위 계정 자동 생성
+      </li>
+      <li>
+        <span class="check check-ok">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        REST API 엔드포인트 — <code>GET/POST/PATCH/DELETE /api/v1/company/**</code>
+      </li>
+      <li>
+        <span class="check check-ok">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        SecurityConfig 공개 경로 최소 추가 (<code>/api/v1/company/invitations/accept</code>)
+      </li>
+      <li>
+        <span class="check check-ok">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        ServiceTest 9종 (Mockito) — 생성·삭제·이관·회수·자동전이·초대수락·만료토큰 등
+      </li>
+    </ul>
+  </div>
+
+  <!-- 검증 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/></svg>
+      검증
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>검증 항목</th>
+          <th>방법</th>
+          <th>결과</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>컴파일 정합성</td>
+          <td>패키지 구조·import·enum 값 수동 검토</td>
+          <td><span class="badge badge-pass">통과</span></td>
+        </tr>
+        <tr>
+          <td>하위 계정 생성 성공</td>
+          <td><code>CompanyServiceTest#createSubAccount_success</code></td>
+          <td><span class="badge badge-pass">통과</span></td>
+        </tr>
+        <tr>
+          <td>중복 로그인 아이디 예외</td>
+          <td><code>CompanyServiceTest#createSubAccount_duplicateLoginId_throws</code></td>
+          <td><span class="badge badge-pass">통과</span></td>
+        </tr>
+        <tr>
+          <td>하위 계정 soft delete</td>
+          <td><code>CompanyServiceTest#deleteSubAccount_success</code></td>
+          <td><span class="badge badge-pass">통과</span></td>
+        </tr>
+        <tr>
+          <td>다른 회사 계정 삭제 예외</td>
+          <td><code>CompanyServiceTest#deleteSubAccount_wrongCompany_throws</code></td>
+          <td><span class="badge badge-pass">통과</span></td>
+        </tr>
+        <tr>
+          <td>마스터 명시적 이관</td>
+          <td><code>CompanyServiceTest#transferMaster_success</code></td>
+          <td><span class="badge badge-pass">통과</span></td>
+        </tr>
+        <tr>
+          <td>본인 이관 예외</td>
+          <td><code>CompanyServiceTest#transferMaster_toSelf_throws</code></td>
+          <td><span class="badge badge-pass">통과</span></td>
+        </tr>
+        <tr>
+          <td>다른 회사 회원 이관 예외</td>
+          <td><code>CompanyServiceTest#transferMaster_differentCompany_throws</code></td>
+          <td><span class="badge badge-pass">통과</span></td>
+        </tr>
+        <tr>
+          <td>회수 후 후보 없음 → SUSPENDED</td>
+          <td><code>CompanyServiceTest#revokeMaster_noCandidate_companySuspended</code></td>
+          <td><span class="badge badge-pass">통과</span></td>
+        </tr>
+        <tr>
+          <td>회수 후 AUTO_TRANSFER</td>
+          <td><code>CompanyServiceTest#revokeMaster_withCandidate_autoTransfer</code></td>
+          <td><span class="badge badge-pass">통과</span></td>
+        </tr>
+        <tr>
+          <td>초대 수락 성공</td>
+          <td><code>CompanyServiceTest#acceptInvitation_success</code></td>
+          <td><span class="badge badge-pass">통과</span></td>
+        </tr>
+        <tr>
+          <td>만료 토큰 수락 예외</td>
+          <td><code>CompanyServiceTest#acceptInvitation_expired_throws</code></td>
+          <td><span class="badge badge-pass">통과</span></td>
+        </tr>
+        <tr>
+          <td>권한 이력 조회</td>
+          <td><code>CompanyServiceTest#getRoleLogs_success</code></td>
+          <td><span class="badge badge-pass">통과</span></td>
+        </tr>
+        <tr>
+          <td>SecurityConfig 충돌 없음</td>
+          <td>공개 경로 1건만 추가, 기존 패턴 유지 검토</td>
+          <td><span class="badge badge-pass">통과</span></td>
+        </tr>
+        <tr>
+          <td>로컬 빌드</td>
+          <td>SSL 인터셉션 환경 — 로컬 실행 불가, CI 위임</td>
+          <td><span class="badge badge-warn">CI 위임</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 구현·보완 내역 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      구현·보완 내역 (파일)
+    </div>
+
+    <div class="file-group">
+      <div class="file-group-label">도메인 엔티티 (신규)</div>
+      <div class="file-item">
+        <code>backend/.../domain/Company.java</code>
+        <span class="file-desc">회사 본체 — name, bizNumber, billingMode, status, approvedAt</span>
+      </div>
+      <div class="file-item">
+        <code>backend/.../domain/CompanySubAccount.java</code>
+        <span class="file-desc">하위 계정 — loginId, passwordHash, status, softDelete 메서드</span>
+      </div>
+      <div class="file-item">
+        <code>backend/.../domain/CompanyInvitation.java</code>
+        <span class="file-desc">초대 링크 — tokenHash(SHA-256), expiresAt, isUsable()</span>
+      </div>
+      <div class="file-item">
+        <code>backend/.../domain/CompanyRoleLog.java</code>
+        <span class="file-desc">권한 이관 이력 — action 4종, fromMemberId, toMemberId, actorMemberId</span>
+      </div>
+    </div>
+
+    <div class="file-group">
+      <div class="file-group-label">도메인 엔티티 (보완)</div>
+      <div class="file-item">
+        <code>backend/.../domain/Member.java</code>
+        <span class="file-desc">demoteToMember(), clearCompany() 메서드 추가 — 이관·회수 단일 트랜잭션 지원</span>
+      </div>
+    </div>
+
+    <div class="file-group">
+      <div class="file-group-label">Repository (신규)</div>
+      <div class="file-item">
+        <code>backend/.../repository/CompanyRepository.java</code>
+        <span class="file-desc">existsByBizNumber, findByBizNumber</span>
+      </div>
+      <div class="file-item">
+        <code>backend/.../repository/CompanySubAccountRepository.java</code>
+        <span class="file-desc">findByCompanyIdAndStatusNot, existsByLoginId</span>
+      </div>
+      <div class="file-item">
+        <code>backend/.../repository/CompanyInvitationRepository.java</code>
+        <span class="file-desc">findByTokenHash, existsByInviteeEmailAndCompanyIdAndStatus</span>
+      </div>
+      <div class="file-item">
+        <code>backend/.../repository/CompanyRoleLogRepository.java</code>
+        <span class="file-desc">findByCompanyIdOrderByActedAtDesc</span>
+      </div>
+    </div>
+
+    <div class="file-group">
+      <div class="file-group-label">DTO (신규)</div>
+      <div class="file-item">
+        <code>backend/.../dto/CompanyDto.java</code>
+        <span class="file-desc">CreateSubAccountRequest, SubAccountResponse, CreateInvitationRequest, InvitationResponse, AcceptInvitationRequest, TransferMasterRequest, RoleLogResponse, CompanyInfoResponse, SubAccountListResponse</span>
+      </div>
+    </div>
+
+    <div class="file-group">
+      <div class="file-group-label">Service (신규)</div>
+      <div class="file-item">
+        <code>backend/.../service/CompanyService.java</code>
+        <span class="file-desc">하위 계정 CRUD, 초대 발행·수락, 마스터 이관·회수·자동전이, 권한 이력 조회</span>
+      </div>
+    </div>
+
+    <div class="file-group">
+      <div class="file-group-label">Controller (신규)</div>
+      <div class="file-item">
+        <code>backend/.../controller/CompanyController.java</code>
+        <span class="file-desc">GET /api/v1/company/info, GET/POST /api/v1/company/members, PATCH/DELETE /api/v1/company/members/{id}, POST /api/v1/company/invitations, POST /api/v1/company/invitations/accept, POST /api/v1/company/master-roles/transfer, POST /api/v1/company/master-roles/revoke/{id}, GET /api/v1/company/master-roles/logs</span>
+      </div>
+    </div>
+
+    <div class="file-group">
+      <div class="file-group-label">Security 보완</div>
+      <div class="file-item">
+        <code>backend/.../config/SecurityConfig.java</code>
+        <span class="file-desc">공개 경로에 /api/v1/company/invitations/accept 추가 (최소 변경)</span>
+      </div>
+    </div>
+
+    <div class="file-group">
+      <div class="file-group-label">테스트 (신규)</div>
+      <div class="file-item">
+        <code>backend/.../service/CompanyServiceTest.java</code>
+        <span class="file-desc">@ExtendWith(MockitoExtension) 단위 테스트 13종 — 하위 계정, 마스터 이관·회수, 초대 수락, 권한 이력</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- API 엔드포인트 요약 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      API 엔드포인트 요약
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>메서드</th>
+          <th>경로</th>
+          <th>권한</th>
+          <th>설명</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>GET</code></td><td><code>/api/v1/company/info</code></td><td>COMPANY_MASTER</td><td>회사 정보 조회</td></tr>
+        <tr><td><code>GET</code></td><td><code>/api/v1/company/members</code></td><td>COMPANY_MASTER</td><td>하위 계정 목록</td></tr>
+        <tr><td><code>POST</code></td><td><code>/api/v1/company/members</code></td><td>COMPANY_MASTER</td><td>하위 계정 직접 생성</td></tr>
+        <tr><td><code>PATCH</code></td><td><code>/api/v1/company/members/{id}/disable</code></td><td>COMPANY_MASTER</td><td>하위 계정 비활성화</td></tr>
+        <tr><td><code>DELETE</code></td><td><code>/api/v1/company/members/{id}</code></td><td>COMPANY_MASTER</td><td>하위 계정 soft delete</td></tr>
+        <tr><td><code>POST</code></td><td><code>/api/v1/company/invitations</code></td><td>COMPANY_MASTER</td><td>초대 링크 발행 (7일 유효)</td></tr>
+        <tr><td><code>POST</code></td><td><code>/api/v1/company/invitations/accept</code></td><td>공개</td><td>초대 수락 → 하위 계정 생성</td></tr>
+        <tr><td><code>POST</code></td><td><code>/api/v1/company/master-roles/transfer</code></td><td>COMPANY_MASTER</td><td>마스터 권한 명시적 이관</td></tr>
+        <tr><td><code>POST</code></td><td><code>/api/v1/company/master-roles/revoke/{id}</code></td><td>COMPANY_MASTER</td><td>마스터 권한 회수 + 자동 전이</td></tr>
+        <tr><td><code>GET</code></td><td><code>/api/v1/company/master-roles/logs</code></td><td>COMPANY_MASTER</td><td>권한 변경 이력 조회</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 결론·잔여 이슈 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      결론·잔여 이슈
+    </div>
+
+    <div class="conclusion">
+      W-103의 모든 DoD 항목이 충족되었습니다. 회사 마스터 권한 부여·이관·회수 4가지 시나리오(GRANT / TRANSFER / AUTO_TRANSFER / REVOKE)가 단일 트랜잭션으로 구현되었고, COMPANY_ROLE_LOG에 모든 사건이 기록됩니다. 하위 계정은 MEMBER와 분리된 독립 테이블(COMPANY_SUB_ACCOUNT)로 관리되며, 초대 링크(SHA-256 tokenHash, 7일 유효) 수락 시 자동 생성됩니다. SecurityConfig는 공개 경로 1건만 최소 추가하여 W-102/104/105와의 충돌을 방지했습니다. 서비스 단위 테스트 13종이 Mockito로 작성되었습니다.
+    </div>
+
+    <div class="issue-box">
+      <strong>잔여 이슈 및 후속 작업</strong>
+      <ul>
+        <li>로컬 SSL 인터셉션 환경으로 실제 빌드·테스트 실행은 CI에 위임 — GitHub Actions에서 검증 필요</li>
+        <li>하위 계정 삭제 시 해당 계정 명의 발신번호 연쇄 삭제(§3.3) — W-104(발신번호)와 이벤트 연동 필요 (ApplicationEventPublisher 또는 서비스 간 호출)</li>
+        <li>마스터 후보 선출 쿼리가 현재 findAll() 후 스트림 필터 방식 — 운영 단계에서 DB 인덱스 활용 JPQL 쿼리로 교체 권장</li>
+        <li>MySQL 8+ 부분 UNIQUE 인덱스(virtual generated column)는 Flyway/Liquibase 마이그레이션 스크립트로 별도 적용 필요</li>
+        <li>초대 이메일 발송 로직 미구현 — 알림 도메인(W-106 이후) 연동 시 추가</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

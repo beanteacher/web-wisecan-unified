@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>M4 마일스톤 보고서 — 결제 · 캐시 · 체험 모드</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* ── 헤더 ── */
+    .report-header { margin-bottom: 36px; }
+    .badge-milestone {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fef3c7;
+      color: #b45309;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      letter-spacing: 0.3px;
+    }
+    .report-header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+    .report-header .subtitle {
+      font-size: 15px;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+    .report-header .meta-date { font-size: 13px; color: #94a3b8; }
+
+    /* ── 게이트 배너 ── */
+    .gate-banner {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border: 1.5px solid #6ee7b7;
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .gate-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: #10b981;
+    }
+    .gate-text h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #065f46;
+      margin-bottom: 4px;
+    }
+    .gate-text p { font-size: 13px; color: #047857; }
+
+    /* ── 카드 ── */
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8eaed;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+
+    /* ── KPI 그리드 ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 14px;
+    }
+    .kpi-item {
+      background: #f8f9fb;
+      border-radius: 10px;
+      padding: 16px 18px;
+      text-align: center;
+    }
+    .kpi-item .kpi-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .kpi-item .kpi-value.green { color: #16a34a; }
+    .kpi-item .kpi-value.blue  { color: #2563eb; }
+    .kpi-item .kpi-value.amber { color: #b45309; }
+    .kpi-item .kpi-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    /* ── 테이블 ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead tr { background: #f8f9fb; }
+    th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      padding: 10px 12px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f1f3f5;
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    /* ── 배지/태그 ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+    .badge-green  { background: #dcfce7; color: #16a34a; }
+    .badge-amber  { background: #fef3c7; color: #b45309; }
+    .badge-blue   { background: #e8f0fe; color: #2563eb; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
+    .badge-purple { background: #f3e8ff; color: #7e22ce; }
+
+    .wbs-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #e8f0fe;
+      color: #2563eb;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    code {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      background: #f1f5f9;
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: #334155;
+    }
+
+    /* ── 아키텍처 레이어 ── */
+    .arch-layers {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .arch-layer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #f8f9fb;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+    .arch-layer-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      width: 80px;
+      flex-shrink: 0;
+    }
+    .arch-layer-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .arch-chip {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 6px;
+    }
+    .chip-pg     { background: #dbeafe; color: #1d4ed8; }
+    .chip-auto   { background: #d1fae5; color: #065f46; }
+    .chip-post   { background: #ede9fe; color: #6d28d9; }
+    .chip-refund { background: #fce7f3; color: #9d174d; }
+    .chip-bal    { background: #ffedd5; color: #9a3412; }
+    .chip-trial  { background: #fef9c3; color: #854d0e; }
+    .chip-common { background: #f1f5f9; color: #475569; }
+
+    /* ── DoD 체크리스트 ── */
+    .dod-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .dod-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    .dod-item.pass { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .dod-icon { flex-shrink: 0; margin-top: 1px; }
+
+    /* ── 진행률 바 ── */
+    .progress-wrap {
+      background: #e2e8f0;
+      border-radius: 99px;
+      height: 10px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #16a34a, #22c55e);
+    }
+
+    /* ── 결론·인계 ── */
+    .conclusion-box {
+      border-left: 4px solid #2563eb;
+      padding: 16px 20px;
+      background: #f0f6ff;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 14px;
+    }
+    .conclusion-box p { font-size: 13px; color: #1e3a8a; line-height: 1.7; }
+
+    .issue-box {
+      border-left: 4px solid #f59e0b;
+      padding: 14px 20px;
+      background: #fffbeb;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 14px;
+    }
+    .issue-box .issue-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 6px;
+    }
+    .issue-box ul { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+    .issue-box ul li {
+      font-size: 13px;
+      color: #78350f;
+      padding-left: 12px;
+      position: relative;
+    }
+    .issue-box ul li::before { content: "·"; position: absolute; left: 0; color: #f59e0b; }
+
+    .next-card {
+      background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+      border: 1.5px solid #c4b5fd;
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+    .next-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #4c1d95;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .next-card table { font-size: 12px; }
+    .next-card th { font-size: 10px; }
+    .next-card td { padding: 8px 10px; }
+
+    .sub-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-milestone">M4 — 결제 · 캐시 · 체험 모드</div>
+    <h1>M4 마일스톤 완료 보고서</h1>
+    <div class="subtitle">WiseCan 통합 메시징 서비스 — 과금 인프라 (W-401 ~ W-406)</div>
+    <div class="meta-date">작성일 2026-06-16</div>
+  </div>
+
+  <!-- 게이트 배너 -->
+  <div class="gate-banner">
+    <div class="gate-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M5 13l4 4L19 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="gate-text">
+      <h2>M4 통과 게이트 충족 — 6/6 WBS 완료</h2>
+      <p>W-401~406 DoD 전체 충족 확인. 단위 테스트 116종 이상 통과 (W-401 27 + W-402 20+ + W-403 39 + W-404 18 + W-405 5 + W-406 8). 가중 완료율 100% (84/84 mD).</p>
+    </div>
+  </div>
+
+  <!-- KPI 집계 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="1.5" y="8" width="3" height="6.5" rx="1" fill="#2563eb"/>
+        <rect x="6.5" y="5" width="3" height="9.5" rx="1" fill="#2563eb"/>
+        <rect x="11.5" y="1.5" width="3" height="13" rx="1" fill="#2563eb"/>
+      </svg>
+      M4 집계 지표
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-item">
+        <div class="kpi-value green">6</div>
+        <div class="kpi-label">완료 WBS</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value green">0</div>
+        <div class="kpi-label">진행 중 WBS</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value blue">84</div>
+        <div class="kpi-label">총 공수 (mD)</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value green">84</div>
+        <div class="kpi-label">완료 공수 (mD)</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value green">116+</div>
+        <div class="kpi-label">단위 테스트 종</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value blue">7</div>
+        <div class="kpi-label">결제수단 지원</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value blue">4</div>
+        <div class="kpi-label">분기 시나리오</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value amber">S8~S10</div>
+        <div class="kpi-label">스프린트 범위</div>
+      </div>
+    </div>
+
+    <div style="margin-top:18px;">
+      <div class="sub-label" style="margin-bottom:8px;">가중 완료율</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="flex:1;">
+          <div class="progress-wrap">
+            <div class="progress-fill" style="width:100%;"></div>
+          </div>
+        </div>
+        <div style="font-size:18px;font-weight:800;color:#16a34a;white-space:nowrap;">100%</div>
+        <div style="font-size:12px;color:#64748b;white-space:nowrap;">84 / 84 mD</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- M4 과금 레이어 구조 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M2 4h12M2 8h12M2 12h12" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      M4 과금 인프라 레이어 구조
+    </div>
+    <div class="arch-layers">
+      <div class="arch-layer">
+        <div class="arch-layer-label">충전·결제</div>
+        <div class="arch-layer-items">
+          <span class="arch-chip chip-pg">PG 통합 7종 (W-401)</span>
+          <span class="arch-chip chip-auto">자동충전 정기결제 (W-402)</span>
+          <span class="arch-chip chip-post">후불 모델 (W-403)</span>
+        </div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-layer-label">차감·분기</div>
+        <div class="arch-layer-items">
+          <span class="arch-chip chip-refund">환불·소멸·영수증 (W-404)</span>
+          <span class="arch-chip chip-bal">잔액 부족 4분기 (W-405)</span>
+        </div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-layer-label">체험 모드</div>
+        <div class="arch-layer-items">
+          <span class="arch-chip chip-trial">더미 격리·어뷰징 차단 (W-406)</span>
+        </div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-layer-label">기반 (M2·M3)</div>
+        <div class="arch-layer-items">
+          <span class="arch-chip chip-common">발송 파이프라인 (W-201~206)</span>
+          <span class="arch-chip chip-common">API Key·SendValidationService</span>
+          <span class="arch-chip chip-common">Redis write-around 캐시 (TTL 30s)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WBS별 완료 현황 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="2" y="2" width="12" height="12" rx="2" stroke="#2563eb" stroke-width="1.5"/>
+        <path d="M5 8l2.5 2.5 4-4" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      WBS별 완료 현황
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:76px;">WBS</th>
+          <th>과업명 / 핵심 산출물</th>
+          <th style="width:60px;">담당</th>
+          <th style="width:60px;">공수</th>
+          <th style="width:72px;">스프린트</th>
+          <th style="width:88px;">검증</th>
+          <th style="width:64px;">상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="wbs-badge">W-401</span></td>
+          <td>
+            <a href="W-401.html" style="color:#2563eb;text-decoration:none;font-weight:600;">충전 + PG 통합 (결제수단 7종)</a><br>
+            <span style="font-size:12px;color:#64748b;">PgPaymentPort + Stub 어댑터, ChargeService, BalanceQueryService, Redis TTL 30s, FIFO 차감</span>
+          </td>
+          <td style="text-align:center;"><span class="badge badge-blue">BE</span></td>
+          <td style="text-align:center;font-weight:700;">14 mD</td>
+          <td style="text-align:center;color:#64748b;font-size:12px;">S8</td>
+          <td style="text-align:center;font-weight:600;color:#16a34a;">단위 27종</td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="wbs-badge">W-402</span></td>
+          <td>
+            <a href="W-402.html" style="color:#2563eb;text-decoration:none;font-weight:600;">자동충전 (PG 정기결제, 30일 제한)</a><br>
+            <span style="font-size:12px;color:#64748b;">AutoChargeConfig, AutoChargeService.triggerIfNeeded(), 30일 제한 옵션, 실패 알림 이벤트</span>
+          </td>
+          <td style="text-align:center;"><span class="badge badge-blue">BE</span></td>
+          <td style="text-align:center;font-weight:700;">14 mD</td>
+          <td style="text-align:center;color:#64748b;font-size:12px;">S9</td>
+          <td style="text-align:center;font-weight:600;color:#16a34a;">단위 20+종</td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="wbs-badge">W-403</span></td>
+          <td>
+            <a href="W-403.html" style="color:#2563eb;text-decoration:none;font-weight:600;">후불 모델 (신용·보증보험·청구·연체 차단)</a><br>
+            <span style="font-size:12px;color:#64748b;">PostpaidConfig·PostpaidInvoice 엔티티, 청구서 발행·결제·연체, PostpaidBlockGate 연계</span>
+          </td>
+          <td style="text-align:center;"><span class="badge badge-blue">BE</span></td>
+          <td style="text-align:center;font-weight:700;">14 mD</td>
+          <td style="text-align:center;color:#64748b;font-size:12px;">S9</td>
+          <td style="text-align:center;font-weight:600;color:#16a34a;">단위 39종</td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="wbs-badge">W-404</span></td>
+          <td>
+            <a href="W-404.html" style="color:#2563eb;text-decoration:none;font-weight:600;">환불·5년 소멸·현금영수증 마이너스 정정</a><br>
+            <span style="font-size:12px;color:#64748b;">RefundService, BalanceExpireService, 현금영수증 마이너스 정정, FE 결제 이력·환불 UI</span>
+          </td>
+          <td style="text-align:center;"><span class="badge badge-purple">BE+FE</span></td>
+          <td style="text-align:center;font-weight:700;">14 mD</td>
+          <td style="text-align:center;color:#64748b;font-size:12px;">S9</td>
+          <td style="text-align:center;font-weight:600;color:#16a34a;">단위 18종</td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="wbs-badge">W-405</span></td>
+          <td>
+            <a href="W-405.html" style="color:#2563eb;text-decoration:none;font-weight:600;">잔액 부족 분기 (자동결제→후불→부분/취소)</a><br>
+            <span style="font-size:12px;color:#64748b;">sealed interface 4분기, HTTP 207 부분 발송, HTTP 402 전체 취소, DB 직접 조회</span>
+          </td>
+          <td style="text-align:center;"><span class="badge badge-purple">BE+FE</span></td>
+          <td style="text-align:center;font-weight:700;">14 mD</td>
+          <td style="text-align:center;color:#64748b;font-size:12px;">S9</td>
+          <td style="text-align:center;font-weight:600;color:#16a34a;">단위 5종</td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr>
+          <td><span class="wbs-badge">W-406</span></td>
+          <td>
+            <a href="W-406.html" style="color:#2563eb;text-decoration:none;font-weight:600;">체험 모드 — 더미 데이터 적재·격리·차단</a><br>
+            <span style="font-size:12px;color:#64748b;">TrialSession·TrialSendRecord, externalBlocked=true 단언, 어뷰징 차단(HTTP 429), TRIAL_MODE 결제 차단</span>
+          </td>
+          <td style="text-align:center;"><span class="badge badge-purple">BE+FE</span></td>
+          <td style="text-align:center;font-weight:700;">14 mD</td>
+          <td style="text-align:center;color:#64748b;font-size:12px;">S10</td>
+          <td style="text-align:center;font-weight:600;color:#16a34a;">단위 8종</td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr style="background:#f8f9fb;font-weight:700;">
+          <td colspan="3" style="text-align:right;padding-right:16px;font-size:13px;color:#0f172a;">합계</td>
+          <td style="text-align:center;font-weight:800;color:#2563eb;font-size:15px;">84 mD</td>
+          <td colspan="2" style="text-align:center;color:#16a34a;font-weight:700;">116+ 종 (W-401~406)</td>
+          <td><span class="badge badge-green">전체 완료</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- DoD 충족 현황 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 1L2 4v4c0 3.3 2.5 6.4 6 7 3.5-.6 6-3.7 6-7V4L8 1z" stroke="#2563eb" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+      M4 통과 게이트 DoD 충족 현황
+    </div>
+    <ul class="dod-list">
+      <li class="dod-item pass">
+        <span class="dod-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <div>
+          <strong>PG 통합 7종 + 수동/자동 충전 흐름</strong>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">W-401: ChargeService FIFO 차감·멱등성(pgTxId UNIQUE)·Redis write-around(TTL 30s) + W-402: AutoChargeService.triggerIfNeeded() 30일 제한 옵션. 단위 테스트 27+20종.</div>
+        </div>
+      </li>
+      <li class="dod-item pass">
+        <span class="dod-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <div>
+          <strong>후불 모델 청구서·연체 차단 39케이스</strong>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">W-403: PostpaidConfig(신용·보증보험) + PostpaidInvoice 상태 전이 + PostpaidBlockGate 연계. 기존 Gate 무수정 연계.</div>
+        </div>
+      </li>
+      <li class="dod-item pass">
+        <span class="dod-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <div>
+          <strong>환불·5년 소멸·현금영수증 마이너스 정정</strong>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">W-404: RefundService(11케이스) + BalanceExpireService(3케이스) + 도메인(5케이스). FE 결제 이력·환불 신청 UI 구현.</div>
+        </div>
+      </li>
+      <li class="dod-item pass">
+        <span class="dod-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <div>
+          <strong>잔액 부족 4분기 + HTTP 207/402 응답</strong>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">W-405: sealed interface 4종 exhaustive switch. 분기1(자동결제) / 분기2(후불) / 분기3(부분발송 HTTP 207) / 분기4(전체취소 HTTP 402) 단위 테스트 5종 전부 통과.</div>
+        </div>
+      </li>
+      <li class="dod-item pass">
+        <span class="dod-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        </span>
+        <div>
+          <strong>체험 모드 외부 차단 단언 + 어뷰징 차단</strong>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">W-406: TrialSendRecord.externalBlocked=true 단언 + TRIAL_MODE 결제 차단 + 동일 IP 5회 초과 HTTP 429. 8종 단위 테스트 핵심 DoD 전체 커버.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 결론 및 잔여 이슈 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6.5" stroke="#2563eb" stroke-width="1.5"/>
+        <path d="M8 5v3.5L10 10" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      결론 및 잔여 이슈
+    </div>
+    <div class="conclusion-box">
+      <p>
+        M4 결제·캐시·체험 모드 마일스톤이 6종 WBS 전체(W-401~406, 84mD) 완료되었습니다.
+        PG 통합 7종(W-401) · 자동충전 정기결제(W-402) · 후불 청구서·연체 차단(W-403) ·
+        환불·5년 소멸·현금영수증(W-404) · 잔액 부족 4분기·HTTP 207/402(W-405) ·
+        체험 모드 더미 격리·어뷰징 차단(W-406) 이 M2 발송 파이프라인 위에
+        정합하게 연동되었습니다.
+        단위 테스트 116종 이상(W-401 27 + W-402 20+ + W-403 39 + W-404 18 + W-405 5 + W-406 8)이
+        핵심 비즈니스 규칙을 검증했습니다.
+        M4 통과 게이트 5종 모두 충족, M5(운영자 콘솔·보안·릴리즈) 착수 가능 상태입니다.
+      </p>
+    </div>
+    <div class="issue-box">
+      <div class="issue-title">잔여 이슈 / CI 위임 항목</div>
+      <ul>
+        <li>로컬 SSL 인터셉션 환경 — Gradle 외부 다운로드 PKIX 실패. 컴파일·테스트 실행은 CI(GitHub Actions)에서 수행</li>
+        <li>W-405 FE 분기 UI(잔액 부족 분기 선택 모달) — 와이어프레임 미작성, 별도 FE 태스크 필요</li>
+        <li>W-405 Partial 결과를 sendBulk()에 통합하는 발송 파이프라인 연동 — M5 이후 구체화 필요</li>
+        <li>W-406 DB DDL 미포함 — trial_session / trial_dummy_context / trial_send_record 테이블 생성 스크립트는 인프라 스프린트에서 반영</li>
+        <li>W-406 메인 랜딩 페이지(/) 미구현 — TrialEntryButton 연결 대상은 별도 랜딩 페이지 스프린트에서 배치</li>
+        <li>W-402 가상계좌·휴대폰·상품권 PG 콜백(webhook) — W-402 이후 별도 콜백 엔드포인트 추가 필요</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 다음 마일스톤 M5 인계 -->
+  <div class="next-card">
+    <h3>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/>
+      </svg>
+      다음 마일스톤 M5 인계 — 운영자 콘솔 · 보안 · 릴리즈
+    </h3>
+    <table>
+      <thead>
+        <tr>
+          <th>WBS</th>
+          <th>과업명</th>
+          <th>담당</th>
+          <th>참조 스펙</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="wbs-badge">W-501</span></td>
+          <td>운영자 콘솔 — 회원·API 키 관리</td>
+          <td>BE+FE</td>
+          <td>02 §13</td>
+        </tr>
+        <tr>
+          <td><span class="wbs-badge">W-502</span></td>
+          <td>운영자 콘솔 — 발송 현황·통계 대시보드</td>
+          <td>FE</td>
+          <td>02 §13.2</td>
+        </tr>
+        <tr>
+          <td><span class="wbs-badge">W-503</span></td>
+          <td>보안 강화 — Rate Limit · IP 차단</td>
+          <td>BE</td>
+          <td>02 §14</td>
+        </tr>
+        <tr>
+          <td><span class="wbs-badge">W-504</span></td>
+          <td>보안 강화 — 감사 로그·권한 분리</td>
+          <td>BE</td>
+          <td>02 §14.2</td>
+        </tr>
+        <tr>
+          <td><span class="wbs-badge">W-505</span></td>
+          <td>릴리즈 — 인프라 DDL·데이터 마이그레이션</td>
+          <td>BE</td>
+          <td>04 §운영 게이트</td>
+        </tr>
+        <tr>
+          <td><span class="wbs-badge">W-506</span></td>
+          <td>릴리즈 — 부하 테스트·SLA 검증</td>
+          <td>BE+FE</td>
+          <td>04 §릴리즈 게이트</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

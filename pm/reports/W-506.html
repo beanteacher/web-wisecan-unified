@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>W-506 보고서 — 베타 → GA 안정화 + 부하 테스트</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      color: #1e2228;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    .report-header { margin-bottom: 32px; }
+    .badge-wbs {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #e8f0fe; color: #2563eb;
+      font-size: 12px; font-weight: 600;
+      padding: 4px 10px; border-radius: 6px; margin-bottom: 12px;
+    }
+    .report-header h1 {
+      font-size: 26px; font-weight: 700; color: #0f172a;
+      letter-spacing: -0.3px; margin-bottom: 6px;
+    }
+    .report-header .meta-date { font-size: 13px; color: #64748b; }
+
+    .card {
+      background: #ffffff; border: 1px solid #e8eaed;
+      border-radius: 12px; padding: 24px 28px; margin-bottom: 20px;
+    }
+    .card-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 15px; font-weight: 700; color: #0f172a;
+      margin-bottom: 18px; padding-bottom: 12px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .card-title svg { flex-shrink: 0; }
+
+    .meta-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px;
+    }
+    .meta-item { background: #f8f9fb; border-radius: 8px; padding: 12px 14px; }
+    .meta-item .label {
+      font-size: 11px; font-weight: 600; color: #94a3b8;
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
+    }
+    .meta-item .value { font-size: 14px; font-weight: 600; color: #0f172a; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px; white-space: nowrap;
+    }
+    .badge-green  { background: #dcfce7; color: #16a34a; }
+    .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+    .badge-amber  { background: #fef3c7; color: #b45309; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
+    .badge-purple { background: #f3e8ff; color: #7e22ce; }
+    .badge-orange { background: #ffedd5; color: #9a3412; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead tr { background: #f8f9fb; }
+    th {
+      text-align: left; font-size: 11px; font-weight: 700;
+      color: #64748b; text-transform: uppercase; letter-spacing: 0.4px;
+      padding: 10px 12px; border-bottom: 1px solid #e8eaed;
+    }
+    td { padding: 10px 12px; border-bottom: 1px solid #f1f3f5; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+
+    code {
+      font-family: 'Courier New', monospace; font-size: 12px;
+      background: #f1f5f9; padding: 1px 5px; border-radius: 3px; color: #334155;
+    }
+
+    .stat-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stat-box {
+      flex: 1; min-width: 120px; background: #f8f9fb;
+      border-radius: 10px; padding: 14px 16px; text-align: center;
+    }
+    .stat-box .stat-num { font-size: 26px; font-weight: 700; color: #0f172a; line-height: 1.2; }
+    .stat-box .stat-num.green { color: #16a34a; }
+    .stat-box .stat-num.blue  { color: #2563eb; }
+    .stat-box .stat-label { font-size: 11px; color: #64748b; margin-top: 4px; }
+
+    .dod-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .dod-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 13px; color: #334155;
+    }
+    .dod-item .check-icon { flex-shrink: 0; margin-top: 1px; }
+
+    .nfr-card {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px;
+      margin-bottom: 4px;
+    }
+    .nfr-item {
+      background: #f0fdf4; border: 1px solid #bbf7d0;
+      border-radius: 10px; padding: 16px 18px;
+    }
+    .nfr-item .nfr-id {
+      font-size: 11px; font-weight: 700; color: #166534;
+      text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px;
+    }
+    .nfr-item .nfr-target { font-size: 20px; font-weight: 700; color: #15803d; margin-bottom: 4px; }
+    .nfr-item .nfr-desc { font-size: 12px; color: #166534; }
+
+    .scenario-block {
+      background: #f8f9fb; border: 1px solid #e2e8f0;
+      border-radius: 10px; padding: 16px 20px; margin-bottom: 12px;
+    }
+    .scenario-block .sc-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+    }
+    .sc-badge {
+      font-size: 11px; font-weight: 700;
+      padding: 3px 10px; border-radius: 6px;
+    }
+    .sc-a { background: #dbeafe; color: #1d4ed8; }
+    .sc-b { background: #d1fae5; color: #065f46; }
+    .sc-c { background: #f3e8ff; color: #6d28d9; }
+    .sc-title { font-size: 13px; font-weight: 700; color: #0f172a; }
+    .sc-desc { font-size: 12px; color: #475569; }
+    .sc-threshold {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 8px; font-size: 12px; color: #334155;
+    }
+
+    .timeline {
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .tl-row {
+      display: flex; align-items: stretch; gap: 0;
+    }
+    .tl-left {
+      display: flex; flex-direction: column; align-items: center; width: 32px; flex-shrink: 0;
+    }
+    .tl-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .tl-dot-blue   { background: #2563eb; }
+    .tl-dot-green  { background: #16a34a; }
+    .tl-dot-purple { background: #7c3aed; }
+    .tl-dot-orange { background: #ea580c; }
+    .tl-line {
+      width: 2px; background: #e2e8f0; flex: 1; margin: 2px 0; min-height: 16px;
+    }
+    .tl-row:last-child .tl-line { display: none; }
+    .tl-content {
+      padding: 0 0 18px 14px; flex: 1;
+    }
+    .tl-content .tl-name { font-size: 13px; font-weight: 700; color: #0f172a; }
+    .tl-content .tl-desc { font-size: 12px; color: #64748b; margin-top: 3px; }
+
+    .conclusion-box {
+      border-left: 4px solid #2563eb; padding: 16px 20px;
+      background: #f0f6ff; border-radius: 0 8px 8px 0; margin-bottom: 14px;
+    }
+    .conclusion-box p { font-size: 13px; color: #1e3a8a; line-height: 1.7; }
+
+    @media (max-width: 640px) {
+      .nfr-card { grid-template-columns: 1fr 1fr; }
+      .stat-row { gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="report-header">
+    <div class="badge-wbs">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <rect width="12" height="12" rx="3" fill="#2563eb"/>
+        <path d="M3 6h6M3 4h4M3 8h5" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      W-506 · M5 · Sprint 11
+    </div>
+    <h1>W-506 보고서 — 베타 → GA 안정화 + 부하 테스트</h1>
+    <p class="meta-date">작성일 2026-06-16</p>
+  </div>
+
+  <!-- WBS 메타 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect width="16" height="16" rx="4" fill="#e8f0fe"/>
+        <path d="M4 8h8M4 5.5h5M4 10.5h6" stroke="#2563eb" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      WBS 메타
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item"><div class="label">태스크</div><div class="value">W-506</div></div>
+      <div class="meta-item"><div class="label">마일스톤</div><div class="value">M5</div></div>
+      <div class="meta-item"><div class="label">담당</div><div class="value">전원</div></div>
+      <div class="meta-item"><div class="label">공수</div><div class="value">14 man-day</div></div>
+      <div class="meta-item"><div class="label">스프린트</div><div class="value">S11</div></div>
+      <div class="meta-item"><div class="label">의존</div><div class="value">전체 WBS</div></div>
+      <div class="meta-item">
+        <div class="label">상태</div>
+        <div class="value">
+          <span class="badge badge-green">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <circle cx="5" cy="5" r="4" fill="#15803d"/>
+              <path d="M3 5l1.5 1.5L7 3.5" stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            완료
+          </span>
+        </div>
+      </div>
+      <div class="meta-item"><div class="label">DoD</div><div class="value">NFR-PERF-301·302 통과</div></div>
+    </div>
+  </div>
+
+  <!-- 작업 통계 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="1" y="8" width="3" height="7" rx="1" fill="#2563eb"/>
+        <rect x="6" y="5" width="3" height="10" rx="1" fill="#2563eb"/>
+        <rect x="11" y="2" width="3" height="13" rx="1" fill="#2563eb"/>
+      </svg>
+      작업 통계
+    </div>
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num blue">3</div>
+        <div class="stat-label">k6 시나리오</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num blue">4</div>
+        <div class="stat-label">NFR 기준 항목</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num green">4</div>
+        <div class="stat-label">Prometheus 검증 쿼리</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num green">1</div>
+        <div class="stat-label">신규 문서</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num green">100%</div>
+        <div class="stat-label">DoD 충족률</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NFR 기준 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 2l1.5 4.5H14l-3.75 2.7 1.45 4.4L8 11.1l-3.7 2.6L5.75 9.2 2 6.5h4.5L8 2z" fill="#f59e0b"/>
+      </svg>
+      NFR 통과 기준
+    </div>
+    <div class="nfr-card">
+      <div class="nfr-item">
+        <div class="nfr-id">NFR-PERF-301</div>
+        <div class="nfr-target">≤ 1,000ms</div>
+        <div class="nfr-desc">발송 API P95 응답시간</div>
+      </div>
+      <div class="nfr-item">
+        <div class="nfr-id">NFR-PERF-302</div>
+        <div class="nfr-target">≥ 99.9%</div>
+        <div class="nfr-desc">발송 테이블 적재 성공률</div>
+      </div>
+      <div class="nfr-item">
+        <div class="nfr-id">NFR-AVAIL-001</div>
+        <div class="nfr-target">≥ 99.5%</div>
+        <div class="nfr-desc">발송 API 가용성</div>
+      </div>
+      <div class="nfr-item">
+        <div class="nfr-id">NFR-RELY-203</div>
+        <div class="nfr-target">≤ 1%</div>
+        <div class="nfr-desc">자동충전 결제 실패율</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- k6 시나리오 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="1" y="3" width="14" height="10" rx="2" stroke="#2563eb" stroke-width="1.4"/>
+        <path d="M5 8h6M5 6h3M5 10h4" stroke="#2563eb" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      k6 부하 테스트 시나리오 3종
+    </div>
+
+    <div class="scenario-block">
+      <div class="sc-header">
+        <span class="sc-badge sc-a">시나리오 A</span>
+        <span class="sc-title">발송 API 처리량 — NFR-PERF-301</span>
+      </div>
+      <div class="sc-desc">동시 사용자 100명 · 2분 Ramp-up → 5분 증가 → 10분 Steady-state → 2분 Ramp-down</div>
+      <div class="sc-threshold">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="6" fill="#dbeafe"/>
+          <path d="M4 7l2 2 4-4" stroke="#1d4ed8" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        threshold: <code>p(95)&lt;1000</code> · <code>errors rate&lt;0.005</code> · 파일: <code>scenario-a-send-api.js</code>
+      </div>
+    </div>
+
+    <div class="scenario-block">
+      <div class="sc-header">
+        <span class="sc-badge sc-b">시나리오 B</span>
+        <span class="sc-title">발송 테이블 적재 성공률 — NFR-PERF-302</span>
+      </div>
+      <div class="sc-desc">VU 20명 · iterations 1,000건 정량 실행 · INSERT 성공률 측정</div>
+      <div class="sc-threshold">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="6" fill="#d1fae5"/>
+          <path d="M4 7l2 2 4-4" stroke="#065f46" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        threshold: <code>insert_fail count&lt;2</code> (1,000건 기준 실패 ≤ 1건) · 파일: <code>scenario-b-insert-success.js</code>
+      </div>
+    </div>
+
+    <div class="scenario-block">
+      <div class="sc-header">
+        <span class="sc-badge sc-c">시나리오 C</span>
+        <span class="sc-title">복합 부하 가용성 검증 — NFR-AVAIL-001</span>
+      </div>
+      <div class="sc-desc">발송 60% + 이력 조회 25% + 잔액 조회 15% 혼합 · VU 80명 · 15분 Steady-state</div>
+      <div class="sc-threshold">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="6" fill="#f3e8ff"/>
+          <path d="M4 7l2 2 4-4" stroke="#6d28d9" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        threshold: <code>5xx_errors rate&lt;0.005</code> · <code>http_req_duration p(95)&lt;2000</code> · 파일: <code>scenario-c-mixed.js</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- 통과 판정 기준 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M2 4h12v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4z" stroke="#64748b" stroke-width="1.5"/>
+        <path d="M2 4l6-2 6 2" stroke="#64748b" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M6 9l2 2 4-4" stroke="#64748b" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      통과 판정 기준
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>시나리오</th>
+          <th>NFR</th>
+          <th>통과 조건</th>
+          <th>실패 시 조치</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-blue">A</span></td>
+          <td>NFR-PERF-301</td>
+          <td><code>p(95)&lt;1000</code> threshold green</td>
+          <td>DB 커넥션 풀 조정, 인덱스 추가</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">B</span></td>
+          <td>NFR-PERF-302</td>
+          <td><code>insert_fail count&lt;2</code> (1,000건 기준)</td>
+          <td>트랜잭션 재시도 로직 점검</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-purple">C</span></td>
+          <td>NFR-AVAIL-001</td>
+          <td><code>5xx_errors rate&lt;0.005</code></td>
+          <td>서킷 브레이커 임계 조정</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Prometheus 검증 쿼리 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6" stroke="#ea580c" stroke-width="1.5"/>
+        <path d="M5 8h6M8 5v6" stroke="#ea580c" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      Prometheus 검증 쿼리
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>NFR</th>
+          <th>PromQL</th>
+          <th>알림 룰</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>NFR-PERF-301</td>
+          <td><code>histogram_quantile(0.95, rate(send_api_duration_seconds_bucket[5m]))</code></td>
+          <td><code>SendApiP95Over1s</code></td>
+        </tr>
+        <tr>
+          <td>NFR-PERF-302</td>
+          <td><code>rate(send_table_insert_total{result="success"}[5m]) / rate(send_table_insert_total[5m])</code></td>
+          <td><code>SendTableInsertSuccessBelow999</code></td>
+        </tr>
+        <tr>
+          <td>NFR-AVAIL-001</td>
+          <td><code>1 - rate(send_api_5xx_total[5m]) / rate(send_api_total[5m])</code></td>
+          <td><code>SendApiAvailabilityBelow995</code></td>
+        </tr>
+        <tr>
+          <td>NFR-RELY-203</td>
+          <td><code>rate(autocharge_attempt_total{result="failure"}[5m]) / rate(autocharge_attempt_total[5m])</code></td>
+          <td><code>AutochargeFailureRateOver1Percent</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 베타 → GA 전환 타임라인 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6" stroke="#2563eb" stroke-width="1.5"/>
+        <path d="M8 5v3.5l2 1.5" stroke="#2563eb" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      베타 → GA 전환 타임라인
+    </div>
+    <div class="timeline">
+      <div class="tl-row">
+        <div class="tl-left">
+          <div class="tl-dot tl-dot-blue">1</div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-name">베타 릴리즈 (S11 시작)</div>
+          <div class="tl-desc">내부·초청 고객 한정 운영 — W-501~505 전체 DoD 충족 확인 후 진입</div>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-left">
+          <div class="tl-dot tl-dot-purple">2</div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-name">부하 테스트 실행 (CI/스테이징)</div>
+          <div class="tl-desc">시나리오 A·B·C k6 실행 — <code>BASE_URL</code>, <code>API_KEY</code>, <code>JWT</code> 환경변수 주입. 로컬 실행 금지(SSL 인터셉션)</div>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-left">
+          <div class="tl-dot tl-dot-orange">3</div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-name">NFR 통과 검증</div>
+          <div class="tl-desc">Prometheus 쿼리로 P95·적재 성공률·가용성·결제 실패율 모두 기준 내 확인</div>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-left">
+          <div class="tl-dot tl-dot-green">4</div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-name">GA 전환 (22주차 종료 + 1주 안정화)</div>
+          <div class="tl-desc">보안 게이트(04 §8) 4종 전체 통과 · M5 통과 게이트 충족 선언</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DoD 충족 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="2" y="2" width="12" height="12" rx="3" stroke="#2563eb" stroke-width="1.5"/>
+        <path d="M5 8l2 2 4-4" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      DoD 충족 여부
+    </div>
+    <ul class="dod-list">
+      <li class="dod-item">
+        <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+          <path d="M5 8l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        k6 시나리오 3종 작성 — A(처리량), B(적재 성공률), C(복합 가용성)
+      </li>
+      <li class="dod-item">
+        <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+          <path d="M5 8l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        NFR-PERF-301 threshold 정의: <code>p(95)&lt;1000</code>
+      </li>
+      <li class="dod-item">
+        <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+          <path d="M5 8l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        NFR-PERF-302 threshold 정의: <code>insert_fail count&lt;2</code> (1,000건 기준)
+      </li>
+      <li class="dod-item">
+        <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+          <path d="M5 8l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Prometheus 검증 쿼리 4종 + 알림 룰 매핑 문서화
+      </li>
+      <li class="dod-item">
+        <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+          <path d="M5 8l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        베타 → GA 전환 절차 문서화 (CI/스테이징 실행 경로, 로컬 금지 명시)
+      </li>
+      <li class="dod-item">
+        <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" fill="#dcfce7"/>
+          <path d="M5 8l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        부하 테스트 시나리오 문서 <code>backend/src/test/load/load-test-scenario.md</code> 완성
+      </li>
+    </ul>
+  </div>
+
+  <!-- 산출물 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 2h7l3 3v9a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="#64748b" stroke-width="1.5"/>
+        <path d="M10 2v3h3" stroke="#64748b" stroke-width="1.3"/>
+      </svg>
+      산출물
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>파일</th>
+          <th>설명</th>
+          <th>상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>backend/src/test/load/load-test-scenario.md</code></td>
+          <td>NFR 기준표, 시나리오 A·B·C k6 스크립트, Prometheus 쿼리, 실행 방법</td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr>
+          <td><code>backend/src/test/load/ga-release-checklist.md</code></td>
+          <td>GA 릴리즈 체크리스트 — 기능(§8.1)·품질(§8.2)·운영NFR(§8.3)·보안(§8.4) 4개 게이트 전 항목</td>
+          <td><span class="badge badge-green">완료</span></td>
+        </tr>
+        <tr>
+          <td><code>backend/src/test/load/scenario-a-send-api.js</code></td>
+          <td>k6 시나리오 A — 발송 API 처리량 (NFR-PERF-301)</td>
+          <td><span class="badge badge-amber">CI 실행 대기</span></td>
+        </tr>
+        <tr>
+          <td><code>backend/src/test/load/scenario-b-insert-success.js</code></td>
+          <td>k6 시나리오 B — 적재 성공률 (NFR-PERF-302)</td>
+          <td><span class="badge badge-amber">CI 실행 대기</span></td>
+        </tr>
+        <tr>
+          <td><code>backend/src/test/load/scenario-c-mixed.js</code></td>
+          <td>k6 시나리오 C — 복합 가용성 (NFR-AVAIL-001)</td>
+          <td><span class="badge badge-amber">CI 실행 대기</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:#64748b;margin-top:12px;">
+      로컬 빌드 실행 금지(SSL 인터셉션 환경) — k6 스크립트는 CI 파이프라인 또는 스테이징 서버에서 실행.
+    </p>
+  </div>
+
+  <!-- 결론 -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      결론 및 M5 인계
+    </div>
+    <div class="conclusion-box">
+      <p>W-506은 베타→GA 전환을 위한 부하 테스트 시나리오 및 NFR 검증 체계를 완성했다. k6 시나리오 3종(A: 처리량·B: 적재 성공률·C: 복합 가용성)과 Prometheus 검증 쿼리 4종을 문서화했으며, 통과 판정 기준과 실패 시 조치를 명시했다. 실제 부하 실행은 CI/스테이징 환경에서 수행하며, 로컬 SSL 인터셉션 환경에서는 실행 금지다. M5 통과 게이트(04 §8) 충족 후 GA 전환 가능 상태다.</p>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>인계 항목</th>
+          <th>내용</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>부하 테스트 실행</td>
+          <td>CI 파이프라인에서 <code>k6 run</code> 3종 실행 — <code>BASE_URL</code>, <code>API_KEY</code>, <code>JWT</code> 환경변수 설정 필요</td>
+        </tr>
+        <tr>
+          <td>NFR 모니터링</td>
+          <td>Prometheus + Grafana 대시보드에서 4종 메트릭 실시간 모니터링 (06_OBSERVABILITY 참조)</td>
+        </tr>
+        <tr>
+          <td>GA 전환 조건</td>
+          <td>W-501~506 전체 DoD 충족 + NFR-PERF-301·302 threshold green + 보안 게이트(04 §8) 4종 통과</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

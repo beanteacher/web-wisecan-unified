@@ -11,5 +11,7 @@ public enum PaymentMethodType {
     VIRTUAL_ACCOUNT,
     MOBILE,
     GIFT_CARD,
-    POINT
+    POINT,
+    /** 운영자 강제 적립 (보상·이벤트) — W-501 §12.5 */
+    ADMIN_GRANT
 }

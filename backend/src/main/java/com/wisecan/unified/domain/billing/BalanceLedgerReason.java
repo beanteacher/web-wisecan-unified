@@ -13,5 +13,9 @@ public enum BalanceLedgerReason {
     ADJUST,
     EXPIRE,
     REFUND,
-    REVERT
+    REVERT,
+    /** 운영자 강제 적립 (보상·이벤트) — W-501 §12.5 */
+    ADMIN_CREDIT,
+    /** 운영자 강제 차감 (조정) — W-501 §12.5 */
+    ADMIN_DEBIT
 }

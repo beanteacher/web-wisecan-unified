@@ -149,4 +149,43 @@ public class Member {
         this.twoFactorMethod = null;
         this.totpSecret = null;
     }
+
+    /**
+     * 운영자 강제 정지 — §12.3.
+     * ACTIVE → SUSPENDED 전이. 이미 SUSPENDED/TERMINATED 이면 예외.
+     */
+    public void suspend() {
+        if (this.status == MemberStatus.SUSPENDED) {
+            throw new IllegalStateException("이미 정지된 회원입니다.");
+        }
+        if (this.status == MemberStatus.TERMINATED) {
+            throw new IllegalStateException("해지된 회원은 정지할 수 없습니다.");
+        }
+        this.status = MemberStatus.SUSPENDED;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 운영자 강제 해지 — §12.3.
+     * ACTIVE / SUSPENDED → TERMINATED 전이.
+     */
+    public void terminate() {
+        if (this.status == MemberStatus.TERMINATED) {
+            throw new IllegalStateException("이미 해지된 회원입니다.");
+        }
+        this.status = MemberStatus.TERMINATED;
+        this.withdrawnAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 운영자 정지 해제 — SUSPENDED → ACTIVE.
+     */
+    public void unsuspend() {
+        if (this.status != MemberStatus.SUSPENDED) {
+            throw new IllegalStateException("정지 상태인 회원만 해제할 수 있습니다. 현재 상태: " + this.status);
+        }
+        this.status = MemberStatus.ACTIVE;
+        this.updatedAt = LocalDateTime.now();
+    }
 }

@@ -39,4 +39,21 @@ public interface ChargeBalanceRepository extends JpaRepository<ChargeBalance, Lo
            "WHERE cb.amountRemaining > 0 " +
            "AND cb.expiresAt <= :now")
     List<ChargeBalance> findExpired(@Param("now") LocalDateTime now);
+
+    /**
+     * 회원의 전체 잔액 행 — 만료 임박 우선 정렬 (운영자 강제 차감용, W-501 §12.5).
+     */
+    @Query("SELECT cb FROM ChargeBalance cb " +
+           "WHERE cb.memberId = :memberId " +
+           "AND cb.amountRemaining > 0 " +
+           "ORDER BY cb.expiresAt ASC, cb.chargedAt ASC")
+    List<ChargeBalance> findByMemberIdOrderByExpiresAtAscChargedAtAsc(@Param("memberId") Long memberId);
+
+    /**
+     * 기간별 충전 잔액 행 조회 (정산 보고서용, W-501 §12.5).
+     */
+    @Query("SELECT cb FROM ChargeBalance cb " +
+           "WHERE cb.chargedAt >= :periodStart AND cb.chargedAt <= :periodEnd")
+    List<ChargeBalance> findByChargedAtBetween(@Param("periodStart") LocalDateTime periodStart,
+                                               @Param("periodEnd") LocalDateTime periodEnd);
 }
